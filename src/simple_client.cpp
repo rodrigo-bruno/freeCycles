@@ -38,21 +38,33 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "libtorrent/session.hpp"
 
 #define UPDATE_INTERVAL 5
+#define TORRENT_FILE_SUFFIX ".torrent"
 
+
+/**
+ * Tests if base ends with suffix.
+ */
+bool ends_with (const char* base, const char* suffix) {
+    int blen = strlen(base);
+    int slen = strlen(suffix);
+    return (blen >= slen) && (!strcmp(base + blen - slen, suffix));
+}
 
 /**
  * Adds a new torrent to the current session. Possible errors are reported
  * through the error_code object.
  */
 libtorrent::torrent_handle add_torrent(
-		libtorrent::session &s, const char* torrent, libtorrent::error_code &ec, const char* work_dir) {
-	using namespace libtorrent;
+		libtorrent::session &s,
+		const char* torrent,
+		libtorrent::error_code &ec,
+		const char* work_dir) {
 
-	add_torrent_params p;
-	torrent_handle th;
+	libtorrent::add_torrent_params p;
+	libtorrent::torrent_handle th;
 
 	p.save_path = work_dir;
-	p.ti = new torrent_info(torrent, ec);
+	p.ti = new libtorrent::torrent_info(torrent, ec);
 	if (ec)	{ return th; }
 	th = s.add_torrent(p, ec);
 	if (ec)	{ return th; }
@@ -61,11 +73,15 @@ libtorrent::torrent_handle add_torrent(
 }
 
 /**
- * Searches for torrent files inside a particular directory ("./new").
+ * Searches for torrent files inside a particular directory.
  * Found torrents will be added to the given session and will be moved to
- * the work directory ("./").
+ * the work directory.
  */
-void check_new_torrent(libtorrent::session &s, libtorrent::error_code &ec, const std::string search_dir, const std::string work_dir) {
+void check_new_torrent(
+		libtorrent::session &s,
+		libtorrent::error_code &ec,
+		const std::string search_dir,
+		const std::string work_dir) {
 	std::string torrent;
 	std::queue<std::string*> delete_queue;
 	DIR* dir;
@@ -74,8 +90,12 @@ void check_new_torrent(libtorrent::session &s, libtorrent::error_code &ec, const
 	if((dir = opendir(search_dir.c_str())) == NULL) { return; }
 	// look for all files and try to add them as new torrents.
 	for(struct dirent* dp = readdir(dir); dp != NULL; dp = readdir(dir)) {
+
 		if(dp->d_type == DT_DIR) { continue; }
+		if(ends_with(dp->d_name, TORRENT_FILE_SUFFIX)) { continue; }
+
 		add_torrent(s, (search_dir+dp->d_name).c_str(), ec, work_dir.c_str());
+
 		if (ec)	{ fprintf(stderr, "%s\n", ec.message().c_str()); }
 		else {
 			fprintf(stderr, "Torrent added: %s\n", dp->d_name);
@@ -99,17 +119,16 @@ void usage(char *name) {
     fprintf(stderr, "This is a simple command line BitTorrent client.\n"
         "Usage: %s [OPTION]...\n"
         "Options:\n"
-        "  [ -d X ]               Donwload rate limit (KBps)\n"
-        "  [ -u Y ]               Upload rate limit (KBps)\n"
-        "  [ -h   ]               Shows this help text.\n",
-        "  [ -s   ]               Directory to search periodically for .torrents\n",
-        "  [ -w   ]               Directory used to save .torrents and downloaded files.\n",
+        "  [ -d X ]   Download rate limit (KBps)\n"
+        "  [ -u Y ]   Upload rate limit (KBps)\n"
+        "  [ -h   ]   Shows this help text.\n",
+        "  [ -s   ]   Directory to search periodically for .torrents\n",
+        "  [ -w   ]   Directory used to save .torrents and downloaded files.\n",
         name
     );
 }
 
 /**
- * TODO - check if found file ends with .torrent.
  * TODO - add way to launch processes once a specific file is downloaded.
  */
 
