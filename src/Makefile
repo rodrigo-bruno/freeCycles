@@ -1,11 +1,11 @@
-all: simple_client simple_app client_test make_torrent dump_torrent uc2
+all: simple_client simple_app simple_work_generator client_test make_torrent dump_torrent uc2
 
 libs:
-#	ln -s `g++ -print-file-name=libstdc++.a`
-	ln -s /home/boincadm/boinc-master/lib/libboinc.a
-#	ln -s /usr/lib/libboinc.a
-	ln -s /home/boincadm/boinc-master/api/libboinc_api.a
-#	ln -s /usr/lib/libboinc_api.a
+	ln -s `g++ -print-file-name=libstdc++.a`
+#	ln -s /home/boincadm/boinc-master/lib/libboinc.a
+	ln -s /usr/lib/libboinc.a
+#	ln -s /home/boincadm/boinc-master/api/libboinc_api.a
+	ln -s /usr/lib/libboinc_api.a
 
 
 simple_client: simple_client.o
@@ -19,6 +19,12 @@ simple_app: libs simple_app.o
 
 simple_app.o: simple_app.cpp
 	g++ -c simple_app.cpp -I/usr/include
+
+simple_work_generator: libs simple_work_generator.o
+	g++ simple_work_generator.o -o simple_work_generator libboinc_api.a libboinc.a -pthread
+
+simple_work_generator.o: simple_work_generator.cpp
+	g++ -c simple_work_generator.cpp -I/usr/include -I/usr/include/mysql
 
 uc2: libs uc2.o
 	g++ uc2.o -o uc2 libboinc_api.a libboinc.a -pthread
