@@ -40,7 +40,7 @@
 #ifdef _WIN32
 #include "boinc_win.h"
 #else
-#include "boinc/config.h"
+#include "config.h"
 #include <cstdio>
 #include <cctype>
 #include <ctime>
@@ -50,12 +50,12 @@
 #include <unistd.h>
 #endif
 
-#include "boinc/str_util.h"
-#include "boinc/util.h"
-#include "boinc/filesys.h"
-#include "boinc/boinc_api.h"
-#include "boinc/mfile.h"
-#include "boinc/graphics2.h"
+#include "str_util.h"
+#include "util.h"
+#include "filesys.h"
+#include "boinc_api.h"
+#include "mfile.h"
+#include "graphics2.h"
 
 #ifdef APP_GRAPHICS
 #include "uc2.h"
