@@ -22,7 +22,7 @@
 // --cpu_time N: use about N CPU seconds after copying files
 //
 
-#include "boinc/config.h"
+#include "config.h"
 #include <cstdio>
 #include <cctype>
 #include <ctime>
@@ -31,11 +31,11 @@
 #include <csignal>
 #include <unistd.h>
 
-#include "boinc/str_util.h"
-#include "boinc/util.h"
-#include "boinc/filesys.h"
-#include "boinc/boinc_api.h"
-#include "boinc/mfile.h"
+#include "str_util.h"
+#include "util.h"
+#include "filesys.h"
+#include "boinc_api.h"
+#include "mfile.h"
 
 using std::string;
 

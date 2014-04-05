@@ -32,6 +32,8 @@
 #include <cstdlib>
 #include <string>
 #include <cstring>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include "boinc_db.h"
 #include "error_numbers.h"
@@ -52,11 +54,44 @@
 const char* app_name = "example_app";
 const char* in_template_file = "example_app_in";
 const char* out_template_file = "example_app_out";
+const char* input_name = "/tmp/ola";
 
 char* in_template;
 DB_APP app;
 int start_time;
 int seqno;
+
+// copies one file from source to dest
+//
+int copy_file(const char* source, const char* dest) {
+  pid_t pid;
+  int childExitStatus;
+  pid = fork();
+  
+  if(pid == 0) {
+    execl("/bin/cp", "/bin/cp", source, dest, (char *)0);
+  }
+  else if (pid < 0) {
+    log_messages.printf(MSG_CRITICAL, "can't fork to perform cp (input staging)\n");
+    return -1;
+  }
+  else {
+    pid_t ws = waitpid( pid, &childExitStatus, 0);
+    if (ws == -1) { 
+      log_messages.printf(MSG_CRITICAL, "can't wait for child (input staging)\n");
+      return -2;
+    }
+    if (WIFSIGNALED(childExitStatus)) { /* killed */
+      log_messages.printf(MSG_CRITICAL, "signaled child (input staging)\n");
+      return -3;
+    }
+    else if (WIFSTOPPED(childExitStatus)) { /* stopped */
+      log_messages.printf(MSG_CRITICAL, "stopped child (input staging)\n");
+      return -4;
+    }
+    return 0;
+  }
+}
 
 // create one new job
 //
@@ -70,15 +105,16 @@ int make_job() {
     //
     sprintf(name, "%s_%d_%d", app_name, start_time, seqno++);
 
-    // Create the input file.
-    // Put it at the right place in the download dir hierarchy
+    // Put the input file at the right place in the download dir hierarchy
     //
     retval = config.download_path(name, path);
     if (retval) return retval;
-    FILE* f = fopen(path, "w");
-    if (!f) return ERR_FOPEN;
-    fprintf(f, "This is the input file for job %s", name);
-    fclose(f);
+
+    log_messages.printf(MSG_NORMAL, "Making workunit %s\n", path);
+    
+    retval = copy_file(input_name, path);
+    log_messages.printf(MSG_NORMAL, "Copy file returned %d\n", retval);
+    if (retval) return retval;
 
     // Fill in the job parameters
     //
