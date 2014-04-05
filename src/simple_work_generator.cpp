@@ -54,7 +54,7 @@
 const char* app_name = "example_app";
 const char* in_template_file = "example_app_in";
 const char* out_template_file = "example_app_out";
-const char* input_name = "/tmp/ola";
+const char* input_name = "/tmp/vinci-XL.txt.torrent";
 
 char* in_template;
 DB_APP app;
@@ -113,7 +113,6 @@ int make_job() {
     log_messages.printf(MSG_NORMAL, "Making workunit %s\n", path);
     
     retval = copy_file(input_name, path);
-    log_messages.printf(MSG_NORMAL, "Copy file returned %d\n", retval);
     if (retval) return retval;
 
     // Fill in the job parameters

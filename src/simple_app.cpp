@@ -58,7 +58,14 @@ static double do_a_giga_flop(int foo) {
     }
     return x;
 }
-
+/**
+ * TODO:
+ * 1 - refactor code to include (uc, cp, etc in separated functions)
+ * 2 - get input file, load it in libtorrent
+ * 3 - one its all done, perform computation
+ * 4 - create .torrent for the output
+ * 5 - mv input and output files, and copy .torrent files (input and output) to a shared dir (with other WUs). 
+ */
 int main(int argc, char **argv) {
     int i;
     int c, nchars = 0, retval;
