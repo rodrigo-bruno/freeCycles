@@ -139,7 +139,7 @@ int main(int argc, char* argv[]) {
 	error_code ec;
 	session_settings settings;
 	std::string search_dir = "./";
-        std::string work_dir = "./";
+    std::string work_dir = "./";
 
 	/* Init session */
 	s.listen_on(std::make_pair(6500, 7000), ec);
