@@ -119,10 +119,10 @@ int make_job() {
     
     // TODO - also stage real input files.
     // input1.torrent -> download/2c/simple_app_1396713410_X
-    // input1 -> bt/client/shared/simple_app_1396713410_X/input
+    // input1 -> bt/client/shared/simple_app_1396713410_X.input/input
     // ...
     // inputN.torrent -> downloads/2c/simple_app_1396713410_W
-    // inputN -> bt/client/shared/simple_app_1396713410_W/input
+    // inputN -> bt/client/shared/simple_app_1396713410_W.input/input
 
     retval = copy_file(input_name, path);
     if (retval) return retval;
