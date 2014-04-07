@@ -21,60 +21,74 @@
 #include "libtorrent/session.hpp"
 
 /*
- * Usage: app [-d X] [-u Y] [-s] [-p]
+ * Usage: freeCycles-wrapper [-d D] [-u U] [-s S] [-t T] --app app_name [app arguments]
  * Options:
- *  -d Download rate limit (KBps)
- *  -u Upload rate limit (KBps)
- *  -s Location for the shared directory
+ *  -d    Download rate limit (KBps)
+ *  -u    Upload rate limit (KBps)
+ *  -s    Location for the shared directory
+ *  -t    Tracker to use for peer discovery
+ *  --app From here on, the app_name is read and all the remaining arguments
+ *  are sent in the "app_name" call.
  *
  */
-
-
-// TODO - use std::string OR char*
-// TODO - test if it is okay to remove this. I like explicit stuff.
-using std::string;
 
 // BOINC template names for input and output files.
 #define BOINC_INPUT_FILENAME "in"
 #define BOINC_OUTPUT_FILENAME "out"
 
-#define BT_SEARCH_INTERVAL 1
-#define BT_FILE_SUFFIX ".torrent"
-
 // Several global variables. Just to facilitate method calling.
 libtorrent::session_settings bt_settings;
 libtorrent::session bt_session;
 libtorrent::error_code bt_ec;
-
-int retval;
 char buf[256];
 
-// Default values for user definable variables.
-//
 // Shared uploads
-std::string shared_dir = "./";
+std::string shared_dir = "/tmp/freeCycles-wrapper";
 // WU name
 std::string wu_name;
+// Tracker url to use.
+std::string tracker_url = "udp://boinc.rnl.ist.utl.pt:6969";
 
-/**
- * Adds a new torrent to the current session.
- */
+// Adds a new torrent to the current session.
 libtorrent::torrent_handle add_torrent(const char* torrent) {
-
 	libtorrent::add_torrent_params p;
-
 	p.save_path = shared_dir;
 	p.ti = new libtorrent::torrent_info(torrent, bt_ec);
 	return bt_session.add_torrent(p, bt_ec);
 }
 
-void search_prefix(const std::string& dir, const std::string& prefix, const std::vector<std::string>& vector) {
-	// TODO
+// Returns all the file names, within a specified location "search_dir",
+// which are prefixed by "prefix".
+int search_prefix(
+		const std::string& search_dir,
+		const std::string& prefix,
+		std::vector<std::string>* results) {
+	DIR* dir;
+
+	// Try to open search_dir. If opendir is unsuccessful, return.
+	if((dir = opendir(search_dir.c_str())) == NULL) {
+		fprintf(stderr,
+				"%s [APP] cannot open dir %s\n",
+	      		boinc_msg_prefix(buf, sizeof(buf)),
+	      		search_dir.c_str());
+		return -1;
+	}
+
+	// Look for all files and and check if prefix applies.
+	for(struct dirent* dp = readdir(dir); dp != NULL; dp = readdir(dir)) {
+
+		if(dp->d_type == DT_DIR) { continue; }
+
+		std::string file_name = std::string(dp->d_name);
+		if(starts_with(file_name, prefix)) {
+			results->push_back(file_name);
+		}
+	}
+	return 0;
 }
 
 // Copies one file from source to destination.
-//
-int copy_file(const std::string source, const std::string dest) {
+int copy_file(const std::string& source, const std::string& dest) {
   // TODO - try to implement this without creating a new process.
   // It seems to me like an excessive overhead...
   // I will use this function to copy only a few thousands of bytes.
@@ -87,29 +101,61 @@ int copy_file(const std::string source, const std::string dest) {
     return execl("/bin/cp", "/bin/cp", source.c_str(), dest.c_str(), (char *)0);
   }
   else if (pid < 0) {
-    log_messages.printf(MSG_CRITICAL, "can't fork to perform cp (input staging)\n");
+      fprintf(stderr,
+      		  "%s [APP] can't fork to perform cp %s %s\n",
+      		  boinc_msg_prefix(buf, sizeof(buf)),
+      		  source.c_str(),
+      		  dest.c_str());
     return -1;
   }
   else {
     pid_t ws = waitpid( pid, &childExitStatus, 0);
     if (ws == -1) {
-      log_messages.printf(MSG_CRITICAL, "can't wait for child (input staging)\n");
-      return -2;
+        fprintf(stderr,
+        		  "%s [APP] cannot wait for child process (cp %s %s)\n",
+        		  boinc_msg_prefix(buf, sizeof(buf)),
+        		  source.c_str(),
+        		  dest.c_str());
+      return -1;
     }
     if (WIFSIGNALED(childExitStatus)) { /* killed */
-      log_messages.printf(MSG_CRITICAL, "signaled child (input staging)\n");
-      return -3;
+        fprintf(stderr,
+        		  "%s [APP] signaled child process (cp %s %s)\n",
+        		  boinc_msg_prefix(buf, sizeof(buf)),
+        		  source.c_str(),
+        		  dest.c_str());
+      return -1;
     }
     else if (WIFSTOPPED(childExitStatus)) { /* stopped */
-      log_messages.printf(MSG_CRITICAL, "stopped child (input staging)\n");
-      return -4;
+        fprintf(stderr,
+        		  "%s [APP] stopped child process (cp %s %s)\n",
+        		  boinc_msg_prefix(buf, sizeof(buf)),
+        		  source.c_str(),
+        		  dest.c_str());
+      return -1;
     }
     return 0;
   }
 }
 
-void init_shared_dir() {
-	// TODO - check if dir exists, create if not
+// Initializes (creates) a directory.
+int init_dir(std::string dir) {
+	int status = mkdir(dir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	if(status == 0 || status == EEXIST) { return 0; }
+	if(status == EACCES) {
+        fprintf(stderr,
+        		  "%s [APP] failed to create dir %s. Permission denied.\n",
+        		  boinc_msg_prefix(buf, sizeof(buf)),
+        		  dir.c_str());
+	}
+	else {
+        fprintf(stderr,
+        		  "%s [APP] failed to create dir %s. Error code %d.\n",
+        		  boinc_msg_prefix(buf, sizeof(buf)),
+        		  dir.c_str(),
+        		  status);
+	}
+	return status;
 }
 
 /**
@@ -130,6 +176,7 @@ void upper_case(const char* work_dir, const char* wu_name) {
     }
 }
 
+// Processes command line arguments.
 void process_cmd_args(int argc, char** argv) {
 
 	/* Setup bt settings */
@@ -150,6 +197,9 @@ void process_cmd_args(int argc, char** argv) {
 		else if (!strcmp(argv[arg_index], "-s"))	{
 			shared_dir = argv[++arg_index];
 		}
+		else if (!strcmp(argv[arg_index], "-t"))	{
+			tracker_url = argv[++arg_index];
+		}
 		else {
 	        fprintf(stderr,
 	        		"%s [APP] unknown cmd arg %s\n",
@@ -166,8 +216,23 @@ void wait_torrent(libtorrent::torrent_handle input) {
 	while(!input.status().is_seeding) { sleep(1); }
 }
 
-int main(int argc, char **argv) {
+void make_torrent(
+		const std::vector<std::string>& input_files,
+		std::string output_file,
+		std::string tracker_url) {
+	std::string creator_str = "freeCycles-wrapper (using libtorrent)";
+	libtorrent::file_storage fs;
 
+	for(std::vector<std::string>::iterator it = input_files.begin(); it != input_files.end(); ++it) {
+	    *it->assign(libtorrent::complete(*it));
+	}
+
+
+	// TODO - implement.
+}
+
+int main(int argc, char **argv) {
+	int retval;
     char input_path[512], output_path[512];
     APP_INIT_DATA boinc_data;
     std::vector<std::string> app_outputs;
@@ -192,6 +257,7 @@ int main(int argc, char **argv) {
     wu_name = std::string(boinc_data.wu_name);
 
 	// Initialize BitTorrent session.
+    init_dir(shared_dir);
     bt_session.set_settings(bt_settings);
     bt_session.listen_on(std::make_pair(6500, 7000), bt_ec);
 	if (bt_ec)	{
@@ -202,18 +268,24 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
+    // TODO - while:
+	// 1- application is running
+	// 2- we are waiting for the input files
+	// -> search for new .torrent files.
 
     // Add torrent and wait until completion
     wait_torrent(add_torrent(input_path));
-    // Copy input .torrent file to shared dir ($(shared_dir)/$(wu_name).input.torrent
-    copy_file(std::string(input_path), shared_dir+"/"+wu_name+".input.torrent");
+    // Copy input .torrent file to shared dir.
+    copy_file(input_path, shared_dir+"/"+wu_name+".input.torrent");
+    // TODO - application should be run in a separate process.
     // Call application.
     upper_case(shared_dir.c_str(), wu_name.c_str());
     // Search for application output files.
-    search_prefix(shared_dir, wu_name, app_outputs);
-    // TODO make_torrent $(app_outputs) -t udp://boinc.rnl.ist.utl.pt:6969 -o $(shared_dir)/$(wu_name).output.torrent
+    search_prefix(shared_dir, wu_name, &app_outputs);
+    // Create .torrent file for output files.
+    make_torrent(app_outputs, tracker_url, shared_dir+"/"+wu_name+".output.torrent");
     // Copy output .torrent file to the right place (BOINC expected location).
-    copy_file(shared_dir+"/"+wu_name+".output.torrent", std::string(output_path));
+    copy_file(shared_dir+"/"+wu_name+".output.torrent", output_path);
 
 
     boinc_fraction_done(1);
