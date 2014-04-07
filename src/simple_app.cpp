@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <csignal>
 #include <unistd.h>
+#include <wait.h>
 
 #include "str_util.h"
 #include "util.h"
@@ -19,13 +20,14 @@
 #include "libtorrent/bencode.hpp"
 #include "libtorrent/session.hpp"
 
-// TODO - usage
-//        "Usage: %s [OPTION]...\n"
-//        "Options:\n"
-//        "  [ -d X ]   Download rate limit (KBps)\n"
-//        "  [ -u Y ]   Upload rate limit (KBps)\n"
-//        "  [ -s   ]   FIXME \n",
-//        "  [ -p   ]   FIXME.\n",
+/*
+ * Usage: app [-d X] [-u Y] [-s] [-p]
+ * Options:
+ *  -d Download rate limit (KBps)
+ *  -u Upload rate limit (KBps)
+ *  -s Location for the shared directory
+ *
+ */
 
 
 // TODO - use std::string OR char*
@@ -49,35 +51,76 @@ char buf[256];
 
 // Default values for user definable variables.
 //
-// Private downloads
-std::string private_dir = "./";
 // Shared uploads
-std::string shared_dir = "./"; // FIXME - I will probably have to create this dir.
-
+std::string shared_dir = "./";
+// WU name
+std::string wu_name;
 
 /**
- * Adds a new torrent to the current session. Possible errors are reported
- * through the error_code object.
+ * Adds a new torrent to the current session.
  */
 libtorrent::torrent_handle add_torrent(const char* torrent) {
 
 	libtorrent::add_torrent_params p;
-	libtorrent::torrent_handle th;
 
-	p.save_path = private_dir;
+	p.save_path = shared_dir;
 	p.ti = new libtorrent::torrent_info(torrent, bt_ec);
-	if (bt_ec)	{ return th; }
-	th = bt_session.add_torrent(p, bt_ec);
-	if (bt_ec)	{ return th; }
-
-	return th;
+	return bt_session.add_torrent(p, bt_ec);
 }
 
+void search_prefix(const std::string& dir, const std::string& prefix, const std::vector<std::string>& vector) {
+	// TODO
+}
+
+// Copies one file from source to destination.
+//
+int copy_file(const std::string source, const std::string dest) {
+  // TODO - try to implement this without creating a new process.
+  // It seems to me like an excessive overhead...
+  // I will use this function to copy only a few thousands of bytes.
+  // See util.h
+  pid_t pid;
+  int childExitStatus;
+  pid = fork();
+
+  if(pid == 0) {
+    return execl("/bin/cp", "/bin/cp", source.c_str(), dest.c_str(), (char *)0);
+  }
+  else if (pid < 0) {
+    log_messages.printf(MSG_CRITICAL, "can't fork to perform cp (input staging)\n");
+    return -1;
+  }
+  else {
+    pid_t ws = waitpid( pid, &childExitStatus, 0);
+    if (ws == -1) {
+      log_messages.printf(MSG_CRITICAL, "can't wait for child (input staging)\n");
+      return -2;
+    }
+    if (WIFSIGNALED(childExitStatus)) { /* killed */
+      log_messages.printf(MSG_CRITICAL, "signaled child (input staging)\n");
+      return -3;
+    }
+    else if (WIFSTOPPED(childExitStatus)) { /* stopped */
+      log_messages.printf(MSG_CRITICAL, "stopped child (input staging)\n");
+      return -4;
+    }
+    return 0;
+  }
+}
+
+void init_shared_dir() {
+	// TODO - check if dir exists, create if not
+}
 
 /**
+ * This is application specific code. It should be isolated as possible.
+ * Only one convention remains: all input and output files must be read and
+ * written inside work_dir and use names prefixed with wu_name.
  * Reads char, converts to upper case, writes char.
  */
-void upper_case(FILE* in, MFILE out) {
+void upper_case(const char* work_dir, const char* wu_name) {
+    MFILE out; // FIXME - proper file opening and closing
+    FILE* in;
 	char c;
     for (int i=0; ; i++) {
         c = fgetc(in);
@@ -107,9 +150,6 @@ void process_cmd_args(int argc, char** argv) {
 		else if (!strcmp(argv[arg_index], "-s"))	{
 			shared_dir = argv[++arg_index];
 		}
-		else if (!strcmp(argv[arg_index], "-p"))	{
-			private_dir = argv[++arg_index];
-		}
 		else {
 	        fprintf(stderr,
 	        		"%s [APP] unknown cmd arg %s\n",
@@ -120,24 +160,21 @@ void process_cmd_args(int argc, char** argv) {
 	}
 }
 
-void wait_for_input() {}
+// Blocking function that holds execution while input is not ready.
+//
+void wait_torrent(libtorrent::torrent_handle input) {
+	while(!input.status().is_seeding) { sleep(1); }
+}
 
-/**
- * TODO:
- * 2 - get input file, load it in libtorrent
- * 3 - one its all done, perform computation
- * 4 - create .torrent for the output
- * 5 - mv input and output files, and copy .torrent files (input and output) to a shared dir (with other WUs). 
- */
 int main(int argc, char **argv) {
-    MFILE out;
-    FILE* in;
+
     char input_path[512], output_path[512];
+    APP_INIT_DATA boinc_data;
+    std::vector<std::string> app_outputs;
 
     process_cmd_args(argc, argv);
 
-    // init boinc
-    //
+    // Initialize BOINC.
     retval = boinc_init();
     if (retval) {
         fprintf(stderr,
@@ -146,7 +183,15 @@ int main(int argc, char **argv) {
         exit(retval);
     }
 
-	/* init bt session */
+    // Resolve input and output files' logical name (.torrent files).
+    boinc_resolve_filename(BOINC_INPUT_FILENAME, input_path, sizeof(input_path));
+    boinc_resolve_filename(BOINC_OUTPUT_FILENAME, output_path, sizeof(output_path));
+
+    // Resolve WU name.
+    boinc_get_init_data(boinc_data);
+    wu_name = std::string(boinc_data.wu_name);
+
+	// Initialize BitTorrent session.
     bt_session.set_settings(bt_settings);
     bt_session.listen_on(std::make_pair(6500, 7000), bt_ec);
 	if (bt_ec)	{
@@ -157,42 +202,19 @@ int main(int argc, char **argv) {
 		return 1;
 	}
 
-    // resolve input file (.torrent file) logical name
-    boinc_resolve_filename(BOINC_INPUT_FILENAME, input_path, sizeof(input_path));
 
-    add_torrent(input_path);
-    // TODO once all files are downloaded
-    // TODO issue (fork) cp downloaded+.torrent to shared
-    upper_case(in, out);
-    // TODO create .torrent file for output files
-    // TODO state .torrent file
-    // TODO mv output+.torrent to shared
+    // Add torrent and wait until completion
+    wait_torrent(add_torrent(input_path));
+    // Copy input .torrent file to shared dir ($(shared_dir)/$(wu_name).input.torrent
+    copy_file(std::string(input_path), shared_dir+"/"+wu_name+".input.torrent");
+    // Call application.
+    upper_case(shared_dir.c_str(), wu_name.c_str());
+    // Search for application output files.
+    search_prefix(shared_dir, wu_name, app_outputs);
+    // TODO make_torrent $(app_outputs) -t udp://boinc.rnl.ist.utl.pt:6969 -o $(shared_dir)/$(wu_name).output.torrent
+    // Copy output .torrent file to the right place (BOINC expected location).
+    copy_file(shared_dir+"/"+wu_name+".output.torrent", std::string(output_path));
 
-
-    // open the output file (resolve logical name first)
-    // FIXME
-    boinc_resolve_filename(BOINC_OUTPUT_FILENAME, output_path, sizeof(output_path));
-    retval = out.open(output_path, "wb");
-    if (retval) {
-        fprintf(stderr, "%s APP: upper_case output open failed:\n",
-            boinc_msg_prefix(buf, sizeof(buf))
-        );
-        fprintf(stderr, "%s resolved name %s, retval %d\n",
-            boinc_msg_prefix(buf, sizeof(buf)), output_path, retval
-        );
-        perror("open");
-        exit(1);
-    }
-
-    // flush output file.
-    //
-    retval = out.flush();
-    if (retval) {
-        fprintf(stderr,
-        		"%s APP: upper_case flush failed %d\n",
-                boinc_msg_prefix(buf, sizeof(buf)), retval);
-        exit(1);
-    }
 
     boinc_fraction_done(1);
     boinc_finish(0);

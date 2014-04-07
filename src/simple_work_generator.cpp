@@ -54,6 +54,10 @@
 const char* app_name = "example_app";
 const char* in_template_file = "example_app_in";
 const char* out_template_file = "example_app_out";
+
+// For freeCycles project, I assume that I already have the computed .torrent
+// files and the correspondent input files.
+// Example: input1 and input1.torrent
 const char* input_name = "/tmp/vinci-XL.txt.torrent";
 
 char* in_template;
@@ -69,7 +73,7 @@ int copy_file(const char* source, const char* dest) {
   pid = fork();
   
   if(pid == 0) {
-    execl("/bin/cp", "/bin/cp", source, dest, (char *)0);
+    return execl("/bin/cp", "/bin/cp", source, dest, (char *)0);
   }
   else if (pid < 0) {
     log_messages.printf(MSG_CRITICAL, "can't fork to perform cp (input staging)\n");
@@ -110,8 +114,16 @@ int make_job() {
     retval = config.download_path(name, path);
     if (retval) return retval;
 
+
     log_messages.printf(MSG_NORMAL, "Making workunit %s\n", path);
     
+    // TODO - also stage real input files.
+    // input1.torrent -> download/2c/simple_app_1396713410_X
+    // input1 -> bt/client/shared/simple_app_1396713410_X.input
+    // ...
+    // inputN.torrent -> downloads/2c/simple_app_1396713410_W
+    // inputN -> bt/client/shared/simple_app_1396713410_W.input
+
     retval = copy_file(input_name, path);
     if (retval) return retval;
 
@@ -125,8 +137,8 @@ int make_job() {
     wu.rsc_memory_bound = 1e8;
     wu.rsc_disk_bound = 1e8;
     wu.delay_bound = 86400;
-    wu.min_quorum = REPLICATION_FACTOR;
-    wu.target_nresults = REPLICATION_FACTOR;
+    wu.min_quorum = REPLICATION_FACTOR;      /* TODO <- 3 for both map and reduce */
+    wu.target_nresults = REPLICATION_FACTOR; /* TODO <- 5 if map, 3 if reduce */
     wu.max_error_results = REPLICATION_FACTOR*4;
     wu.max_total_results = REPLICATION_FACTOR*8;
     wu.max_success_results = REPLICATION_FACTOR*4;
