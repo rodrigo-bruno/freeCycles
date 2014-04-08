@@ -1,5 +1,8 @@
 // TODO - place open source banner
 
+// Compilation flag to enable local testing.
+#define STANDALONE
+
 #include "config.h"
 #include <cstdio>
 #include <cctype>
@@ -10,11 +13,13 @@
 #include <unistd.h>
 #include <wait.h>
 
+#ifndef STANDALONE
 #include "str_util.h"
 #include "util.h"
 #include "filesys.h"
 #include "boinc_api.h"
 #include "mfile.h"
+#endif
 
 #include "libtorrent/entry.hpp"
 #include "libtorrent/bencode.hpp"
@@ -57,6 +62,12 @@ std::string output_dir;
 std::string wu_name;
 // Tracker URL to use.
 std::string tracker_url = "udp://boinc.rnl.ist.utl.pt:6969";
+
+#ifdef STANDALONE
+char* boinc_msg_prefix(char* buf, int size) {
+	return strcpy(buf, "[STANDALONE]");
+}
+#endif
 
 // Adds a new torrent to the current session.
 libtorrent::torrent_handle add_torrent(const char* torrent) {
@@ -145,12 +156,12 @@ int init_dir(std::string dir) {
 int upper_case(std::string input_dir, std::string output_dir) {
 	std::string input_file = input_dir + "/infile";
 	std::string output_file = output_dir + "/outfile";
-    MFILE out;
+    FILE* out;
     FILE* in;
     int retval;
 	char c;
 
-    in = boinc_fopen(input_file.c_str(), "r");
+    in = fopen(input_file.c_str(), "r");
     if (!in) {
         fprintf(stderr,
             "%s [APP] Couldn't find input file, resolved name %s.\n",
@@ -158,8 +169,8 @@ int upper_case(std::string input_dir, std::string output_dir) {
         return -1;
     }
 
-    retval = out.open(output_file.c_str(), "wb");
-    if (retval) {
+    out = fopen(output_file.c_str(), "wb");
+    if (!out) {
     	fprintf(stderr, "%s [APP]: upper_case output open failed:\n",
     			boinc_msg_prefix(buf, sizeof(buf)));
     	fprintf(stderr, "%s resolved name %s, retval %d\n",
@@ -173,18 +184,11 @@ int upper_case(std::string input_dir, std::string output_dir) {
     for (int i=0; ; i++) {
         c = fgetc(in);
         if (c == EOF) break;
-        c = toupper(c);
-        out._putchar(c);
+        fputc(toupper(c), out);
     }
 
-    retval = out.flush();
-    if (retval) {
-        fprintf(stderr,
-        		"%s [APP]: upper_case flush failed %d\n",
-        		boinc_msg_prefix(buf, sizeof(buf)),
-        		retval);
-        return -1;
-    }
+    fclose(in);
+    fclose(out);
     return 0;
 }
 
@@ -295,11 +299,13 @@ int make_torrent(
 int main(int argc, char **argv) {
 	int retval;
     char input_path[512], output_path[512];
+#ifndef STANDALONE
     APP_INIT_DATA boinc_data;
-    std::vector<std::string> app_outputs;
+#endif
 
     process_cmd_args(argc, argv);
 
+#ifndef STANDALONE
     // Initialize BOINC.
     retval = boinc_init();
     if (retval) {
@@ -308,20 +314,34 @@ int main(int argc, char **argv) {
         		boinc_msg_prefix(buf, sizeof(buf)), retval);
         exit(retval);
     }
+#endif
 
     // Resolve input and output files' logical name (.torrent files).
+#ifndef STANDALONE
     boinc_resolve_filename(BOINC_INPUT_FILENAME, input_path, sizeof(input_path));
     boinc_resolve_filename(BOINC_OUTPUT_FILENAME, output_path, sizeof(output_path));
+#else
+    strcpy(input_path, "/tmp/boinc-slot/input");
+    strcpy(output_path, "/tmp/boinc-slot/output");
+#endif
 
     // Resolve WU name.
+#ifndef STANDALONE
     boinc_get_init_data(boinc_data);
     wu_name = std::string(boinc_data.wu_name);
+#else
+    wu_name = "freeCycles-wrapper_321_123";
+#endif
     input_torrent = shared_dir + "/" + wu_name + ".input.torrent";
     input_dir = shared_dir + "/" + wu_name + ".input";
     output_torrent = shared_dir + "/" + wu_name + ".output.torrent";
     output_dir = shared_dir + "/" + wu_name + ".output";
 
     // Initialize needed directories.
+#ifdef STANDALONE
+    init_dir(input_path);
+    init_dir(output_path);
+#endif
     init_dir(shared_dir);
 
 	// Initialize BitTorrent session.
@@ -339,12 +359,12 @@ int main(int argc, char **argv) {
 	// 1- application is running
 	// 2- we are waiting for the input files
 	// -> search for new .torrent files.
+    // TODO - application should be run in a separate process.
 
     // Add torrent and wait until completion
     wait_torrent(add_torrent(input_path));
     // Copy input .torrent file to shared dir.
     copy_file(input_path, input_torrent);
-    // TODO - application should be run in a separate process.
     // Call application.
     upper_case(input_dir, output_dir);
     // Create .torrent file for output directory.
@@ -352,7 +372,8 @@ int main(int argc, char **argv) {
     // Copy output .torrent file to the right place (BOINC expected location).
     copy_file(output_torrent, output_path);
 
-
+#ifndef STANDALONE
     boinc_fraction_done(1);
     boinc_finish(0);
+#endif
 }
