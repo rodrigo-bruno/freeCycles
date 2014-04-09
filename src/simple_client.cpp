@@ -92,7 +92,7 @@ void check_new_torrent(
 	for(struct dirent* dp = readdir(dir); dp != NULL; dp = readdir(dir)) {
 
 		if(dp->d_type == DT_DIR) { continue; }
-		if(ends_with(dp->d_name, TORRENT_FILE_SUFFIX)) { continue; }
+		if(! ends_with(dp->d_name, TORRENT_FILE_SUFFIX)) { continue; }
 
 		add_torrent(s, (search_dir+dp->d_name).c_str(), ec, work_dir.c_str());
 

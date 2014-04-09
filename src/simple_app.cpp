@@ -61,7 +61,11 @@ std::string output_dir;
 // WU name
 std::string wu_name;
 // Tracker URL to use.
+#ifdef STANDALONE
+std::string tracker_url = "udp://localhost:6969";
+#else
 std::string tracker_url = "udp://boinc.rnl.ist.utl.pt:6969";
+#endif
 
 #ifdef STANDALONE
 char* boinc_msg_prefix(char* buf, int size) {
@@ -96,7 +100,7 @@ int copy_file(const std::string& source, const std::string& dest) {
       		  boinc_msg_prefix(buf, sizeof(buf)),
       		  source.c_str(),
       		  dest.c_str());
-    return -1;
+    return 1;
   }
   else {
     pid_t ws = waitpid( pid, &childExitStatus, 0);
@@ -106,7 +110,7 @@ int copy_file(const std::string& source, const std::string& dest) {
         		  boinc_msg_prefix(buf, sizeof(buf)),
         		  source.c_str(),
         		  dest.c_str());
-      return -1;
+      return 1;
     }
     if (WIFSIGNALED(childExitStatus)) { /* killed */
         fprintf(stderr,
@@ -114,7 +118,7 @@ int copy_file(const std::string& source, const std::string& dest) {
         		  boinc_msg_prefix(buf, sizeof(buf)),
         		  source.c_str(),
         		  dest.c_str());
-      return -1;
+      return 1;
     }
     else if (WIFSTOPPED(childExitStatus)) { /* stopped */
         fprintf(stderr,
@@ -122,7 +126,7 @@ int copy_file(const std::string& source, const std::string& dest) {
         		  boinc_msg_prefix(buf, sizeof(buf)),
         		  source.c_str(),
         		  dest.c_str());
-      return -1;
+      return 1;
     }
     return 0;
   }
@@ -152,10 +156,12 @@ int init_dir(std::string dir) {
  * This is application specific code. It should be isolated as possible.
  * Only one convention remains: all input and output files must be read and
  * written inside input_dir and output_dir respectively.
+ *
+ * input_file and output_file are done accordingly to the work_generator.
  */
 int upper_case(std::string input_dir, std::string output_dir) {
-	std::string input_file = input_dir + "/infile";
-	std::string output_file = output_dir + "/outfile";
+	std::string input_file = input_dir + "/input";
+	std::string output_file = output_dir + "/output";
     FILE* out;
     FILE* in;
     int retval;
@@ -166,7 +172,7 @@ int upper_case(std::string input_dir, std::string output_dir) {
         fprintf(stderr,
             "%s [APP] Couldn't find input file, resolved name %s.\n",
             boinc_msg_prefix(buf, sizeof(buf)), input_file.c_str());
-        return -1;
+        return 1;
     }
 
     out = fopen(output_file.c_str(), "wb");
@@ -178,7 +184,7 @@ int upper_case(std::string input_dir, std::string output_dir) {
     			output_file.c_str(),
     			retval);
     	perror("open");
-    	return -1;
+    	return 1;
     }
 
     for (int i=0; ; i++) {
@@ -260,7 +266,7 @@ int make_torrent(
         		"%s [WRAPPER-make_torrent] no files found in %s\n",
         		boinc_msg_prefix(buf, sizeof(buf)),
         		output_dir.c_str());
-		return -1;
+		return 1;
 	}
 
 	libtorrent::create_torrent t(fs, piece_size, pad_file_limit, flags);
@@ -272,7 +278,7 @@ int make_torrent(
         		"%s [WRAPPER-make_torrent] %s\n",
         		boinc_msg_prefix(buf, sizeof(buf)),
         		ec.message().c_str());
-		return -1;
+		return 1;
 	}
 
 	t.set_creator(creator_str.c_str());
@@ -289,7 +295,7 @@ int make_torrent(
         		output_torrent.c_str(),
         		errno,
         		strerror(errno));
-		return -1;
+		return 1;
 	}
 	fwrite(&torrent[0], 1, torrent.size(), output);
 	fclose(output);
@@ -321,8 +327,8 @@ int main(int argc, char **argv) {
     boinc_resolve_filename(BOINC_INPUT_FILENAME, input_path, sizeof(input_path));
     boinc_resolve_filename(BOINC_OUTPUT_FILENAME, output_path, sizeof(output_path));
 #else
-    strcpy(input_path, "/tmp/boinc-slot/input");
-    strcpy(output_path, "/tmp/boinc-slot/output");
+    strcpy(input_path, "/tmp/boinc-slot/input/in");
+    strcpy(output_path, "/tmp/boinc-slot/output/out");
 #endif
 
     // Resolve WU name.
@@ -338,11 +344,8 @@ int main(int argc, char **argv) {
     output_dir = shared_dir + "/" + wu_name + ".output";
 
     // Initialize needed directories.
-#ifdef STANDALONE
-    init_dir(input_path);
-    init_dir(output_path);
-#endif
     init_dir(shared_dir);
+    init_dir(output_dir);
 
 	// Initialize BitTorrent session.
     bt_session.set_settings(bt_settings);
@@ -358,6 +361,7 @@ int main(int argc, char **argv) {
     // TODO - while:
 	// 1- application is running
 	// 2- we are waiting for the input files
+	// 3- we are sleeping (in the end)
 	// -> search for new .torrent files.
     // TODO - application should be run in a separate process.
 
@@ -366,11 +370,15 @@ int main(int argc, char **argv) {
     // Copy input .torrent file to shared dir.
     copy_file(input_path, input_torrent);
     // Call application.
-    upper_case(input_dir, output_dir);
+    if (upper_case(input_dir, output_dir)) { return 1; }
     // Create .torrent file for output directory.
     make_torrent(output_dir, output_torrent, tracker_url);
     // Copy output .torrent file to the right place (BOINC expected location).
     copy_file(output_torrent, output_path);
+    // Start sharing output.
+    add_torrent(output_path);
+
+    sleep(60);
 
 #ifndef STANDALONE
     boinc_fraction_done(1);
