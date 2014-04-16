@@ -51,10 +51,16 @@
     // maintain at least this many unsent results
 #define REPLICATION_FACTOR  1
 
+// FIXME - this file should be named freeCycles_work_generator.
+// It will use the wr-wrapper and, consequently, the bt-wrapper.
+
+
+// TODO - put some decent names.
 const char* app_name = "example_app";
 const char* in_template_file = "example_app_in";
 const char* out_template_file = "example_app_out";
 
+// TODO - simple_work_generator should read only one input file.
 // For freeCycles project, I assume that I already have the computed .torrent
 // files and the correspondent input files.
 // Example: input1 and input1.torrent
