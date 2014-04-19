@@ -10,9 +10,11 @@
 # - create .torrent files for each of the file parts and will place them inside
 # a well known location.
 
+PRE_STAGE_DIR=/tmp
+UPLOAD_DIR=/tmp
+MAKE_TORRENT=/home/underscore/git/freeCycles/src/make_torrent
+TRACKER=udp://boinc.rnl.ist.utl.pt:6969
 JOBTRACKER_FILE=/tmp/jobtracker.xml
-PRE_STAGE_DIR=/tmp/pre_stage
-UPLOAD_DIR=/tmp/upload
 
 function split_input_file {
   # number of lines per split = total number of lines divided by the number
@@ -27,7 +29,6 @@ function prepare_splits {
   for file in $id-map-*
   do
     mv $file $id-map-$aux
-    # make_torrent
     aux=$((aux + 1))
   done 
 }
@@ -53,7 +54,7 @@ function print_jobtracker {
   do
     echo "<reduce>"
     echo "<status>w</status>"
-    echo "<input>$PRE_STATE_DIR/$id-reduce-$aux.zip</input>"
+    echo "<input>$PRE_STAGE_DIR/$id-reduce-$aux.zip</input>"
     echo "<output>$UPLOAD_DIR/$id-reduce-$aux.torrent</input>"
     echo "</reduce>"
   done
@@ -62,20 +63,19 @@ function print_jobtracker {
   echo "</mr>" >> $JOBTRACKER_FILE
 }
 
+function make_torrents {
+  for file in $id-map-*
+  do
+    $MAKE_TORRENT $file -t $TRACKER -o $file.torrent
+  done
+
+}
+
 if [ "$#" -ne 3 ]; then
   echo "Illegal number of parameters."
   echo "Usage ./setup-mr.sh nmaps nreds ifile"
   exit 
 fi
-
-
-# shuffle will be:
-# cd $UPLOAD_DIR
-# unzip $UPLOAD_DIR/$id-map-*.zip
-# for ((aux=0; aux<$nreds; aux++))
-# do 
-#  zip $id-reduce-$aux.zip $id-map-*$aux.torrent
-# done
 
 nmaps=$1
 nreds=$2
@@ -86,4 +86,5 @@ cd $PRE_STAGE_DIR
 split_input_file
 prepare_splits
 print_jobtracker >> $JOBTRACKER_FILE
+make_torrents
 

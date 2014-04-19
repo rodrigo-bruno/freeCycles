@@ -1,4 +1,4 @@
-all: simple_client simple_app client_test make_torrent dump_torrent uc2
+all: simple_client simple_app client_test make_torrent dump_torrent mr_parser
 
 # FIXME - needed?
 libs:
@@ -20,17 +20,25 @@ LIBTORRENT_LIBS = -L/usr/local/lib/ -L/usr/lib/ -ltorrent-rasterbar -lboost_syst
 
 INCLUDES = -I/usr/include -I/usr/local/include -I/usr/local/include/libtorrent -I/usr/include/boinc
 
+FLAGS = -Wall -g
+
 simple_client: simple_client.o
 	g++ simple_client.o -o simple_client $(LIBTORRENT_LIBS)
 
 simple_client.o: simple_client.cpp
-	g++ -c simple_client.cpp $(MACROS) $(INCLUDES)
+	g++ -c simple_client.cpp $(MACROS) $(INCLUDES) $(FLAGS)
 
 simple_app: simple_app.o
 	g++ simple_app.o -o simple_app $(BOINC_LIBS) $(LIBTORRENT_LIBS)
 	
 simple_app.o: simple_app.cpp
-	g++ -c simple_app.cpp $(MACROS) $(INCLUDES)
+	g++ -c simple_app.cpp $(MACROS) $(INCLUDES) $(FLAGS)
+
+mr_parser: mr_parser.o
+	g++ mr_parser.o -g -o mr_parser $(BOINC_LIBS) $(LIBTORRENT_LIBS)
+	
+mr_parser.o: mr_parser.cpp
+	g++ -c -g mr_parser.cpp $(MACROS) $(INCLUDES) $(FLAGS)
 
 simple_work_generator:
 	cp simple_work_generator.cpp $(BOINC_BUILD)/sched/sample_work_generator.cpp
@@ -48,19 +56,19 @@ client_test: client_test.o
 	g++ client_test.o -o client_test $(LIBTORRENT_LIBS)
 
 client_test.o: client_test.cpp
-	g++ -c client_test.cpp $(MACROS) $(INCLUDES)
+	g++ -c client_test.cpp $(MACROS) $(INCLUDES) $(FLAGS)
 
 make_torrent: make_torrent.o
 	g++ make_torrent.o -o make_torrent $(LIBTORRENT_LIBS)
 
 make_torrent.o: make_torrent.cpp
-	g++ -c make_torrent.cpp $(MACROS) $(INCLUDES) 
+	g++ -c make_torrent.cpp $(MACROS) $(INCLUDES)  $(FLAGS)
 
 dump_torrent: dump_torrent.o
 	g++ dump_torrent.o -o dump_torrent $(LIBTORRENT_LIBS) 
 
 dump_torrent.o: dump_torrent.cpp
-	g++ -c dump_torrent.cpp $(MACROS) $(INCLUDES) 
+	g++ -c dump_torrent.cpp $(MACROS) $(INCLUDES) $(FLAGS)
 
 clean:
-	rm *.o simple_client client_test make_torrent dump_torrent simple_app uc2 simple_work_generator
+	rm *.o simple_client client_test make_torrent dump_torrent simple_app mr_parser simple_work_generator

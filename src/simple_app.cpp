@@ -164,8 +164,7 @@ int upper_case(std::string input_dir, std::string output_dir) {
 	std::string output_file = output_dir + "/output";
     FILE* out;
     FILE* in;
-    int retval;
-	char c;
+    char c;
 
     in = fopen(input_file.c_str(), "r");
     if (!in) {
@@ -179,10 +178,9 @@ int upper_case(std::string input_dir, std::string output_dir) {
     if (!out) {
     	fprintf(stderr, "%s [APP]: upper_case output open failed:\n",
     			boinc_msg_prefix(buf, sizeof(buf)));
-    	fprintf(stderr, "%s resolved name %s, retval %d\n",
+    	fprintf(stderr, "%s resolved name %s\n",
     			boinc_msg_prefix(buf, sizeof(buf)),
-    			output_file.c_str(),
-    			retval);
+    			output_file.c_str());
     	perror("open");
     	return 1;
     }
@@ -303,8 +301,7 @@ int make_torrent(
 }
 
 int main(int argc, char **argv) {
-	int retval;
-    char input_path[512], output_path[512];
+	char input_path[512], output_path[512];
 #ifndef STANDALONE
     APP_INIT_DATA boinc_data;
 #endif
@@ -354,7 +351,7 @@ int main(int argc, char **argv) {
         fprintf(stderr,
                 "%s [BT] Failed to open listen socket: %s\n",
                 boinc_msg_prefix(buf, sizeof(buf)),
-                input_path, bt_ec.message().c_str());
+                bt_ec.message().c_str());
 		return 1;
 	}
 

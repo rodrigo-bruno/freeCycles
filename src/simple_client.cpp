@@ -121,8 +121,8 @@ void usage(char *name) {
         "Options:\n"
         "  [ -d X ]   Download rate limit (KBps)\n"
         "  [ -u Y ]   Upload rate limit (KBps)\n"
-        "  [ -h   ]   Shows this help text.\n",
-        "  [ -s   ]   Directory to search periodically for .torrents\n",
+        "  [ -h   ]   Shows this help text.\n"
+        "  [ -s   ]   Directory to search periodically for .torrents\n"
         "  [ -w   ]   Directory used to save .torrents and downloaded files.\n",
         name
     );

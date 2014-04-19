@@ -52,7 +52,7 @@
 #define REPLICATION_FACTOR  1
 
 // FIXME - this file should be named freeCycles_work_generator.
-// It will use the wr-wrapper and, consequently, the bt-wrapper.
+// It will use the mr-wrapper and, consequently, the bt-wrapper.
 
 
 // TODO - put some decent names.
@@ -60,10 +60,7 @@ const char* app_name = "example_app";
 const char* in_template_file = "example_app_in";
 const char* out_template_file = "example_app_out";
 
-// TODO - simple_work_generator should read only one input file.
-// For freeCycles project, I assume that I already have the computed .torrent
-// files and the correspondent input files.
-// Example: input1 and input1.torrent
+// FIXME
 const char* input_name = "/tmp/vinci-XL.txt.torrent";
 
 char* in_template;
@@ -123,12 +120,7 @@ int make_job() {
 
     log_messages.printf(MSG_NORMAL, "Making workunit %s\n", path);
     
-    // TODO - also stage real input files.
-    // input1.torrent -> download/2c/simple_app_1396713410_X
-    // input1 -> bt/client/shared/simple_app_1396713410_X.input/input
-    // ...
-    // inputN.torrent -> downloads/2c/simple_app_1396713410_W
-    // inputN -> bt/client/shared/simple_app_1396713410_W.input/input
+    // FIXME
 
     retval = copy_file(input_name, path);
     if (retval) return retval;
@@ -149,6 +141,8 @@ int make_job() {
     wu.max_total_results = REPLICATION_FACTOR*8;
     wu.max_success_results = REPLICATION_FACTOR*4;
     infiles[0] = name;
+
+    // TODO - update XML
 
     // Register the job with BOINC
     //
@@ -179,7 +173,9 @@ void main_loop() {
         }
         if (n > CUSHION) {
             daemon_sleep(10);
-        } else {
+        }
+        // TODO - check if can make job
+        else {
             int njobs = (CUSHION-n)/REPLICATION_FACTOR;
             log_messages.printf(MSG_DEBUG,
                 "Making %d jobs\n", njobs
@@ -249,7 +245,9 @@ int main(int argc, char** argv) {
         } else if (is_arg(argv[i], "v") || is_arg(argv[i], "version")) {
             printf("%s\n", SVN_VERSION);
             exit(0);
-        } else {
+        }
+        // TODO - add --jobtracker_file
+        else {
             log_messages.printf(MSG_CRITICAL, "unknown command line argument: %s\n\n", argv[i]);
             usage(argv[0]);
             exit(1);
@@ -263,6 +261,8 @@ int main(int argc, char** argv) {
         );
         exit(1);
     }
+
+    // TODO - parse jobtracker_file
 
     retval = boinc_db.open(
         config.db_name, config.db_host, config.db_user, config.db_passwd
@@ -284,6 +284,7 @@ int main(int argc, char** argv) {
         exit(1);
     }
 
+    // FIXME - this is not needed anymore.
     start_time = time(0);
     seqno = 0;
 
