@@ -59,12 +59,15 @@
 const char* app_name = "example_app";
 const char* in_template_file = "example_app_in";
 const char* out_template_file = "example_app_out";
+const char* jobtracker_file = "jobtracker.xml";
 
-// FIXME
+// FIXME - delete
 const char* input_name = "/tmp/vinci-XL.txt.torrent";
 
+// TODO - why are these needed?
 char* in_template;
 DB_APP app;
+// FIXME - these two are no longer needed
 int start_time;
 int seqno;
 
@@ -176,11 +179,13 @@ void main_loop() {
         }
         // TODO - check if can make job
         else {
+        	// FIXME - this is no longer true, max(njobs, missing maps)
             int njobs = (CUSHION-n)/REPLICATION_FACTOR;
             log_messages.printf(MSG_DEBUG,
                 "Making %d jobs\n", njobs
             );
             for (int i=0; i<njobs; i++) {
+            	// TODO - send MapReduce task
                 retval = make_job();
                 if (retval) {
                     log_messages.printf(MSG_CRITICAL,
@@ -212,6 +217,7 @@ void usage(char *name) {
         "  [ --app X                Application name (default: example_app)\n"
         "  [ --in_template_file     Input template (default: example_app_in)\n"
         "  [ --out_template_file    Output template (default: example_app_out)\n"
+    	"  [ --jobtracker_file    	MapReduce state file (default: jobtracker.xml)\n"
         "  [ -d X ]                 Sets debug level to X.\n"
         "  [ -h | --help ]          Shows this help text.\n"
         "  [ -v | --version ]       Shows version information.\n",
@@ -239,6 +245,8 @@ int main(int argc, char** argv) {
             in_template_file = argv[++i];
         } else if (!strcmp(argv[i], "--out_template_file")) {
             out_template_file = argv[++i];
+        } else if (!strcmp(argv[i], "--jobtracker_file")) {
+            jobtracker_file = argv[++i];
         } else if (is_arg(argv[i], "h") || is_arg(argv[i], "help")) {
             usage(argv[0]);
             exit(0);
@@ -246,7 +254,6 @@ int main(int argc, char** argv) {
             printf("%s\n", SVN_VERSION);
             exit(0);
         }
-        // TODO - add --jobtracker_file
         else {
             log_messages.printf(MSG_CRITICAL, "unknown command line argument: %s\n\n", argv[i]);
             usage(argv[0]);
