@@ -1,4 +1,4 @@
-all: simple_client simple_app make_torrent parser_test
+all: simple_app
 
 # FIXME - needed?
 libs:
@@ -22,23 +22,11 @@ INCLUDES = -I/usr/include -I/usr/local/include -I/usr/local/include/libtorrent -
 
 FLAGS = -Wall -g3 -pedantic -w -Wextra -Werror
 
-simple_client: simple_client.o
-	g++ simple_client.o -o simple_client $(LIBTORRENT_LIBS)
-
-simple_client.o: simple_client.cpp
-	g++ -c simple_client.cpp $(MACROS) $(INCLUDES) $(FLAGS)
-
 simple_app: simple_app.o
 	g++ simple_app.o -o simple_app $(BOINC_LIBS) $(LIBTORRENT_LIBS)
 	
 simple_app.o: simple_app.cpp
 	g++ -c simple_app.cpp $(MACROS) $(INCLUDES) $(FLAGS)
-
-parser_test: parser_test.o
-	g++ parser_test.o -g -o parser_test $(BOINC_LIBS) $(LIBTORRENT_LIBS)
-	
-parser_test.o: parser_test.cpp
-	g++ -c parser_test.cpp $(MACROS) $(INCLUDES) $(FLAGS)
 
 simple_work_generator:
 	cp simple_work_generator.cpp $(BOINC_BUILD)/sched/sample_work_generator.cpp
@@ -46,29 +34,5 @@ simple_work_generator:
 	cp $(BOINC_BUILD)/sched/sample_work_generator.o ./simple_work_generator.o
 	cp $(BOINC_BUILD)/sched/sample_work_generator ./simple_work_generator
 
-uc2: uc2.o
-	g++ uc2.o -o uc2 $(BOINC_LIBS)
-
-uc2.o: uc2.cpp
-	g++ -c uc2.cpp $(INCLUDES)
-
-client_test: client_test.o
-	g++ client_test.o -o client_test $(LIBTORRENT_LIBS)
-
-client_test.o: client_test.cpp
-	g++ -c client_test.cpp $(MACROS) $(INCLUDES) $(FLAGS)
-
-make_torrent: make_torrent.o
-	g++ make_torrent.o -o make_torrent $(LIBTORRENT_LIBS)
-
-make_torrent.o: make_torrent.cpp
-	g++ -c make_torrent.cpp $(MACROS) $(INCLUDES)  $(FLAGS)
-
-dump_torrent: dump_torrent.o
-	g++ dump_torrent.o -o dump_torrent $(LIBTORRENT_LIBS) 
-
-dump_torrent.o: dump_torrent.cpp
-	g++ -c dump_torrent.cpp $(MACROS) $(INCLUDES) $(FLAGS)
-
 clean:
-	rm *.o simple_client client_test make_torrent dump_torrent simple_app parser_test simple_work_generator
+	rm *.o simple_app simple_work_generator
