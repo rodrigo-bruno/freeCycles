@@ -38,7 +38,7 @@ int parse_task(FILE* f, MapReduceJob& mpr) {
         }
         else {
         	// TODO - print decent message
-        	printf("erro=%s", buf);
+        	printf("error=%s", buf);
         	return ERR_XML_PARSE; }
 	}
 	return 0;
@@ -51,20 +51,29 @@ int parse_task(FILE* f, MapReduceJob& mpr) {
  */
 int parse_job(FILE* f, std::vector<MapReduceJob>& jobs) {
 	char buf[512];
-	int id;
+	std::string id;
+	int shuffledOffset;
+	bool shuffled;
 
 	while (fgets(buf, 512, f)) {
         if (match_tag(buf, "<id>")) {
-        	parse_int(buf, "<id>", id);
+        	parse_str(buf, "<id>", id);
         	jobs.push_back(MapReduceJob(id));
         }
         else if (match_tag(buf, "<map>")) { parse_task(f, jobs.back()); }
         else if (match_tag(buf, "<reduce>")) { parse_task(f, jobs.back()); }
+        else if (match_tag(buf, "<shuffled>")) {
+        	// *ALERT* - magic number 13.
+        	shuffledOffset = ftell(f) - 13;
+        	parse_bool(buf,"<shuffled>", shuffled);
+        	jobs.back().setShuffled(shuffled);
+        	jobs.back().setShuffledOffset(shuffledOffset);
+        }
         else if (match_tag(buf, "</mr>")) { break; }
         else if (match_tag(buf, "</id>")) { continue; }
         else {
         	// TODO - print decent message
-        	printf("erro=%s", buf);
+        	printf("error=%s", buf);
         	return ERR_XML_PARSE;
         }
     }

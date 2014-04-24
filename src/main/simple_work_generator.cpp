@@ -62,14 +62,17 @@ const char* app_name = "example_app";
 const char* in_template_file = "example_app_in";
 const char* out_template_file = "example_app_out";
 const char* jobtracker_file_path = "/home/boincadm/projects/test4vm/mr/jobtracker.xml";
+const char* shuffle_script = "/tmp/shuffle.sh";
 
 char* in_template;
 DB_APP app;
 std::vector<MapReduceJob> jobs;
-FILE* jobtracker_file;
+FILE* jobtracker_file = NULL;
 
-// copies one file from source to dest
-//
+/**
+ * Helper function that copies file(s).
+ * It uses the cp (unix program) do perform the copy.
+ */
 int copy_file(const char* source, const char* dest) {
   pid_t pid;
   int childExitStatus;
@@ -100,8 +103,43 @@ int copy_file(const char* source, const char* dest) {
   }
 }
 
-// create one new job
-//
+/**
+ * Helper function that shuffles the intermediate data.
+ * It uses an external script to perform the shuffle.
+ */
+int shuffle(const char* job_id, const char* nreds) {
+  pid_t pid;
+  int childExitStatus;
+  pid = fork();
+
+  if(pid == 0) {
+    return execl(shuffle_script, shuffle_script, job_id, nreds, (char*)0);
+  }
+  else if (pid < 0) {
+    log_messages.printf(MSG_CRITICAL, "can't fork to perform cp (input staging)\n");
+    return -1;
+  }
+  else {
+    pid_t ws = waitpid( pid, &childExitStatus, 0);
+    if (ws == -1) {
+      log_messages.printf(MSG_CRITICAL, "can't wait for child (input staging)\n");
+      return -2;
+    }
+    if (WIFSIGNALED(childExitStatus)) { /* killed */
+      log_messages.printf(MSG_CRITICAL, "signaled child (input staging)\n");
+      return -3;
+    }
+    else if (WIFSTOPPED(childExitStatus)) { /* stopped */
+      log_messages.printf(MSG_CRITICAL, "stopped child (input staging)\n");
+      return -4;
+    }
+    return 0;
+  }
+}
+
+/**
+ * Creates a new job.
+ */
 int make_job(MapReduceTask* mrt) {
     DB_WORKUNIT wu;
     char path[MAXPATHLEN];
@@ -155,12 +193,25 @@ int make_job(MapReduceTask* mrt) {
 }
 
 /**
- * TODO
+ * Helper function that writes to the jobtracker state file.
+ * It is called when a task is sent.
  */
 void write_task_state(MapReduceTask* mrt) {
 	fseek(jobtracker_file, mrt->getStateOffset(),SEEK_SET);
 	fwrite(TASK_CREATED, 1, 1, jobtracker_file);
+	fflush(jobtracker_file);
 	mrt->setState(TASK_CREATED);
+}
+
+/**
+ * Helper function that writes to the jobtracker state file.
+ * It is called when the shuffle is performed.
+ */
+void write_shuffled_state(MapReduceJob* mrj) {
+	fseek(jobtracker_file, mrj->getShuffledOffset(),SEEK_SET);
+	fwrite("1", 1, 1, jobtracker_file);
+	fflush(jobtracker_file);
+	mrj->setShuffled(true);
 }
 
 /**
@@ -196,11 +247,19 @@ MapReduceTask* get_MapReduce_task(std::vector<MapReduceJob>& jobs) {
 		// if all map tasks were already delivered.
 		if(mrt == NULL) {
 			read_maps_state(job);
-			// TODO - see if we are ready for shuffle
 			mrt = it->getNextReduce();
 			// this means that we might be waiting for map results.
 			if(mrt == NULL) { continue; }
-			else { return mrt; }
+			else {
+				// before returning a reduce task, make sure that the input is
+				// shuffled already.
+				if(it->needShuffle()) {
+					shuffle(it->getID().c_str(),
+							std::string(it->getReduceTasks().size()).c_str());
+					write_shuffled_state(&(*it));
+				}
+				return mrt;
+			}
 		}
 		else { return mrt; }
 	}
@@ -314,9 +373,10 @@ int main(int argc, char** argv) {
 
     retval = config.parse_file();
     if (retval) {
-        log_messages.printf(MSG_CRITICAL,
-            "Can't parse config.xml: %s\n", boincerror(retval)
-        );
+        log_messages.printf(
+        		MSG_CRITICAL,
+        		"Can't parse config.xml: %s\n",
+        		boincerror(retval));
         exit(1);
     }
 

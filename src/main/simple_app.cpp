@@ -1,7 +1,7 @@
 // TODO - place open source banner
 
 // Compilation flag to enable local testing.
-#define STANDALONE
+//#define STANDALONE
 
 #include "config.h"
 #include <cstdio>
@@ -27,14 +27,14 @@
 #include "libtorrent/create_torrent.hpp"
 
 /*
- * Usage: freeCycles-wrapper [-d D] [-u U] [-s S] [-t T] --app app_name [app arguments]
+ * Usage: freeCycles-wrapper [-d D] [-u U] [-s S] [-t T] -map M -red R
  * Options:
  *  -d    Download rate limit (KBps)
  *  -u    Upload rate limit (KBps)
  *  -s    Location for the shared directory
  *  -t    Tracker to use for peer discovery
- *  --app From here on, the app_name is read and all the remaining arguments
- *  are sent in the "app_name" call.
+ *  -map  Number of mappers
+ *  -red  Number of reducers
  *
  */
 
@@ -60,12 +60,17 @@ std::string output_torrent;
 std::string output_dir;
 // WU name
 std::string wu_name;
+// Number of mappers
+int nmaps;
+// Number of reducers
+int nreds;
 // Tracker URL to use.
 #ifdef STANDALONE
 std::string tracker_url = "udp://localhost:6969";
 #else
 std::string tracker_url = "udp://boinc.rnl.ist.utl.pt:6969";
 #endif
+
 
 #ifdef STANDALONE
 char* boinc_msg_prefix(char* buf, int size) {
@@ -220,6 +225,12 @@ void process_cmd_args(int argc, char** argv) {
 		else if (!strcmp(argv[arg_index], "-t"))	{
 			tracker_url = argv[++arg_index];
 		}
+		else if (!strcmp(argv[arg_index], "-map"))	{
+			nmaps = atoi(argv[++arg_index]);
+		}
+		else if (!strcmp(argv[arg_index], "-red"))	{
+			nreds = atoi(argv[++arg_index]);
+		}
 		else {
 	        fprintf(stderr,
 	        		"%s [WRAPPER-process_cmd_args] unknown cmd arg %s\n",
@@ -310,7 +321,7 @@ int main(int argc, char **argv) {
 
 #ifndef STANDALONE
     // Initialize BOINC.
-    retval = boinc_init();
+    int retval = boinc_init();
     if (retval) {
         fprintf(stderr,
         		"%s [BOINC] boinc_init returned %d\n",
@@ -324,6 +335,7 @@ int main(int argc, char **argv) {
     boinc_resolve_filename(BOINC_INPUT_FILENAME, input_path, sizeof(input_path));
     boinc_resolve_filename(BOINC_OUTPUT_FILENAME, output_path, sizeof(output_path));
 #else
+    // FIXME - maybe I we could use the slot dir only.
     strcpy(input_path, "/tmp/boinc-slot/input/in");
     strcpy(output_path, "/tmp/boinc-slot/output/out");
 #endif
@@ -335,6 +347,24 @@ int main(int argc, char **argv) {
 #else
     wu_name = "freeCycles-wrapper_321_123";
 #endif
+    // FIXME - fix these names
+    // if map
+    //  input file:
+    //   - wu_name.torrent (eg: 3123987-map-2.torrent) -> in
+    //  output file:
+    //   - wu_name.zip (eg: 3123987-map-2.zip) -> out
+    // if reduce
+    //  input file:
+    //   - wu_name.zip (eg: 3123987-reduce-2.zip) -> in
+    //  output file:
+    //   - wu_name.torrent (eg: 3123987-reduce-2.torrent) -> out
+    // TODO - zip and unzip script
+    // if map
+    //  output files:
+    //   - prepare-output output-dir wu_name-* (makes torrent and zips?)
+    // if reduce
+    //  input files
+    //   - prepare-input input-dir $id-map-X-redID.torrent ...
     input_torrent = shared_dir + "/" + wu_name + ".input.torrent";
     input_dir = shared_dir + "/" + wu_name + ".input";
     output_torrent = shared_dir + "/" + wu_name + ".output.torrent";
@@ -367,9 +397,12 @@ int main(int argc, char **argv) {
     // Copy input .torrent file to shared dir.
     copy_file(input_path, input_torrent);
     // Call application.
+    // FIXME - the application can return a list of strings (output files?)
     if (upper_case(input_dir, output_dir)) { return 1; }
     // Create .torrent file for output directory.
+    // FIXME - make_torrent will be called for every output, not for output dir.
     make_torrent(output_dir, output_torrent, tracker_url);
+    // FIXME - We have to create a zip and copy it to the output path.
     // Copy output .torrent file to the right place (BOINC expected location).
     copy_file(output_torrent, output_path);
     // Start sharing output.

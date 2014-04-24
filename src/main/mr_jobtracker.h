@@ -27,7 +27,7 @@ protected:
 	 * This offset is used to place the file pointer pointing to the offset
 	 * byte.
 	 */
-	unsigned long stateOffset;
+	unsigned long state_offset;
 	/**
 	 * Input file path.
 	 */
@@ -50,11 +50,11 @@ public:
 			std::string output) :
 		name(name),
 		state(state),
-		stateOffset(offset),
+		state_offset(offset),
 		input(input),
 		output(output) {}
 	void setState(std::string state) { this->state = state; }
-	unsigned long getStateOffset() { return this->stateOffset; }
+	unsigned long getStateOffset() { return this->state_offset; }
 	const std::string& getState() { return this->state; }
 	const std::string& getInputPath() { return this->input; }
 	const std::string& getOutputPath() { return this->output; }
@@ -69,7 +69,7 @@ public:
 				this->state.c_str(),
 				this->input.c_str(),
 				this->output.c_str(),
-				this->stateOffset);
+				this->state_offset);
 	}
 };
 
@@ -104,13 +104,29 @@ protected:
 	 */
 	bool unsent_tasks;
 	/**
+	 * True if the job is already shuffled.
+	 */
+	bool shuffled;
+	/**
+	 * This shuffled offset is used when we need to change the state file.
+	 * This offset is used to place the file pointer pointing to the offset
+	 * byte.
+	 */
+	int shuffledOffset;
+	/**
 	 * Unique job identifier.
 	 */
-	int id;
+	std::string id;
 
 public:
-	MapReduceJob(int id) :
-		id(id), next_map(0), next_red(0), finished_map(0), unsent_tasks(true) {}
+	MapReduceJob(std::string id) :
+		id(id),
+		next_map(0),
+		next_red(0),
+		finished_map(0),
+		unsent_tasks(true),
+		shuffled(false),
+		shuffledOffset(-1) {}
 	std::vector<MapReduceTask>& getMapTasks() { return this->maps; }
 	std::vector<MapReduceTask>& getReduceTasks() { return this->reds; }
 	/**
@@ -134,7 +150,6 @@ public:
 			if (this->maps[this->finished_map].getState() != TASK_FINISHED)
 			{ return NULL;}
 		}
-		// TODO - if(!shuffle) shuffle = true; return NULL;
 		for(; this->next_red < this->reds.size(); this->next_red++) {
 			if (this->reds[this->next_red].getState() == TASK_WAITING)
 			{ return &(this->reds[this->next_red]); }
@@ -142,6 +157,17 @@ public:
 		this->unsent_tasks = false;
 		return NULL;
 	}
+	/**
+	 * Method to test if the job needs to be shuffled.
+	 */
+	bool needShuffle() {
+		return !shuffled ? this->finished_map == this->maps.size() : false;
+	}
+	void setShuffled(bool shuffled) { this->shuffled = shuffled; }
+	void setShuffledOffset(int shuffledOffset)
+	{ this->shuffledOffset = shuffledOffset; }
+	int getShuffledOffset() { return this->shuffledOffset; }
+	std::string getID() { return this->id; }
 	void addMapTask(const MapReduceTask& mrt) { this->maps.push_back(mrt); }
 	void addReduceTask(const MapReduceTask& mrt) { this->reds.push_back(mrt); }
 	bool hasUnsentTasks() { return this->unsent_tasks; }
@@ -149,7 +175,7 @@ public:
 	 * Dumps the current job state.
 	 */
 	void dump(FILE* io) {
-		fprintf(io,"MapReduceJob: id=%d\n", this->id);
+		fprintf(io,"MapReduceJob: id=%s, shuffled=%d\n", this->id, this->shuffled);
 		// print map tasks
 		fprintf(io,"Map Tasks:\n");
 		for(	std::vector<MapReduceTask>::iterator it = this->maps.begin();
