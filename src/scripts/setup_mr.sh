@@ -12,7 +12,7 @@
 
 PRE_STAGE_DIR=/tmp
 UPLOAD_DIR=/tmp
-MAKE_TORRENT=/home/underscore/git/freeCycles/src/make_torrent
+MAKE_TORRENT=/home/underscore/git/freeCycles/src/util/bt/make_torrent
 TRACKER=udp://boinc.rnl.ist.utl.pt:6969
 JOBTRACKER_FILE=/tmp/jobtracker.xml
 
@@ -39,6 +39,8 @@ function print_jobtracker {
   echo "<mr>"
   # write the mr identifier
   echo "<id>"$id"</id>"
+  # write the shuffle status (initialized to false)
+  echo "<shuffled>0</shuffled>"
   # write map task information
   for file in $id-map-*
   do
