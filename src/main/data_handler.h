@@ -3,6 +3,10 @@
 
 #include <stdio.h>
 
+#include <vector>
+#include <list>
+#include <string>
+
 #include "libtorrent/entry.hpp"
 #include "libtorrent/bencode.hpp"
 #include "libtorrent/session.hpp"
@@ -13,7 +17,7 @@ using std::list;
 using std::string;
 
 // Auxiliary buffer for some C I/O operations.
-char buf[1024];
+char dh_buf[1024];
 
 /**
  * Auxiliary function that handles child processes. It waits until child process
@@ -53,8 +57,8 @@ int copy_file(const string& source, const string& dest) {
   if((pid = fork()) == 0)
   { return execl("/bin/cp", "/bin/cp", source.c_str(), dest.c_str(), (char *)0); }
   else {
-	  sprintf(buf, "%s %s %s", "/bin/cp", source.c_str(), dest.c_str());
-	  return handle_child_proc(pid, buf);
+	  sprintf(dh_buf, "%s %s %s", "/bin/cp", source.c_str(), dest.c_str());
+	  return handle_child_proc(pid, dh_buf);
   }
 }
 
@@ -68,8 +72,8 @@ int move_file(const string& source, const string& dest) {
   if((pid = fork()) == 0)
   { return execl("/bin/mv", "/bin/mv", source.c_str(), dest.c_str(), (char *)0); }
   else {
-	  sprintf(buf, "%s %s %s", "/bin/mv", source.c_str(), dest.c_str());
-	  return handle_child_proc(pid, buf);
+	  sprintf(dh_buf, "%s %s %s", "/bin/mv", source.c_str(), dest.c_str());
+	  return handle_child_proc(pid, dh_buf);
   }
 }
 
@@ -95,11 +99,11 @@ int zip_files(const string& output, vector<string>& files) {
   { return execv(args[0], args); }
   else {
 	  sprintf(
-			  buf,
+			  dh_buf,
 			  "%s %s ... %s", "/bin/zip",
 			  files.front().c_str(),
 			  files.back().c_str());
-	  ret = handle_child_proc(pid, buf);
+	  ret = handle_child_proc(pid, dh_buf);
 	  // Just to be safe, free args after child is done.
 	  free(args);
 	  return ret;
@@ -127,8 +131,8 @@ int unzip_files(const string& wdir, const string& input, vector<string>& files) 
 			(char *)0);
 	}
 	else {
-		sprintf(buf, "%s %s", "/bin/unzip", input.c_str());
-		if(!handle_child_proc(pid, buf)) {
+		sprintf(dh_buf, "%s %s", "/bin/unzip", input.c_str());
+		if(!handle_child_proc(pid, dh_buf)) {
 			// TODO - handle failure
 		}
 		// Read hidden file (which contains list of unzipped files)
@@ -178,7 +182,7 @@ int init_dir(string dir) {
  */
 class DataHandler {
 
-private:
+protected:
 	string input_path;
 	string output_path;
 	string working_dir;
@@ -229,6 +233,22 @@ public:
 };
 
 /**
+ * TODO - doc.
+ */
+bool torrent_done_asd (const libtorrent::torrent_handle& t)
+{ return t.status().is_seeding; }
+
+/**
+ * TODO - doc.
+ * Do not include files and folders whose name starts with a "." (dot).
+ */
+bool file_filter(string const& f) {
+	if (libtorrent::filename(f)[0] == '.') return false;
+	fprintf(stderr, "%s\n", f.c_str());
+	return true;
+}
+
+/**
  * TODO - comment.
  */
 class BitTorrentHandler : public DataHandler {
@@ -255,6 +275,9 @@ public:
 				DataHandler(input, output, working_dir) {
 		init_dir(shared_dir);
 	}
+	BitTorrentHandler() = delete;
+	BitTorrentHandler(const BitTorrentHandler& bt) = delete;
+	~BitTorrentHandler() {}
 
 	/**
 	 * I am assuming that the BOINC input path preserves the original file name
@@ -326,17 +349,16 @@ public:
 	 */
 	int init(int download_rate,	int upload_rate) {
 		// Setup BitTorrent settings
-	    bt_settings = libtorrent::high_performance_seed();
-	    bt_settings.allow_multiple_connections_per_ip = true;
-	    bt_settings.active_downloads = -1; // unlimited
-	    bt_settings.download_rate_limit = download_rate;
-	    bt_settings.upload_rate_limit = upload_rate;
-	    bt_session.set_settings(bt_settings);
-	    bt_session.listen_on(std::make_pair(6500, 7000), bt_ec);
+	    this->bt_settings = libtorrent::high_performance_seed();
+	    this->bt_settings.allow_multiple_connections_per_ip = true;
+	    this->bt_settings.active_downloads = -1; // unlimited
+	    this->bt_settings.download_rate_limit = download_rate;
+	    this->bt_settings.upload_rate_limit = upload_rate;
+	    this->bt_session.set_settings(bt_settings);
+	    this->bt_session.listen_on(std::make_pair(6500, 7000), bt_ec);
 	    if (bt_ec)	{
 	        fprintf(stderr,
-	                "%s [BT] Failed to open listen socket: %s\n",
-	                boinc_msg_prefix(buf, sizeof(buf)),
+	                "[DH] Failed to open listen socket: %s\n",
 	                bt_ec.message().c_str());
 			return 1;
 		}
@@ -349,30 +371,17 @@ public:
 	 */
 	libtorrent::torrent_handle add_torrent(string torrent, string save_path) {
 		libtorrent::add_torrent_params p;
-		p.save_path = shared_dir;
+		p.save_path = this->shared_dir;
 		p.ti = new libtorrent::torrent_info(torrent, this->bt_ec);
-		return bt_session.add_torrent(p, this->bt_ec);
+		return this->bt_session.add_torrent(p, this->bt_ec);
 	}
-
-	/**
-	 * TODO - doc.
-	 */
-	bool torrent_done (const libtorrent::torrent_handle& t)
-	{ return t.status().is_seeding; }
 
 	/**
 	 * TODO - doc.
 	 * Blocking function that holds execution while input is not ready.
 	 */
 	void wait_torrent(list<libtorrent::torrent_handle> torrents)
-	{ while(!torrents.size()) { torrents.remove_if(torrent_done); } }
-
-	// Do not include files and folders whose name starts with a "." (dot).
-	bool file_filter(string const& f) {
-		if (libtorrent::filename(f)[0] == '.') return false;
-		fprintf(stderr, "%s\n", f.c_str());
-		return true;
-	}
+	{ while(!torrents.size()) { torrents.remove_if(torrent_done_asd); } }
 
 	// Creates a torrent file ("output_torrent") representing the contents of
 	// "output_file". The tracker "tracker_url" is added. See documentation in

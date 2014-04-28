@@ -129,19 +129,18 @@ int main(int argc, char **argv) {
 
     working_dir = std::string("/tmp/") + wu_name + "/";
 
-    *bth = BitTorrentHandler(
-    		input_path, output_path, working_dir, shared_dir, tracker_url);
+    bth = new BitTorrentHandler(input_path, output_path, working_dir, shared_dir, tracker_url);
     bth->init(download_rate, upload_rate);
 
     // map task
     if(wu_name.find("map") != std::string::npos) {
-    	*tt = MapTracker(bth, wu_name+"-", nmaps, nreds);
+    	tt = new MapTracker(bth, wu_name+"-", nmaps, nreds);
         tt->map(wc_map);
         bth->stage_output(tt->getOutputs()->front());
     }
     // reduce task
     else {
-    	*tt = ReduceTracker(bth, wu_name, nmaps, nreds);
+    	tt = new ReduceTracker(bth, wu_name, nmaps, nreds);
         tt->reduce(wc_reduce);
         bth->stage_zipped_output(*(tt->getOutputs()));
     }
@@ -153,6 +152,9 @@ int main(int argc, char **argv) {
 	// -> search for new .torrent files.
     // TODO - application should be run in a separate thread.
     sleep(60);
+
+    delete tt;
+    delete bth;
 
 #ifndef STANDALONE
     boinc_fraction_done(1);
