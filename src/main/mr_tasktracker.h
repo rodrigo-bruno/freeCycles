@@ -13,6 +13,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sstream>
+#include <map>
+#include <vector>
+#include <string>
+
+#include "data_handler.h"
 
 using std::vector;
 using std::map;
@@ -26,7 +31,7 @@ using std::string;
  *  - imap (where output data should be placed).
  */
 void wc_map(
-		int k, string v, vector<std::map<string, vector<string>>>* imap) {
+		int k, string v, vector<std::map<string, vector<string> > >* imap) {
 	std::istringstream iss(v);
 	string token;
 	int red = 0;
@@ -44,10 +49,10 @@ void wc_map(
  *  - omap (where output data is stored until it is written to file).
  */
 void wc_reduce(
-		string k, vector<string> v, std::map<string, vector<string>>* omap) {
+		string k, vector<string> v, std::map<string, vector<string> >* omap) {
 	std::stringstream ss;
 	ss << v.size();
-	(*omap)[k] = ss.str();
+	(*omap)[k] = vector<string>(1, ss.str());
 }
 
 /**
@@ -89,13 +94,13 @@ public:
 	 * the input file.
 	 */
 	int map(void (*map_func) (
-			int k, string v, vector<map<string, vector<string>>>* io)) {
+			int k, string v, vector<std::map<string, vector<string> > >* io)) {
         char* line = NULL;
         size_t len = 0;
-        std::map<string, vector<string>>::iterator mit;
+        std::map<string, vector<string> >::iterator mit;
         vector<string>::iterator vit;
-        vector<std::map<string, vector<string>>>* io =
-        		new vector<std::map<string, vector<string>>>(this->nreds);
+        vector<std::map<string, vector<string> > >* io =
+        		new vector<std::map<string, vector<string> > >(this->nreds);
 
         // Open file (map tasks are assumed to have only one input file).
 		FILE* f = fopen(this->inputs.front().c_str(), "r");
@@ -110,7 +115,7 @@ public:
         // Cleanup.
         free(line);
         fclose(f);
-        // For every map, write intermediate data to file.
+        // For every std::map, write intermediate data to file.
         for(int i = 0; i < io->size(); i++)
         { writeData(this->outputs[i], &(io->at(i))); }
         free(io);
@@ -122,30 +127,30 @@ public:
 	 * <K,V>.
 	 */
 	int reduce(void (*reduce_func) (
-			string k, vector<string> v,	std::map<string, vector<string>>* o)) {
+			string k, vector<string> v,	std::map<string, vector<string> >* o)) {
 		vector<string>::iterator vit;
-		std::map<string, vector<string>>::iterator mit;
-		std::map<string, vector<string>> imap;
-		std::map<string, vector<string>> omap;
+		std::map<string, vector<string> >::iterator mit;
+		std::map<string, vector<string> > imap;
+		std::map<string, vector<string> > omap;
 
 		// For every input path, open file and load key,values.
 		for(vit = this->inputs.begin(); vit != this->inputs.end(); vit++)
 		{ this->readData(*vit, &imap); }
 		// For every <K,V> pair, call reduce function.
 		for(mit = imap.begin(); mit != imap.end(); mit++)
-		{ reduce_func(mit->first, mit->second, omap); }
+		{ reduce_func(mit->first, mit->second, &omap); }
 		this->writeData(this->outputs.front(), &omap);
 		return 0;
 	}
 	virtual ~TaskTracker() { }
-	std::vector<std::string> getInputs() { return this->inputs; }
-	std::vector<std::string> getOutputs() { return this->outputs; }
+	std::vector<std::string>* getInputs() { return &this->inputs; }
+	std::vector<std::string>* getOutputs() { return &this->outputs; }
 
 	/**
 	 * Auxiliary method that reads an input file with <K,V> pairs and loads
 	 * them into a map structure.
 	 */
-	int readData(string path, std::map<string, vector<string>>* data) {
+	int readData(string path, std::map<string, vector<string> >* data) {
         char *line = NULL, *ptr = NULL;
         FILE* f = NULL;
         size_t len = 0;
@@ -179,8 +184,8 @@ public:
 	/**
 	 * Auxiliary method that writes <K,V> pairs into an output file.
 	 */
-	int writeData(string path, std::map<string, vector<string>>* data) {
-		std::map<string, vector<string>>::iterator mit;
+	int writeData(string path, std::map<string, vector<string> >* data) {
+		std::map<string, vector<string> >::iterator mit;
 		vector<string>::iterator vit;
 		FILE* f = NULL;
 
@@ -213,12 +218,13 @@ public:
 	 * vectors.
 	 */
 	MapTracker(
-			std::string input,
+			DataHandler* dh,
 			std::string output_prefix,
 			int nmaps,
 			int nreds) : TaskTracker(nmaps, nreds) {
 		char buf[64];
-		this->inputs.push_back(input);
+		this->inputs.push_back(string());
+		dh->get_input(this->inputs[0]);
 		for(int i = 0; i < nreds; i++) {
 			sprintf(buf,"%d",i);
 			this->outputs.push_back(output_prefix + std::string(buf));
@@ -237,11 +243,11 @@ public:
 	 * vectors.
 	 */
 	ReduceTracker(
-			std::vector<std::string> inputs,
+			DataHandler* dh,
 			std::string output,
 			int nmaps,
 			int nreds) : TaskTracker(nmaps, nreds) {
-		this->inputs = inputs;
+		dh->get_zipped_input(this->inputs);
 		this->outputs.push_back(output);
 	}
 };
