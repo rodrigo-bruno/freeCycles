@@ -2,6 +2,7 @@
 #define __DATA_HANDLER_H__
 
 #include <stdio.h>
+#include <wait.h>
 
 #include <vector>
 #include <list>
@@ -85,10 +86,11 @@ int zip_files(const string& output, vector<string>& files) {
   pid_t pid;
   int i, ret;
   // Three additional args: 1) executable path, 2) output zip file path, 3) NULL.
-  char** args = new char* [files.size()+3];
+  const char** const args = new const char*[files.size()+3]();
+
 
   // Setup command
-  args[0] = "/bin/zip";
+  args[0] = "/usr/bin/zip";
   args[1] = output.c_str();
   for(int i = 0; i < files.size(); i++)
   { args[i+2] = files[i].c_str(); }
@@ -96,11 +98,13 @@ int zip_files(const string& output, vector<string>& files) {
 
   // Split execution
   if((pid = fork()) == 0)
-  { return execv(args[0], args); }
+  // Lets all hope this is OK (cast from const char** const to char** const).
+  { return execv("/usr/bin/zip", (char** const)args); }
   else {
 	  sprintf(
 			  dh_buf,
-			  "%s %s ... %s", "/bin/zip",
+			  "%s %s ... %s",
+			  "/usr/bin/zip",
 			  files.front().c_str(),
 			  files.back().c_str());
 	  ret = handle_child_proc(pid, dh_buf);
@@ -124,14 +128,14 @@ int unzip_files(const string& wdir, const string& input, vector<string>& files) 
 	// Split execution
 	if((pid = fork()) == 0) {
 		return execl(
-			"/bin/unzip",
-			"/bin/unzip",
+			"/usr/bin/unzip",
+			"/usr/bin/unzip",
 			"-d", wdir.c_str(),
 			input.c_str(),
 			(char *)0);
 	}
 	else {
-		sprintf(dh_buf, "%s %s", "/bin/unzip", input.c_str());
+		sprintf(dh_buf, "%s %s", "/usr/bin/unzip", input.c_str());
 		if(!handle_child_proc(pid, dh_buf)) {
 			// TODO - handle failure
 		}
@@ -170,6 +174,22 @@ int init_dir(string dir) {
         		status);
 	}
 	return status;
+}
+
+/**
+ * Auxiliary function that is used as a predicate to check if a torrent has
+ * finished downloading or not.
+ */
+bool torrent_done (const libtorrent::torrent_handle& t)
+{ return t.status().is_seeding; }
+
+/**
+ * Auxiliary function that is used as a predicate and detected hidden files.
+ */
+bool file_filter(string const& f) {
+	if (libtorrent::filename(f)[0] == '.') return false;
+	fprintf(stderr, "%s\n", f.c_str());
+	return true;
 }
 
 /**
@@ -232,24 +252,11 @@ public:
 	{ zip_files(this->output_path, outputs); }
 };
 
-/**
- * TODO - doc.
- */
-bool torrent_done_asd (const libtorrent::torrent_handle& t)
-{ return t.status().is_seeding; }
 
 /**
- * TODO - doc.
- * Do not include files and folders whose name starts with a "." (dot).
- */
-bool file_filter(string const& f) {
-	if (libtorrent::filename(f)[0] == '.') return false;
-	fprintf(stderr, "%s\n", f.c_str());
-	return true;
-}
-
-/**
- * TODO - comment.
+ * BitTorrentHandler is another implementation but it uses the BitTorrent
+ * protocol to move data. The BOINC protocol is still used only to carry
+ * .torrent files.
  */
 class BitTorrentHandler : public DataHandler {
 private:
@@ -262,7 +269,10 @@ private:
 public:
 
 	/**
-	 * TODO - put a comment on shared_dir and tracker_url.
+	 * Regarding the fields not already described in the superclass (shared_dir
+	 * and tracker_url): the first one is a path to the locatio where multiple
+	 * clients share their input; the second one is the tracker url (that goes
+	 * in the .torrent file).
 	 */
 	BitTorrentHandler(
 			string input,
@@ -292,8 +302,9 @@ public:
 		this->wait_torrent(handles);
 		// Copy input torrent to shared dir.
 		copy_file(this->input_path, this->shared_dir);
-		// Return the file path.
-		input = handles.front().get_torrent_info().file_at(0).path;
+		// Return the file NAME.
+		input = this->shared_dir +
+				handles.front().get_torrent_info().file_at(0).path;
 	}
 
 	void get_zipped_input(vector<string>& inputs) {
@@ -310,10 +321,12 @@ public:
 		this->wait_torrent(handles);
 		// Copy .torrent files to shared directory.
 		copy_file(this->working_dir + "*.torrent", this->shared_dir);
-		// Return the file paths.
+		// Return the file names.
 		inputs.clear();
 		for(lit = handles.begin(); lit != handles.end(); lit++)
-		{ inputs.push_back(lit->get_torrent_info().file_at(0).path); }
+		{ inputs.push_back(
+				this->shared_dir +
+				lit->get_torrent_info().file_at(0).path); }
 	}
 
 	/**
@@ -329,7 +342,7 @@ public:
 	}
 
 	void stage_zipped_output(vector<string>& outputs) {
-		vector<string> torrents = vector<string>(outputs.size());
+		vector<string> torrents = vector<string>();
 		vector<string>::iterator vit;
 
 		// For every output file, create .torrent.
@@ -341,11 +354,13 @@ public:
 		zip_files(this->output_path, torrents);
 		// Move all files from working directory (output files and .torrents) to
 		// the shared directory. WARNING: this could be dangerous.
-		move_file(this->working_dir+"/*", this->shared_dir);
+		// TODO - the start only works for bash. Use rename.
+		move_file(this->working_dir+"*", this->shared_dir);
 	}
 
 	/**
-	 * TODO - doc.
+	 * Initialization function, starts BitTorrent client after some
+	 * configuration (some configurations are user definable).
 	 */
 	int init(int download_rate,	int upload_rate) {
 		// Setup BitTorrent settings
@@ -377,15 +392,22 @@ public:
 	}
 
 	/**
-	 * TODO - doc.
 	 * Blocking function that holds execution while input is not ready.
 	 */
-	void wait_torrent(list<libtorrent::torrent_handle> torrents)
-	{ while(!torrents.size()) { torrents.remove_if(torrent_done_asd); } }
+	void wait_torrent(list<libtorrent::torrent_handle> torrents) {
+		int s;
+		while(!torrents.size()) {
+			s = 1;
+			torrents.remove_if(torrent_done);
+			while(s >= 1) { s = sleep(s); }
+		}
+	}
 
-	// Creates a torrent file ("output_torrent") representing the contents of
-	// "output_file". The tracker "tracker_url" is added. See documentation in
-	// http://www.rasterbar.com/products/libtorrent/make_torrent.html
+	/**
+	 * Creates a torrent file ("output_torrent") representing the contents of
+	 * "output_file". The tracker "tracker_url" is added. See documentation in
+	 * http://www.rasterbar.com/products/libtorrent/make_torrent.html
+	 */
 	int make_torrent(string output_file, string output_torrent) {
 		libtorrent::file_storage fs;
 		libtorrent::error_code ec;

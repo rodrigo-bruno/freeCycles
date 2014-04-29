@@ -12,10 +12,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
 #include <sstream>
 #include <map>
 #include <vector>
 #include <string>
+
 
 #include "data_handler.h"
 
@@ -27,14 +29,17 @@ using std::string;
  * Simple implementation for the word count map task.
  * The function receives:
  *  - key (current file pointer)
- *  - line (read from input file)
+ *  - line (read from input file (it may include a '\n' at the end))
  *  - imap (where output data should be placed).
  */
 void wc_map(
 		int k, string v, vector<std::map<string, vector<string> > >* imap) {
-	std::istringstream iss(v);
 	string token;
 	int red = 0;
+
+	// remove trailing new line if exists.
+	if(*(--v.end()) == '\n') { v.erase(--v.end()); }
+	std::istringstream iss(v);
 	// For every word in line, apply the modulo to the first character and
 	// insert some place holder inside a map.
 	while(getline(iss, token, ' '))
@@ -99,26 +104,27 @@ public:
         size_t len = 0;
         std::map<string, vector<string> >::iterator mit;
         vector<string>::iterator vit;
-        vector<std::map<string, vector<string> > >* io =
-        		new vector<std::map<string, vector<string> > >(this->nreds);
+        vector<std::map<string, vector<string> > > io =
+        		vector<std::map<string, vector<string> > >(this->nreds);
 
         // Open file (map tasks are assumed to have only one input file).
 		FILE* f = fopen(this->inputs.front().c_str(), "r");
         if (f == NULL) {
-        	// TODO - handle failure
-        	// be aware of frees
+            fprintf(stderr,
+            		"[MR-map] failed to open file %s.\n",
+            		this->inputs.front().c_str());
+            return 1;
         }
 
         // For every line, call map function.
         while (getline(&line, &len, f) != -1)
-        { map_func(ftell(f), std::string(line), io); }
+        { map_func(ftell(f), std::string(line), &io); }
         // Cleanup.
         free(line);
         fclose(f);
         // For every std::map, write intermediate data to file.
-        for(int i = 0; i < io->size(); i++)
-        { writeData(this->outputs[i], &(io->at(i))); }
-        free(io);
+        for(int i = 0; i < io.size(); i++)
+        { writeData(this->outputs[i], &(io.at(i))); }
         return 0;
 	}
 	/**
@@ -158,7 +164,10 @@ public:
 		string key;
 
 		if(!(f = fopen(path.c_str(), "r"))) {
-			// TODO - handle failure
+            fprintf(stderr,
+            		"[MR-readData] failed to open file %s.\n",
+            		path.c_str());
+            return 1;
 		}
 
 		// For every line, extract <K (string), V (string vector)>
@@ -190,7 +199,9 @@ public:
 		FILE* f = NULL;
 
 		if(!(f = fopen(path.c_str(), "w"))) {
-			// TODO - handle failure
+            fprintf(stderr,
+            		"[MR-readData] failed to open file %s.\n",
+            		path.c_str());
 		}
 
     	// For every <K,V>, write it to file
@@ -217,11 +228,8 @@ public:
 	 * This constructor is responsible for initializing both input and output
 	 * vectors.
 	 */
-	MapTracker(
-			DataHandler* dh,
-			std::string output_prefix,
-			int nmaps,
-			int nreds) : TaskTracker(nmaps, nreds) {
+	MapTracker(DataHandler* dh, string output_prefix, int nmaps, int nreds) :
+			TaskTracker(nmaps, nreds) {
 		char buf[64];
 		this->inputs.push_back(string());
 		dh->get_input(this->inputs[0]);
@@ -242,11 +250,8 @@ public:
 	 * This constructor is responsible for initializing both input and output
 	 * vectors.
 	 */
-	ReduceTracker(
-			DataHandler* dh,
-			std::string output,
-			int nmaps,
-			int nreds) : TaskTracker(nmaps, nreds) {
+	ReduceTracker(DataHandler* dh, string output, int nmaps, int nreds) :
+			TaskTracker(nmaps, nreds) {
 		dh->get_zipped_input(this->inputs);
 		this->outputs.push_back(output);
 	}

@@ -25,7 +25,7 @@ FLAGS = -Wall -g3 -pedantic -w -Wextra -Werror
 simple_app: simple_app.o
 	g++ simple_app.o -o simple_app $(BOINC_LIBS) $(LIBTORRENT_LIBS)
 	
-simple_app.o: simple_app.cpp
+simple_app.o: simple_app.cpp mr_tasktracker.h data_handler.h
 	g++ -c simple_app.cpp $(MACROS) $(INCLUDES) $(FLAGS)
 
 simple_work_generator:
