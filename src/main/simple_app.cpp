@@ -149,7 +149,7 @@ int main(int argc, char **argv) {
     else if (wu_name.find("reduce") != std::string::npos){
     	tt = new ReduceTracker(bth, shared_dir + wu_name, nmaps, nreds);
         tt->reduce(wc_reduce);
-        //bth->stage_output(tt->getOutputs()->front());
+        bth->stage_output(tt->getOutputs()->front());
 
     }
     // unknown task

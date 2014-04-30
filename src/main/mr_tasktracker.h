@@ -181,7 +181,7 @@ public:
 				values.push_back(buf.substr(start, end - start));
 				end = buf.find(";", (start = end + 1));
 			}
-			if(data->find(key) != data->end()) {	// TODO - fix
+			if(data->find(key) != data->end()) {
 				(*data)[key].insert(
 						(*data)[key].end(), values.begin(), values.end());
 			}

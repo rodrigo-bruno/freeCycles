@@ -1,4 +1,4 @@
-all: simple_app
+all: simple_app simple_work_generator
 
 # FIXME - needed?
 libs:
