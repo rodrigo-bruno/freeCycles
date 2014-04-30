@@ -42,11 +42,11 @@ std::vector<MapReduceJob> jobs;
  * the given 'wu_name'.
  * Note: Task names follow the format: id-[map|reduce]-seq.number
  */
-MapReduceTask* get_task_by_name(std::vector<MapReduceJob> jobs, char* wu_name) {
+MapReduceTask* get_task_by_name(std::vector<MapReduceJob>& jobs_ref, char* wu_name) {
 	std::string id = std::string(wu_name, strchr(wu_name, '-') - 1);
 	std::vector<MapReduceJob>::iterator it;
 	std::vector<MapReduceTask>::iterator it2;
-	for(it = jobs.begin(); it != jobs.end(); ++it) {
+	for(it = jobs_ref.begin(); it != jobs_ref.end(); ++it) {
 		if (it->getID() != id) { continue; }
 		// Search wu_name among map tasks
 		for(	it2 = it->getMapTasks().begin();

@@ -16,6 +16,10 @@ class MapReduceTask {
 
 protected:
 	/**
+	 * Unique task identifier.
+	 */
+	std::string name;
+	/**
 	 * State can be one of the following values:
 	 * - "w" (if the task is waiting to be created)
 	 * - "c" (if the task is already created)
@@ -36,24 +40,20 @@ protected:
 	 * Output file path.
 	 */
 	std::string output;
-	/**
-	 * Unique task identifier.
-	 */
-	std::string name;
 
 public:
 	MapReduceTask(
-			std::string name,
-			std::string state,
-			int offset,
-			std::string input,
-			std::string output) :
-		name(name),
-		state(state),
-		state_offset(offset),
-		input(input),
-		output(output) {}
-	void setState(std::string state) { this->state = state; }
+			std::string task_name,
+			std::string task_state,
+			int task_offset,
+			std::string task_input,
+			std::string task_output) :
+		name(task_name),
+		state(task_state),
+		state_offset(task_offset),
+		input(task_input),
+		output(task_output) {}
+	void setState(std::string task_state) { this->state = task_state; }
 	unsigned long getStateOffset() { return this->state_offset; }
 	const std::string& getState() { return this->state; }
 	const std::string& getInputPath() { return this->input; }
@@ -80,6 +80,10 @@ class MapReduceJob {
 
 protected:
 	/**
+	 * Unique job identifier.
+	 */
+	std::string id;
+	/**
 	 * Map tasks.
 	 */
 	std::vector<MapReduceTask> maps;
@@ -90,15 +94,15 @@ protected:
 	/**
 	 * Index (within maps vector) of the next map task to send.
 	 */
-	int next_map;
+	unsigned int next_map;
 	/**
 	 * Index (within reds vector) of the next reduce task to send.
 	 */
-	int next_red;
+	unsigned int next_red;
 	/**
 	 * Number of finished map tasks.
 	 */
-	int finished_map;
+	unsigned int finished_map;
 	/**
 	 * False if all the map and reduce tasks have already been sent.
 	 */
@@ -112,21 +116,17 @@ protected:
 	 * This offset is used to place the file pointer pointing to the offset
 	 * byte.
 	 */
-	int shuffledOffset;
-	/**
-	 * Unique job identifier.
-	 */
-	std::string id;
+	int shuffled_offset;
 
 public:
-	MapReduceJob(std::string id) :
-		id(id),
+	MapReduceJob(std::string job_id) :
+		id(job_id),
 		next_map(0),
 		next_red(0),
 		finished_map(0),
 		unsent_tasks(true),
 		shuffled(false),
-		shuffledOffset(-1) {}
+		shuffled_offset(-1) {}
 	std::vector<MapReduceTask>& getMapTasks() { return this->maps; }
 	std::vector<MapReduceTask>& getReduceTasks() { return this->reds; }
 	/**
@@ -163,10 +163,10 @@ public:
 	bool needShuffle() {
 		return !shuffled ? this->finished_map == this->maps.size() : false;
 	}
-	void setShuffled(bool shuffled) { this->shuffled = shuffled; }
-	void setShuffledOffset(int shuffledOffset)
-	{ this->shuffledOffset = shuffledOffset; }
-	int getShuffledOffset() { return this->shuffledOffset; }
+	void setShuffled(bool new_shuffled) { this->shuffled = new_shuffled; }
+	void setShuffledOffset(int new_shuffled_offset)
+	{ this->shuffled_offset = new_shuffled_offset; }
+	int getShuffledOffset() { return this->shuffled_offset; }
 	std::string getID() { return this->id; }
 	void addMapTask(const MapReduceTask& mrt) { this->maps.push_back(mrt); }
 	void addReduceTask(const MapReduceTask& mrt) { this->reds.push_back(mrt); }
@@ -175,7 +175,10 @@ public:
 	 * Dumps the current job state.
 	 */
 	void dump(FILE* io) {
-		fprintf(io,"MapReduceJob: id=%s, shuffled=%d\n", this->id, this->shuffled);
+		fprintf(io,
+				"MapReduceJob: id=%s, shuffled=%d\n",
+				this->id.c_str(),
+				this->shuffled);
 		// print map tasks
 		fprintf(io,"Map Tasks:\n");
 		for(	std::vector<MapReduceTask>::iterator it = this->maps.begin();

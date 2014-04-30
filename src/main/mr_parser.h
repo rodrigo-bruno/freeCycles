@@ -16,7 +16,7 @@ int parse_task(FILE* f, MapReduceJob& mpr) {
 	char buf[512];
 	std::string state;
 	std::string name;
-	unsigned long stateOffset;
+	unsigned long stateOffset = 0;
 	std::string input;
 	std::string output;
 	while (fgets(buf, 512, f)) {
@@ -52,8 +52,8 @@ int parse_task(FILE* f, MapReduceJob& mpr) {
 int parse_job(FILE* f, std::vector<MapReduceJob>& jobs) {
 	char buf[512];
 	std::string id;
-	int shuffledOffset;
-	bool shuffled;
+	int shuffledOffset = 0;
+	bool shuffled = false;
 
 	while (fgets(buf, 512, f)) {
         if (match_tag(buf, "<id>")) {

@@ -37,7 +37,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "libtorrent/bencode.hpp"
 #include "libtorrent/session.hpp"
 
-#define UPDATE_INTERVAL 5
+#define UPDATE_INTERVAL 2
 #define TORRENT_FILE_SUFFIX ".torrent"
 
 
@@ -103,7 +103,7 @@ void check_new_torrent(
 		}
 	}
 
-	// move all successfully added torrents to work directory.
+	// move all successfully added .torrent files to work directory.
 	while(!delete_queue.empty()) {
 		std::string name = *delete_queue.front();
 		std::string work_name = work_dir + name;
@@ -127,10 +127,6 @@ void usage(char *name) {
         name
     );
 }
-
-/**
- * TODO - add way to launch processes once a specific file is downloaded.
- */
 
 int main(int argc, char* argv[]) {
 	using namespace libtorrent;

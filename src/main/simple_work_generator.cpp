@@ -138,61 +138,6 @@ int shuffle(const char* job_id, const char* nreds) {
 }
 
 /**
- * Creates a new job.
- */
-int make_job(MapReduceTask* mrt) {
-    DB_WORKUNIT wu;
-    char path[MAXPATHLEN];
-    const char* infiles[1];
-    int retval;
-
-    // Put the input file at the right place in the download dir hierarchy.s
-    retval = config.download_path(mrt->getName().c_str(), path);
-    if (retval) return retval;
-
-
-    log_messages.printf(MSG_NORMAL, "Making workunit %s\n", path);
-    
-    retval = copy_file(mrt->getInputPath(), path);
-    if (retval) return retval;
-
-    // Fill in the job parameters
-    //
-    wu.clear();
-    wu.appid = app.id;
-    strcpy(wu.name, mrt->getName().c_str());
-    wu.rsc_fpops_est = 1e12;
-    wu.rsc_fpops_bound = 1e14;
-    wu.rsc_memory_bound = 1e8;
-    wu.rsc_disk_bound = 1e8;
-    wu.delay_bound = 86400;
-    wu.min_quorum = REPLICATION_FACTOR;      /* TODO <- 3 for both map and reduce */
-    wu.target_nresults = REPLICATION_FACTOR; /* TODO <- 5 if map, 3 if reduce */
-    wu.max_error_results = REPLICATION_FACTOR*4;
-    wu.max_total_results = REPLICATION_FACTOR*8;
-    wu.max_success_results = REPLICATION_FACTOR*4;
-
-    // Extracts the file name from path.
-    infiles[0] = mrt->getInputPath().substr(
-    		mrt->getInputPath().find_last_of("\\")+1).c_str();
-
-    // Updates the MapReduceTask state and updates the jobtracker state file.
-    write_task_state(mrt);
-
-    // Register the job with BOINC.
-    sprintf(path, "templates/%s", out_template_file);
-    return create_work(
-        wu,
-        in_template,
-        path,
-        config.project_path(path),
-        infiles,
-        1,
-        config
-    );
-}
-
-/**
  * Helper function that writes to the jobtracker state file.
  * It is called when a task is sent.
  */
@@ -237,16 +182,17 @@ void read_maps_state(MapReduceJob& mrj) {
  * 	- tries to find a map task
  * 	- tries to find a reduce task (if all map tasks are finished)
  */
-MapReduceTask* get_MapReduce_task(std::vector<MapReduceJob>& jobs) {
+MapReduceTask* get_MapReduce_task(std::vector<MapReduceJob>& jobs_ref) {
 	std::vector<MapReduceJob>::iterator it;
 	MapReduceTask* mrt = NULL;
-	for( it = jobs.begin(); it != jobs.end(); ++it) {
+	char buf[128];
+	for( it = jobs_ref.begin(); it != jobs_ref.end(); ++it) {
 		// if this job is already deployed (maps and reduces), nothing to do.
 		if(!it->hasUnsentTasks()) { continue; }
 		mrt = it->getNextMap();
 		// if all map tasks were already delivered.
 		if(mrt == NULL) {
-			read_maps_state(job);
+			read_maps_state(*it);
 			mrt = it->getNextReduce();
 			// this means that we might be waiting for map results.
 			if(mrt == NULL) { continue; }
@@ -254,8 +200,8 @@ MapReduceTask* get_MapReduce_task(std::vector<MapReduceJob>& jobs) {
 				// before returning a reduce task, make sure that the input is
 				// shuffled already.
 				if(it->needShuffle()) {
-					shuffle(it->getID().c_str(),
-							std::string(it->getReduceTasks().size()).c_str());
+					sprintf(buf, "%lu", it->getReduceTasks().size());
+					shuffle(it->getID().c_str(), buf);
 					write_shuffled_state(&(*it));
 				}
 				return mrt;
@@ -265,6 +211,61 @@ MapReduceTask* get_MapReduce_task(std::vector<MapReduceJob>& jobs) {
 	}
 	// if no job has more tasks to deliver.
 	return NULL;
+}
+
+/**
+ * Creates a new job.
+ */
+int make_job(MapReduceTask* mrt) {
+    DB_WORKUNIT wu;
+    char path[MAXPATHLEN];
+    const char* infiles[1];
+    int retval;
+
+    // Put the input file at the right place in the download dir hierarchy.s
+    retval = config.download_path(mrt->getName().c_str(), path);
+    if (retval) return retval;
+
+
+    log_messages.printf(MSG_NORMAL, "Making workunit %s\n", path);
+
+    retval = copy_file(mrt->getInputPath().c_str(), path);
+    if (retval) return retval;
+
+    // Fill in the job parameters
+    //
+    wu.clear();
+    wu.appid = app.id;
+    strcpy(wu.name, mrt->getName().c_str());
+    wu.rsc_fpops_est = 1e12;
+    wu.rsc_fpops_bound = 1e14;
+    wu.rsc_memory_bound = 1e8;
+    wu.rsc_disk_bound = 1e8;
+    wu.delay_bound = 86400;
+    wu.min_quorum = REPLICATION_FACTOR;      /* TODO <- 3 for both map and reduce */
+    wu.target_nresults = REPLICATION_FACTOR; /* TODO <- 5 if map, 3 if reduce */
+    wu.max_error_results = REPLICATION_FACTOR*4;
+    wu.max_total_results = REPLICATION_FACTOR*8;
+    wu.max_success_results = REPLICATION_FACTOR*4;
+
+    // Extracts the file name from path.
+    infiles[0] = mrt->getInputPath().substr(
+    		mrt->getInputPath().find_last_of("\\")+1).c_str();
+
+    // Updates the MapReduceTask state and updates the jobtracker state file.
+    write_task_state(mrt);
+
+    // Register the job with BOINC.
+    sprintf(path, "templates/%s", out_template_file);
+    return create_work(
+        wu,
+        in_template,
+        path,
+        config.project_path(path),
+        infiles,
+        1,
+        config
+    );
 }
 
 void main_loop() {

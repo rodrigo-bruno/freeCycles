@@ -1,4 +1,4 @@
-all: simple_app simple_work_generator
+all: simple_app simple_work_generator simple_assimilator
 
 # FIXME - needed?
 libs:
@@ -28,11 +28,19 @@ simple_app: simple_app.o
 simple_app.o: simple_app.cpp mr_tasktracker.h data_handler.h
 	g++ -c simple_app.cpp $(MACROS) $(INCLUDES) $(FLAGS)
 
-simple_work_generator:
-	cp simple_work_generator.cpp $(BOINC_BUILD)/sched/sample_work_generator.cpp
+simple_work_generator: simple_work_generator.cpp mr_jobtracker.h mr_parser.h
+	cp simple_work_generator.cpp $(BOINC_BUILD)/sched/sample_work_generator.cpp 
+	cp mr_jobtracker.h mr_parser.h $(BOINC_BUILD)/sched/
 	cd $(BOINC_BUILD); make
 	cp $(BOINC_BUILD)/sched/sample_work_generator.o ./simple_work_generator.o
 	cp $(BOINC_BUILD)/sched/sample_work_generator ./simple_work_generator
 
+simple_assimilator: simple_assimilator.cpp mr_jobtracker.h mr_parser.h
+	cp simple_assimilator.cpp $(BOINC_BUILD)/sched/sample_assimilator.cpp 
+	cp mr_jobtracker.h mr_parser.h $(BOINC_BUILD)/sched/
+	cd $(BOINC_BUILD); make
+	cp $(BOINC_BUILD)/sched/sample_assimilator.o ./simple_assimilator.o
+	cp $(BOINC_BUILD)/sched/sample_assimilator ./simple_assimilator
+
 clean:
-	rm *.o simple_app simple_work_generator
+	rm *.o simple_app simple_work_generator simple_assimilator
