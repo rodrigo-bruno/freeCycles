@@ -148,6 +148,7 @@ public:
 		this->writeData(this->outputs.front(), &omap);
 		return 0;
 	}
+
 	virtual ~TaskTracker() { }
 	std::vector<std::string>* getInputs() { return &this->inputs; }
 	std::vector<std::string>* getOutputs() { return &this->outputs; }
@@ -157,11 +158,10 @@ public:
 	 * them into a map structure.
 	 */
 	int readData(string path, std::map<string, vector<string> >* data) {
-        char *line = NULL, *ptr = NULL;
+        char *line = NULL, *ptr=NULL;
         FILE* f = NULL;
-        size_t len = 0;
-		vector<string> values = vector<string>();
-		string key;
+        size_t len = 0, start = 0, end = 0;
+		string key, buf;
 
 		if(!(f = fopen(path.c_str(), "r"))) {
             fprintf(stderr,
@@ -171,15 +171,17 @@ public:
 		}
 
 		// For every line, extract <K (string), V (string vector)>
-		while (getline(&line, &len, f) != -1) {
-			ptr = strtok(line,"=;"); // Get the key
-			if(ptr == NULL) {
-				// TODO - handle failure
+		while(getline(&line, &len, f) != -1) {
+			vector<string> values = vector<string>();
+			buf = string(line);
+			end = buf.find("=", (start = 0));
+			key = buf.substr(start, end - start);
+			end = buf.find(";", (start = end + 1));
+			while(end != string::npos) {
+				values.push_back(buf.substr(start, end - start));
+				end = buf.find(";", (start = end + 1));
 			}
-			key = string(ptr);
-			while((ptr != strtok(NULL, "=;")))
-			{ values.push_back(std::string(ptr)); }
-			if(data->find(key) != data->end()) {
+			if(data->find(key) != data->end()) {	// TODO - fix
 				(*data)[key].insert(
 						(*data)[key].end(), values.begin(), values.end());
 			}
@@ -187,6 +189,7 @@ public:
 			{ (*data)[key] = values; }
 		}
 		fclose(f);
+		free(line);
 		return 0;
 	}
 

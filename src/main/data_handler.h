@@ -65,6 +65,7 @@ int copy_file(const string& source, const string& dest) {
 
 /**
  * Moves one file from source to destination.
+ * FIXME - deprecated code, delete?
  */
 int move_file(const string& source, const string& dest) {
   pid_t pid;
@@ -85,16 +86,16 @@ int move_file(const string& source, const string& dest) {
 int zip_files(const string& output, vector<string>& files) {
   pid_t pid;
   int i, ret;
-  // Three additional args: 1) executable path, 2) output zip file path, 3) NULL.
-  const char** const args = new const char*[files.size()+3]();
-
+  // Four additional args (see below).
+  const char** const args = new const char*[files.size()+4]();
 
   // Setup command
-  args[0] = "/usr/bin/zip";
-  args[1] = output.c_str();
+  args[0] = "/usr/bin/zip"; 		// 1) executable path,
+  args[1] = "-j"; 					// 2) -j (junk paths),
+  args[2] = output.c_str(); 		// 3) output zip file path,
   for(int i = 0; i < files.size(); i++)
-  { args[i+2] = files[i].c_str(); }
-  args[files.size()+3 - 1] = NULL;
+  { args[i+3] = files[i].c_str(); }
+  args[files.size()+4 - 1] = NULL; 	// 4) NULL.
 
   // Split execution
   if((pid = fork()) == 0)
@@ -123,35 +124,28 @@ int zip_files(const string& output, vector<string>& files) {
 int unzip_files(const string& wdir, const string& input, vector<string>& files) {
 	pid_t pid;
 	FILE* f;
-	char *line, *ptr;
-	size_t len;
+	char buf[128];
 	// Split execution
 	if((pid = fork()) == 0) {
 		return execl(
 			"/usr/bin/unzip",
 			"/usr/bin/unzip",
+			"-u",
 			"-d", wdir.c_str(),
 			input.c_str(),
 			(char *)0);
 	}
 	else {
 		sprintf(dh_buf, "%s %s", "/usr/bin/unzip", input.c_str());
-		if(!handle_child_proc(pid, dh_buf)) {
-			// TODO - handle failure
-		}
+		handle_child_proc(pid, dh_buf);
 		// Read hidden file (which contains list of unzipped files)
 		if(!(f = fopen((wdir+".files").c_str(), "r"))) {
-			// TODO - handle failure
+	        fprintf(stderr,
+	        		"[DH-unzip] failed to open file %s.\n",
+	        		(wdir+".files").c_str());
 		}
 		// Read all files and fill the vector.
-		while (getline(&line, &len, f) != -1) {
-			ptr = strtok(line," ");
-			while(ptr != NULL) {
-				files.push_back(wdir + ptr);
-				strtok(NULL," ");
-			}
-		}
-		free(line);
+		while (fscanf(f, "%s", buf) != EOF) { files.push_back(wdir + buf); }
 		return 0;
 	}
 }
@@ -182,6 +176,15 @@ int init_dir(string dir) {
  */
 bool torrent_done (const libtorrent::torrent_handle& t)
 { return t.status().is_seeding; }
+
+/**
+ * Auxiliary function that is used as a predicato to check if a file is
+ * accessible or not.
+ */
+bool file_ready (const string& s) {
+	struct stat buffer;
+	return (stat(s.c_str(), &buffer) == 0);
+}
 
 /**
  * Auxiliary function that is used as a predicate and detected hidden files.
@@ -295,6 +298,7 @@ public:
 	 */
 	void get_input(string& input) {
 		list<libtorrent::torrent_handle> handles;
+		list<string> files;
 
 		// Add input torrent (input path) with shared_dir as shared_dir.
 		handles.push_back(this->add_torrent(this->input_path, this->shared_dir));
@@ -302,13 +306,16 @@ public:
 		this->wait_torrent(handles);
 		// Copy input torrent to shared dir.
 		copy_file(this->input_path, this->shared_dir);
-		// Return the file NAME.
-		input = this->shared_dir +
-				handles.front().get_torrent_info().file_at(0).path;
+		// Return the file PATH.
+		input = this->shared_dir + handles.front().name();
+		// Wait until the file is accessible.
+		files.push_back(input);
+		this->wait_files(files);
 	}
 
 	void get_zipped_input(vector<string>& inputs) {
 		list<libtorrent::torrent_handle> handles;
+		list<string> files;
 		vector<string>::iterator vit;
 		list<libtorrent::torrent_handle>::iterator lit;
 
@@ -317,16 +324,20 @@ public:
 		// For every .torrent file, add torrent and save handle.
 		for(vit = inputs.begin(); vit != inputs.end(); vit++)
 		{ handles.push_back(this->add_torrent(*vit, this->shared_dir)); }
-		// Wait until all torrents are done.
+		// Wait until all files are downloaded.
 		this->wait_torrent(handles);
-		// Copy .torrent files to shared directory.
-		copy_file(this->working_dir + "*.torrent", this->shared_dir);
-		// Return the file names.
 		inputs.clear();
-		for(lit = handles.begin(); lit != handles.end(); lit++)
-		{ inputs.push_back(
-				this->shared_dir +
-				lit->get_torrent_info().file_at(0).path); }
+		for(lit = handles.begin(); lit != handles.end(); lit++)	{
+			// Prepare output (list of input file paths).
+			inputs.push_back(this->shared_dir + lit->name());
+			// Prepare list to use in wait_files
+			files.push_back(inputs.back());
+			// Move .torrent files from working to shared directory.
+			rename(	(this->working_dir+lit->name()+".torrent").c_str(),
+					(this->shared_dir+lit->name()+".torrent").c_str());
+		}
+		// Wait until the file is accessible.
+		this->wait_files(files);
 	}
 
 	/**
@@ -336,7 +347,7 @@ public:
 		// Create .torrent (according to BOINC output path).
 		make_torrent(output, this->output_path);
 		// Move output to shared directory.
-		move_file(output, this->shared_dir);
+		rename(output.c_str(), this->shared_dir.c_str());
 		// Copy .torrent to shared directory.
 		copy_file(this->output_path, this->shared_dir);
 	}
@@ -348,14 +359,11 @@ public:
 		// For every output file, create .torrent.
 		for(vit = outputs.begin(); vit != outputs.end(); vit++) {
 			torrents.push_back(*vit+".torrent");
+			// These .torrent files go directly to the shared directory.
 			make_torrent(*vit, *vit+".torrent");
 		}
 		// Zip .torrent files and place zip into BOINC output path.
 		zip_files(this->output_path, torrents);
-		// Move all files from working directory (output files and .torrents) to
-		// the shared directory. WARNING: this could be dangerous.
-		// TODO - the start only works for bash. Use rename.
-		move_file(this->working_dir+"*", this->shared_dir);
 	}
 
 	/**
@@ -396,9 +404,24 @@ public:
 	 */
 	void wait_torrent(list<libtorrent::torrent_handle> torrents) {
 		int s;
-		while(!torrents.size()) {
+		torrents.remove_if(torrent_done);
+		//torrents.remove_if(torrent_done);
+		while(torrents.size()) {
 			s = 1;
 			torrents.remove_if(torrent_done);
+			while(s >= 1) { s = sleep(s); }
+		}
+	}
+
+	/**
+	 * Blocking function that holds execution while input is not ready.
+	 */
+	void wait_files(list<string> files) {
+		int s;
+		files.remove_if(file_ready);
+		while(files.size()) {
+			s = 1;
+			files.remove_if(file_ready);
 			while(s >= 1) { s = sleep(s); }
 		}
 	}

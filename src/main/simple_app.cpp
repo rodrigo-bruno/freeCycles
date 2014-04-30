@@ -120,10 +120,18 @@ int main(int argc, char **argv) {
     boinc_get_init_data(boinc_data);
     wu_name = std::string(boinc_data.wu_name);
 #else
+    init_dir("/tmp/freeCycles-boinc-slot/");
+/** Test 1
     input_path = "/tmp/freeCycles-boinc-slot/freeCycles-map-0.torrent";
     output_path = "/tmp/freeCycles-boinc-slot/freeCycles-map-0.zip";
-    init_dir("/tmp/freeCycles-boinc-slot/");
     wu_name = "freeCycles-map-0";
+*/
+/** Teste 2 */
+    input_path = "/tmp/freeCycles-boinc-slot/freeCycles-reduce-0.zip";
+    output_path = "/tmp/freeCycles-boinc-slot/freeCycles-reduce-0.torrent";
+    wu_name = "freeCycles-reduce-0";
+
+
 #endif
     working_dir = std::string("/tmp/") + wu_name + "/";
 
@@ -133,15 +141,15 @@ int main(int argc, char **argv) {
 
     // map task
     if(wu_name.find("map") != std::string::npos) {
-    	tt = new MapTracker(bth, working_dir+ wu_name+"-", nmaps, nreds);
+    	tt = new MapTracker(bth, shared_dir + wu_name+"-", nmaps, nreds);
         tt->map(wc_map);
         bth->stage_zipped_output(*(tt->getOutputs()));
     }
     // reduce task
     else if (wu_name.find("reduce") != std::string::npos){
-    	tt = new ReduceTracker(bth, wu_name, nmaps, nreds);
+    	tt = new ReduceTracker(bth, shared_dir + wu_name, nmaps, nreds);
         tt->reduce(wc_reduce);
-        bth->stage_output(tt->getOutputs()->front());
+        //bth->stage_output(tt->getOutputs()->front());
 
     }
     // unknown task
@@ -158,8 +166,6 @@ int main(int argc, char **argv) {
 	// 2- we are waiting for the input files
 	// 3- we are sleeping (in the end)
 	// -> search for new .torrent files.
-
-    //sleep(10);
 
     delete tt;
     delete bth;
