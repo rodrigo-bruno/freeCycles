@@ -1,7 +1,7 @@
 // TODO - place open source banner
 
 // Compilation flag to enable local testing.
-#define STANDALONE
+//#define STANDALONE
 
 #include <stdio.h>
 #include <stdlib.h>
