@@ -62,7 +62,7 @@ const char* app_name = "example_app";
 const char* in_template_file = "example_app_in";
 const char* out_template_file = "example_app_out";
 const char* jobtracker_file_path = "/home/boincadm/projects/test4vm/mr/jobtracker.xml";
-const char* shuffle_script = "/tmp/shuffle.sh";
+const char* shuffle_script = "/home/boincadm/git/freeCycles/src/scripts/shuffle.sh";
 
 char* in_template;
 DB_APP app;
@@ -251,6 +251,7 @@ int make_job(MapReduceTask* mrt) {
     // Extracts the file name from path.
     infiles[0] = mrt->getInputPath().substr(
     		mrt->getInputPath().find_last_of("\\")+1).c_str();
+    log_messages.printf(MSG_NORMAL, "In File %s", infiles[0]);
 
     // Updates the MapReduceTask state and updates the jobtracker state file.
     write_task_state(mrt);
