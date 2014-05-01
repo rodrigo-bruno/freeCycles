@@ -1,15 +1,7 @@
 all: simple_app simple_work_generator simple_assimilator
 
-# FIXME - needed?
-libs:
-	ln -s `g++ -print-file-name=libstdc++.a`
-#	ln -s /home/boincadm/boinc-master/lib/libboinc.a
-	ln -s /usr/lib/libboinc.a
-#	ln -s /home/boincadm/boinc-master/api/libboinc_api.a
-	ln -s /usr/lib/libboinc_api.a
-
-#BOINC_BUILD = /home/boincadm/boinc-master
-BOINC_BUILD = /home/underscore/CloudPT/freeCycles-software/boinc-master
+BOINC_BUILD = /home/boincadm/boinc-master
+#BOINC_BUILD = /home/underscore/CloudPT/freeCycles-software/boinc-master
 
 BOOST_MACROS = -DBOOST_ASIO_HASH_MAP_BUCKETS=1021 -DBOOST_EXCEPTION_DISABLE -DBOOST_ASIO_ENABLE_CANCELIO -DBOOST_ASIO_DYN_LINK
 LIBTORRENT_MACROS = -DTORRENT_USE_OPENSSL -DWITH_SHIPPED_GEOIP_H -DTORRENT_LINKING_SHARED
