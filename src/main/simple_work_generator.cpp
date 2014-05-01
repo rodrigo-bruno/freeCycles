@@ -249,8 +249,7 @@ int make_job(MapReduceTask* mrt) {
     wu.max_success_results = REPLICATION_FACTOR*4;
 
     // Extracts the file name from path.
-    infiles[0] = mrt->getInputPath().substr(
-    		mrt->getInputPath().find_last_of("/")+1).c_str();
+    infiles[0] = mrt->getName().c_str();
     log_messages.printf(MSG_NORMAL, "In File %s", infiles[0]);
 
     // Updates the MapReduceTask state and updates the jobtracker state file.
