@@ -98,12 +98,12 @@ int main(int argc, char **argv) {
 	std::string input_path, output_path;
 	BitTorrentHandler* bth = NULL;
 	TaskTracker* tt = NULL;
-	 int retval;
+	 int retval = 0;
 #ifndef STANDALONE
     APP_INIT_DATA boinc_data;
 #endif
 
-    if((retval = process_cmd_args(argc, argv))) { exit(retval); }
+    if((retval = process_cmd_args(argc, argv))) { goto exit; }
 
 #ifndef STANDALONE
     // Initialize BOINC.
@@ -111,7 +111,7 @@ int main(int argc, char **argv) {
         fprintf(stderr,
         		"%s [BOINC] boinc_init returned %d\n",
         		boinc_msg_prefix(buf, sizeof(buf)), retval);
-        exit(retval);
+        goto exit;
     }
     // Resolve input and output files' logical name (.torrent files).
     boinc_resolve_filename_s(BOINC_INPUT_FILENAME, input_path);
@@ -158,7 +158,7 @@ int main(int argc, char **argv) {
         		"%s [WRAPPER-main] task is not map nor reduce: %s\n",
         		boinc_msg_prefix(buf, sizeof(buf)),
         		wu_name.c_str());
-        return 1;
+        retval = 1;
     }
 
     // TODO - while:
@@ -167,11 +167,16 @@ int main(int argc, char **argv) {
 	// 3- we are sleeping (in the end)
 	// -> search for new .torrent files.
 
+exit:
+	fprintf(stderr,
+			"%s [WRAPPER-main] Sleeping for 2 minutes\n",
+			boinc_msg_prefix(buf, sizeof(buf)));
+	sleep(120);
     delete tt;
     delete bth;
 
 #ifndef STANDALONE
     boinc_fraction_done(1);
-    boinc_finish(0);
+    boinc_finish(retval);
 #endif
 }
