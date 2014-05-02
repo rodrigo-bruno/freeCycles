@@ -2,6 +2,7 @@
 
 // Compilation flag to enable local testing.
 //#define STANDALONE
+#define DEBUG
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -55,6 +56,14 @@ int nreds = 0;
 #ifdef STANDALONE
 char* boinc_msg_prefix(char* buf, int size) {
 	return strcpy(buf, "[STANDALONE]");
+}
+#endif
+
+#ifdef DEBUG
+void debug_log(const char* where, const char* what, const char* aux) {
+	fprintf(stderr,
+			"%s [%s] %s %s\n",
+			boinc_msg_prefix(buf, sizeof(buf)), where, what, aux);
 }
 #endif
 
@@ -141,7 +150,14 @@ int main(int argc, char **argv) {
 
     // map task
     if(wu_name.find("map") != std::string::npos) {
+#ifdef DEBUG
+    	debug_log("[WRAPPER-main]", "running map task:", wu_name.c_str());
+    	debug_log("[WRAPPER-main]", "input to download:", input_path.c_str());
+#endif
     	tt = new MapTracker(bth, shared_dir + wu_name+"-", nmaps, nreds);
+#ifdef DEBUG
+    	debug_log("[WRAPPER-main]", "input downloaded.", "");
+#endif
         tt->map(wc_map);
         bth->stage_zipped_output(*(tt->getOutputs()));
     }
