@@ -148,17 +148,22 @@ int main(int argc, char **argv) {
     		input_path, output_path, working_dir, shared_dir, tracker_url);
     bth->init(download_rate, upload_rate);
 
-    // map task
-    if(wu_name.find("map") != std::string::npos) {
 #ifdef DEBUG
     	debug_log("[WRAPPER-main]", "running map task:", wu_name.c_str());
     	debug_log("[WRAPPER-main]", "input to download:", input_path.c_str());
+    	debug_log("[WRAPPER-main]", "output to upload:", output_path.c_str());
 #endif
+
+    // map task
+    if(wu_name.find("map") != std::string::npos) {
     	tt = new MapTracker(bth, shared_dir + wu_name+"-", nmaps, nreds);
 #ifdef DEBUG
     	debug_log("[WRAPPER-main]", "input downloaded.", "");
 #endif
         tt->map(wc_map);
+#ifdef DEBUG
+    	debug_log("[WRAPPER-main]", "map done.", "");
+#endif
         bth->stage_zipped_output(*(tt->getOutputs()));
     }
     // reduce task
