@@ -107,7 +107,6 @@ int assimilate_handler(
 		RESULT& canonical_result) {
     int retval;
     char buf[1024];
-    unsigned int i;
     MapReduceTask* mrt = NULL;
 
     // First time initialization (loads jobtracker state).
@@ -133,7 +132,6 @@ int assimilate_handler(
         std::vector<OUTPUT_FILE_INFO> output_files;
         const char *copy_path;
         get_output_file_infos(canonical_result, output_files);
-        unsigned int n = output_files.size();
         bool file_copied = false;
 
         // Get the task identified by the work unit name.
@@ -145,7 +143,7 @@ int assimilate_handler(
         // Update: 1)state file and 2) in memory structure (jobs)
 		write_task_state(mrt);
 		// FIXME - if wu.name contains reduce, also copy to bt new.
-		retval = boinc_copy(output_files[0].path.c_str() , mrt->getOutputPath());
+		retval = boinc_copy(output_files[0].path.c_str() , mrt->getOutputPath().c_str());
 		if (!retval) { file_copied = true; }
 
 
