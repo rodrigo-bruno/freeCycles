@@ -8,6 +8,7 @@
 #if not STADALONE
 #include "config.h"
 #include "boinc_api.h"
+#include "util.h"
 #endif
 
 #include "mr_tasktracker.h"
@@ -176,11 +177,11 @@ exit:
 	fprintf(stderr,
 			"%s [WRAPPER-main] Sleeping for 2 minutes\n",
 			boinc_msg_prefix(buf, sizeof(buf)));
-	sleep(120);
     delete tt;
     delete bth;
 
 #if not STANDALONE
+    boinc_sleep(600);
     boinc_fraction_done(1);
     boinc_finish(retval);
 #endif
