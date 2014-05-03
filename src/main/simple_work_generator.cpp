@@ -34,6 +34,7 @@
 #include <cstring>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 
 #include "boinc_db.h"
 #include "error_numbers.h"
@@ -139,13 +140,12 @@ int shuffle(const char* job_id, const char* nreds) {
 
 /**
  * Helper function that writes to the jobtracker state file.
- * It is called when a task is sent.
  */
-void write_task_state(MapReduceTask* mrt) {
+void write_task_state(MapReduceTask* mrt, const char* state) {
 	fseek(jobtracker_file, mrt->getStateOffset(),SEEK_SET);
 	fwrite(TASK_CREATED, 1, 1, jobtracker_file);
 	fflush(jobtracker_file);
-	mrt->setState(TASK_CREATED);
+	mrt->setState(state);
 }
 
 /**
@@ -160,19 +160,19 @@ void write_shuffled_state(MapReduceJob* mrj) {
 }
 
 /**
- * This function re-reads the jobtracker state file to update the map task
- * status (this is important to start the reduce phase).
+ * This function checks if the map output is ready. This is important to start
+ * the reduce phase.
  */
-void read_maps_state(MapReduceJob& mrj) {
+void check_maps_state(MapReduceJob& mrj) {
 	std::vector<MapReduceTask>& maps = mrj.getMapTasks();
 	std::vector<MapReduceTask>::iterator it;
 	for( it = maps.begin(); it != maps.end();	++it) {
-		char state[2];
-		fseek(jobtracker_file, it->getStateOffset(), SEEK_SET);
-		fread(&state, 1, 1, jobtracker_file);
-		state[1] = '\0';
-		log_messages.printf(MSG_NORMAL, "Map task %s state %s\n", it->getName().c_str(), state);
-		it->setState(std::string(state));
+		struct stat buffer;
+		if (!stat(it->getOutputPath().c_str(), &buffer)) {
+			log_messages.printf(MSG_NORMAL, "Map task %s finished\n", it->getName().c_str());
+			it->setState(std::string(TASK_FINISHED));
+			write_task_state(&(*it), TASK_FINISHED);
+		}
 	}
 }
 
@@ -194,7 +194,7 @@ MapReduceTask* get_MapReduce_task(std::vector<MapReduceJob>& jobs_ref) {
 		// if all map tasks were already delivered.
 		if(mrt == NULL) {
 			log_messages.printf(MSG_NORMAL, "No more map tasks\n");
-			read_maps_state(*it);
+			check_maps_state(*it);
 			mrt = it->getNextReduce();
 			// this means that we might be waiting for map results.
 			if(mrt == NULL) {
@@ -264,7 +264,7 @@ int make_job(MapReduceTask* mrt) {
     log_messages.printf(MSG_NORMAL, "In File %s", infiles[0]);
 
     // Updates the MapReduceTask state and updates the jobtracker state file.
-    write_task_state(mrt);
+    write_task_state(mrt, TASK_CREATED);
 
     // Register the job with BOINC.
     sprintf(path, "templates/%s", out_template_file);

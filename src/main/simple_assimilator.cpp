@@ -89,18 +89,6 @@ MapReduceTask* get_task_by_name(std::vector<MapReduceJob>& jobs_ref, char* wu_na
 	return NULL;
 }
 
-/**
- * Helper function that writes to the jobtracker state file.
- * It is called when a task is assimilated.
- */
-void write_task_state(MapReduceTask* mrt) {
-	debug("write_task_state", mrt->getName().c_str());
-	fseek(jobtracker_file, mrt->getStateOffset(),SEEK_SET);
-	fwrite(TASK_FINISHED, 1, 1, jobtracker_file);
-	fflush(jobtracker_file);
-	mrt->setState(TASK_FINISHED);
-}
-
 int assimilate_handler(
 		WORKUNIT& wu,
 		std::vector<RESULT>& /*results*/,
@@ -110,6 +98,8 @@ int assimilate_handler(
     MapReduceTask* mrt = NULL;
 
     // First time initialization (loads jobtracker state).
+    // This information is loaded into memory but we only need the output paths
+    // and wu names. We are not updating the file here.
     if(jobtracker_file == NULL) {
 		// Open jobtracker state file.
 		jobtracker_file = fopen(jobtracker_file_path, "r+");
@@ -140,8 +130,6 @@ int assimilate_handler(
 			sprintf(buf, "Can't find MapRedureTask %s\n", wu.name);
 			return write_error(buf);
         }
-        // Update: 1)state file and 2) in memory structure (jobs)
-		write_task_state(mrt);
 		// FIXME - if wu.name contains reduce, also copy to bt new.
 		retval = boinc_copy(output_files[0].path.c_str() , mrt->getOutputPath().c_str());
 		if (!retval) { file_copied = true; }
