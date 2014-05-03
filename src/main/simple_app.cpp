@@ -181,7 +181,7 @@ exit:
     delete bth;
 
 #if not STANDALONE
-    boinc_sleep(600);
+    boinc_sleep(60);
     boinc_fraction_done(1);
     boinc_finish(retval);
 #endif
