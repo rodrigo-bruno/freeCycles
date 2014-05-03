@@ -1,13 +1,11 @@
 // TODO - place open source banner
 
-// Compilation flag to enable local testing.
-//#define STANDALONE
-#define DEBUG
+#include "control.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifndef STANDALONE
+#if not STADALONE
 #include "config.h"
 #include "boinc_api.h"
 #endif
@@ -40,7 +38,7 @@ std::string shared_dir = "/tmp/freeCycles-shared/";
 // Private downloads.
 std::string working_dir;
 // Tracker URL to use.
-#ifdef STANDALONE
+#if STANDALONE
 std::string tracker_url = "udp://localhost:6969";
 #else
 std::string tracker_url = "udp://boinc.rnl.ist.utl.pt:6969";
@@ -52,20 +50,6 @@ std::string wu_name;
 int nmaps = 0;
 // Number of reducers
 int nreds = 0;
-
-#ifdef STANDALONE
-char* boinc_msg_prefix(char* buf, int size) {
-	return strcpy(buf, "[STANDALONE]");
-}
-#endif
-
-#ifdef DEBUG
-void debug_log(const char* where, const char* what, const char* aux) {
-	fprintf(stderr,
-			"%s [%s] %s %s\n",
-			boinc_msg_prefix(buf, sizeof(buf)), where, what, aux);
-}
-#endif
 
 /*
  * Command line processing.
@@ -108,13 +92,13 @@ int main(int argc, char **argv) {
 	BitTorrentHandler* bth = NULL;
 	TaskTracker* tt = NULL;
 	 int retval = 0;
-#ifndef STANDALONE
+#if not STANDALONE
     APP_INIT_DATA boinc_data;
 #endif
 
     if((retval = process_cmd_args(argc, argv))) { goto exit; }
 
-#ifndef STANDALONE
+#if not STANDALONE
     // Initialize BOINC.
     if ((retval = boinc_init())) {
         fprintf(stderr,
@@ -148,8 +132,8 @@ int main(int argc, char **argv) {
     		input_path, output_path, working_dir, shared_dir, tracker_url);
     bth->init(download_rate, upload_rate);
 
-#ifdef DEBUG
-    	debug_log("[WRAPPER-main]", "running map task:", wu_name.c_str());
+#if DEBUG
+    	debug_log("[WRAPPER-main]", "running task:", wu_name.c_str());
     	debug_log("[WRAPPER-main]", "input to download:", input_path.c_str());
     	debug_log("[WRAPPER-main]", "output to upload:", output_path.c_str());
 #endif
@@ -157,11 +141,11 @@ int main(int argc, char **argv) {
     // map task
     if(wu_name.find("map") != std::string::npos) {
     	tt = new MapTracker(bth, shared_dir + wu_name+"-", nmaps, nreds);
-#ifdef DEBUG
+#if DEBUG
     	debug_log("[WRAPPER-main]", "input downloaded.", "");
 #endif
         tt->map(wc_map);
-#ifdef DEBUG
+#if DEBUG
     	debug_log("[WRAPPER-main]", "map done.", "");
 #endif
         bth->stage_zipped_output(*(tt->getOutputs()));
@@ -196,7 +180,7 @@ exit:
     delete tt;
     delete bth;
 
-#ifndef STANDALONE
+#if not STANDALONE
     boinc_fraction_done(1);
     boinc_finish(retval);
 #endif
