@@ -140,28 +140,15 @@ int assimilate_handler(
         mrt = get_task_by_name(jobs, wu.name);
         if (mrt == NULL) {
 			sprintf(buf, "Can't find MapRedureTask %s\n", wu.name);
-			//return write_error(buf);
-			write_error(buf);
+			return write_error(buf);
         }
         // Update: 1)state file and 2) in memory structure (jobs)
-		if (mrt != NULL) { write_task_state(mrt); }
+		write_task_state(mrt);
+		// FIXME - if wu.name contains reduce, also copy to bt new.
+		retval = boinc_copy(output_files[0].path.c_str() , mrt->getOutputPath());
+		if (!retval) { file_copied = true; }
 
-    	// TODO - both map and reduces will only have one output.
-        for (i=0; i<n; i++) {
-            OUTPUT_FILE_INFO& fi = output_files[i];
-            if (n==1) {
-            	// FIXME - maybe we should use the value writen on the mr xml file.
-            	// FIXME - if wu.name contains reduce, also copy to bt new.
-                copy_path = config.project_path("sample_results/%s", wu.name);
-            } else {
-                copy_path = config.project_path("sample_results/%s_%d", wu.name, i);
-            }
 
-            retval = boinc_copy(fi.path.c_str() , copy_path);
-            if (!retval) { file_copied = true; }
-
-        }
-        // TODO - delete?
         if (!file_copied) {
             copy_path = config.project_path("sample_results/%s_%s", wu.name, "no_output_files");
             FILE* f = fopen(copy_path, "w");
