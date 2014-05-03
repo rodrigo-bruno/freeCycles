@@ -94,6 +94,7 @@ MapReduceTask* get_task_by_name(std::vector<MapReduceJob>& jobs_ref, char* wu_na
  * It is called when a task is assimilated.
  */
 void write_task_state(MapReduceTask* mrt) {
+	debug("write_task_state", mrt->getName().c_str());
 	fseek(jobtracker_file, mrt->getStateOffset(),SEEK_SET);
 	fwrite(TASK_FINISHED, 1, 1, jobtracker_file);
 	fflush(jobtracker_file);
@@ -140,6 +141,7 @@ int assimilate_handler(
         if (mrt == NULL) {
 			sprintf(buf, "Can't find MapRedureTask %s\n", wu.name);
 			//return write_error(buf);
+			write_error(buf);
         }
         // Update: 1)state file and 2) in memory structure (jobs)
 		if (mrt != NULL) { write_task_state(mrt); }
