@@ -60,7 +60,7 @@ void debug(const char* what, const char* with) {
  * Note: Task names follow the format: id-[map|reduce]-seq.number
  */
 MapReduceTask* get_task_by_name(std::vector<MapReduceJob>& jobs_ref, char* wu_name) {
-	std::string id = std::string(wu_name, wu_name - strchr(wu_name, '-'));
+	std::string id = std::string(wu_name, strchr(wu_name, '-')  - wu_name);
 	std::vector<MapReduceJob>::iterator it;
 	std::vector<MapReduceTask>::iterator it2;
 
