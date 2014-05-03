@@ -37,6 +37,23 @@ const char* jobtracker_file_path = "/home/boincadm/projects/test4vm/mr/jobtracke
 FILE* jobtracker_file = NULL;
 std::vector<MapReduceJob> jobs;
 
+int write_error(char* p) {
+    static FILE* f = 0;
+    if (!f) {
+        f = fopen(config.project_path("sample_results/errors"), "a");
+        if (!f) return ERR_FOPEN;
+    }
+    fprintf(f, "%s", p);
+    fflush(f);
+    return 0;
+}
+
+void debug(const char* what, const char* with) {
+	char buf[1024];
+	sprintf(buf, "%s %s\n", what, with);
+	write_error(buf);
+}
+
 /**
  * This helper function searches for a MapReduce task which is identified by
  * the given 'wu_name'.
@@ -46,18 +63,28 @@ MapReduceTask* get_task_by_name(std::vector<MapReduceJob>& jobs_ref, char* wu_na
 	std::string id = std::string(wu_name, strchr(wu_name, '-') - 1);
 	std::vector<MapReduceJob>::iterator it;
 	std::vector<MapReduceTask>::iterator it2;
+
+	debug("get_task_by_name", wu_name);
+
 	for(it = jobs_ref.begin(); it != jobs_ref.end(); ++it) {
-		if (it->getID() != id) { continue; }
+		debug("job", id.c_str());
+		if (it->getID().compare(id)) { continue; }
 		// Search wu_name among map tasks
 		for(	it2 = it->getMapTasks().begin();
 				it2 != it->getMapTasks().end();
 				++it2)
-			{ if(!strcmp(wu_name, it2->getName().c_str())) { return &(*it2); } }
+			{
+			debug("map task", it2->getName().c_str());
+			if(!strcmp(wu_name, it2->getName().c_str())) { return &(*it2); }
+			}
 		// Search wu_name among reduce tasks
 		for(	it2 = it->getReduceTasks().begin();
 				it2 != it->getReduceTasks().end();
 				++it2)
-			{ if(!strcmp(wu_name, it2->getName().c_str())) { return &(*it2); } }
+			{
+			debug("reduce task", it2->getName().c_str());
+			if(!strcmp(wu_name, it2->getName().c_str())) { return &(*it2); }
+			}
 	}
 	return NULL;
 }
@@ -71,17 +98,6 @@ void write_task_state(MapReduceTask* mrt) {
 	fwrite(TASK_FINISHED, 1, 1, jobtracker_file);
 	fflush(jobtracker_file);
 	mrt->setState(TASK_FINISHED);
-}
-
-int write_error(char* p) {
-    static FILE* f = 0;
-    if (!f) {
-        f = fopen(config.project_path("sample_results/errors"), "a");
-        if (!f) return ERR_FOPEN;
-    }
-    fprintf(f, "%s", p);
-    fflush(f);
-    return 0;
 }
 
 int assimilate_handler(
@@ -118,6 +134,17 @@ int assimilate_handler(
         get_output_file_infos(canonical_result, output_files);
         unsigned int n = output_files.size();
         bool file_copied = false;
+
+        // Get the task identified by the work unit name.
+        mrt = get_task_by_name(jobs, wu.name);
+        if (mrt == NULL) {
+			sprintf(buf, "Can't find MapRedureTask %s\n", wu.name);
+			//return write_error(buf);
+        }
+        // Update: 1)state file and 2) in memory structure (jobs)
+		if (mrt != NULL) { write_task_state(mrt); }
+
+    	// TODO - both map and reduces will only have one output.
         for (i=0; i<n; i++) {
             OUTPUT_FILE_INFO& fi = output_files[i];
             if (n==1) {
@@ -127,23 +154,14 @@ int assimilate_handler(
             } else {
                 copy_path = config.project_path("sample_results/%s_%d", wu.name, i);
             }
-            retval = boinc_copy(fi.path.c_str() , copy_path);
-            if (!retval) {
-                file_copied = true;
-            }
 
-            // Get the task identified by the work unit name.
-            mrt = get_task_by_name(jobs, wu.name);
-            if (mrt == NULL) {
-    			sprintf(buf, "Can't find MapRedureTask %s\n", wu.name);
-    			return write_error(buf);
-            }
-            // Update: 1)state file and 2) in memory structure (jobs)
-    		write_task_state(mrt);
+            retval = boinc_copy(fi.path.c_str() , copy_path);
+            if (!retval) { file_copied = true; }
+
         }
+        // TODO - delete?
         if (!file_copied) {
-            copy_path = config.project_path(
-                "sample_results/%s_%s", wu.name, "no_output_files");
+            copy_path = config.project_path("sample_results/%s_%s", wu.name, "no_output_files");
             FILE* f = fopen(copy_path, "w");
             fclose(f);
         }
