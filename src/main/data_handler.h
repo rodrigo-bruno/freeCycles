@@ -412,16 +412,13 @@ public:
 	 * Blocking function that holds execution while input is not ready.
 	 */
 	void wait_torrent(list<libtorrent::torrent_handle> torrents) {
-		int s;
-		torrents.remove_if(torrent_done);
 		//torrents.remove_if(torrent_done);
 		while(torrents.size()) {
 #if DEBUG
     	debug_log("[DH-wait_torrent]", "Waiting ...", "");
 #endif
-			s = 1;
 			torrents.remove_if(torrent_done);
-			while(s >= 1) { s = sleep(s); }
+			sleep(1);
 		}
 	}
 
@@ -429,12 +426,9 @@ public:
 	 * Blocking function that holds execution while input is not ready.
 	 */
 	void wait_files(list<string> files) {
-		int s;
-		files.remove_if(file_ready);
 		while(files.size()) {
-			s = 1;
 			files.remove_if(file_ready);
-			while(s >= 1) { s = sleep(s); }
+			sleep(1);
 		}
 	}
 
