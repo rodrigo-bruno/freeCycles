@@ -175,7 +175,7 @@ int main(int argc, char **argv) {
 
 exit:
 	fprintf(stderr,
-			"%s [WRAPPER-main] Sleeping for 2 minutes\n",
+			"%s [WRAPPER-main] Sleeping for 10 minutes\n",
 			boinc_msg_prefix(buf, sizeof(buf)));
     delete tt;
     delete bth;

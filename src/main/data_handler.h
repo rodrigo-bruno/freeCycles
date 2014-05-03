@@ -310,10 +310,11 @@ public:
 #if DEBUG
     	debug_log("[DH-get_input]", "download done.", "");
 #endif
-		// Copy input torrent to shared dir.
-		copy_file(this->input_path, this->shared_dir);
 		// Return the file PATH.
 		input = this->shared_dir + handles.front().name();
+		// Copy input torrent to shared dir (the name has to be faked since
+		// boinc does not preserve the original file name).
+		copy_file(this->input_path, input + ".torrent");
 		// Wait until the file is accessible.
 		files.push_back(input);
 #if DEBUG
@@ -412,11 +413,8 @@ public:
 	 * Blocking function that holds execution while input is not ready.
 	 */
 	void wait_torrent(list<libtorrent::torrent_handle> torrents) {
-		//torrents.remove_if(torrent_done);
+		torrents.remove_if(torrent_done);
 		while(torrents.size()) {
-#if DEBUG
-    	debug_log("[DH-wait_torrent]", "Waiting ...", "");
-#endif
 			torrents.remove_if(torrent_done);
 			sleep(1);
 		}
@@ -426,6 +424,7 @@ public:
 	 * Blocking function that holds execution while input is not ready.
 	 */
 	void wait_files(list<string> files) {
+		files.remove_if(file_ready);
 		while(files.size()) {
 			files.remove_if(file_ready);
 			sleep(1);
