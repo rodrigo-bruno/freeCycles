@@ -294,7 +294,7 @@ public:
 
 	/**
 	 * I am assuming that the BOINC input path preserves the original file name
-	 * (the one given by the work generator).
+	 * (the one given by the work generator). // TODO - eventhough it should work
 	 */
 	void get_input(string& input) {
 		list<libtorrent::torrent_handle> handles;
@@ -302,14 +302,23 @@ public:
 
 		// Add input torrent (input path) with shared_dir as shared_dir.
 		handles.push_back(this->add_torrent(this->input_path, this->shared_dir));
+#if DEBUG
+    	debug_log("[DH-get_input]", "Torrent added:.", this->input_path.c_str());
+#endif
 		// Wait until its done.
 		this->wait_torrent(handles);
+#if DEBUG
+    	debug_log("[DH-get_input]", "download done.", "");
+#endif
 		// Copy input torrent to shared dir.
 		copy_file(this->input_path, this->shared_dir);
 		// Return the file PATH.
 		input = this->shared_dir + handles.front().name();
 		// Wait until the file is accessible.
 		files.push_back(input);
+#if DEBUG
+    	debug_log("[DH-get_input]", "waiting for file:", input.c_str());
+#endif
 		this->wait_files(files);
 	}
 
@@ -407,6 +416,9 @@ public:
 		torrents.remove_if(torrent_done);
 		//torrents.remove_if(torrent_done);
 		while(torrents.size()) {
+#if DEBUG
+    	debug_log("[DH-wait_torrent]", "Waiting ...", "");
+#endif
 			s = 1;
 			torrents.remove_if(torrent_done);
 			while(s >= 1) { s = sleep(s); }
