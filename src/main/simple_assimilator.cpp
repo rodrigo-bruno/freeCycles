@@ -121,6 +121,8 @@ int assimilate_handler(
         for (i=0; i<n; i++) {
             OUTPUT_FILE_INFO& fi = output_files[i];
             if (n==1) {
+            	// FIXME - maybe we should use the value writen on the mr xml file.
+            	// FIXME - if wu.name contains reduce, also copy to bt new.
                 copy_path = config.project_path("sample_results/%s", wu.name);
             } else {
                 copy_path = config.project_path("sample_results/%s_%d", wu.name, i);

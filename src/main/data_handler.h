@@ -373,7 +373,9 @@ public:
 			make_torrent(*vit, *vit+".torrent");
 		}
 		// Zip .torrent files and place zip into BOINC output path.
-		zip_files(this->output_path, torrents);
+		zip_files(this->working_dir + "output", torrents);
+		rename(	(this->working_dir + "output.zip").c_str(),
+				 this->output_path.c_str());
 	}
 
 	/**
