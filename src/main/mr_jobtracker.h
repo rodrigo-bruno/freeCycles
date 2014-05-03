@@ -135,7 +135,7 @@ public:
 	 */
 	MapReduceTask* getNextMap() {
 		for(; this->next_map < this->maps.size(); this->next_map++) {
-			if (this->maps[this->next_map].getState() == TASK_WAITING)
+			if (!this->maps[this->next_map].getState().compare(TASK_WAITING))
 			{ return &(this->maps[this->next_map]); }
 		}
 		return NULL;
@@ -147,11 +147,11 @@ public:
 	 */
 	MapReduceTask* getNextReduce() {
 		for(; this->finished_map < this->maps.size(); this->finished_map++) {
-			if (this->maps[this->finished_map].getState() != TASK_FINISHED)
+			if (this->maps[this->finished_map].getState().compare(TASK_FINISHED))
 			{ return NULL;}
 		}
 		for(; this->next_red < this->reds.size(); this->next_red++) {
-			if (this->reds[this->next_red].getState() == TASK_WAITING)
+			if (!this->reds[this->next_red].getState().compare(TASK_WAITING))
 			{ return &(this->reds[this->next_red]); }
 		}
 		this->unsent_tasks = false;

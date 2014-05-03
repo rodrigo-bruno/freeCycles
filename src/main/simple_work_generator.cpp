@@ -171,6 +171,7 @@ void read_maps_state(MapReduceJob& mrj) {
 		fseek(jobtracker_file, it->getStateOffset(), SEEK_SET);
 		fread(&state, 1, 1, jobtracker_file);
 		state[1] = '\0';
+		log_messages.printf(MSG_NORMAL, "Map task %s state %s\n", it->getName().c_str(), state);
 		it->setState(std::string(state));
 	}
 }
@@ -192,24 +193,34 @@ MapReduceTask* get_MapReduce_task(std::vector<MapReduceJob>& jobs_ref) {
 		mrt = it->getNextMap();
 		// if all map tasks were already delivered.
 		if(mrt == NULL) {
+			log_messages.printf(MSG_NORMAL, "No more map tasks\n");
 			read_maps_state(*it);
 			mrt = it->getNextReduce();
 			// this means that we might be waiting for map results.
-			if(mrt == NULL) { continue; }
+			if(mrt == NULL) {
+				log_messages.printf(MSG_NORMAL, "No new reduce tasks.\n");
+				continue;
+			}
 			else {
 				// before returning a reduce task, make sure that the input is
 				// shuffled already.
 				if(it->needShuffle()) {
+					log_messages.printf(MSG_NORMAL, "Go go shuffle!\n");
 					sprintf(buf, "%lu", it->getReduceTasks().size());
 					shuffle(it->getID().c_str(), buf);
 					write_shuffled_state(&(*it));
 				}
+				log_messages.printf(MSG_NORMAL, "New reduce task: %s\n", mrt->getName().c_str());
 				return mrt;
 			}
 		}
-		else { return mrt; }
+		else {
+			log_messages.printf(MSG_NORMAL, "Next map task: %s\n", mrt->getName().c_str());
+			return mrt;
+		}
 	}
 	// if no job has more tasks to deliver.
+	log_messages.printf(MSG_NORMAL, "No job has more tasks to deliver\n");
 	return NULL;
 }
 
