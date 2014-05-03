@@ -374,8 +374,8 @@ public:
 		}
 		// Zip .torrent files and place zip into BOINC output path.
 		zip_files(this->working_dir + "output", torrents);
-		rename(	(this->working_dir + "output.zip").c_str(),
-				 this->output_path.c_str());
+		copy_file((this->working_dir + "output.zip").c_str(),
+				   this->output_path.c_str());
 	}
 
 	/**
