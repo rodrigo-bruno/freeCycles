@@ -109,6 +109,13 @@ int main(int argc, char **argv) {
     APP_INIT_DATA boinc_data;
 #endif
 
+    // TODO - doc
+    if (signal(SIGTERM, SIG_IGN) == SIG_ERR) {
+    	fprintf(stderr,
+    			"%s [WRAPPER-main] failed to setup SIGTERM handler.\n",
+    	        boinc_msg_prefix(buf, sizeof(buf)));
+    }
+
     if((retval = process_cmd_args(argc, argv))) { goto exit; }
 
 #if not STANDALONE
@@ -196,13 +203,7 @@ exit:
     // Split execution
     if((pid = fork()) != 0) {
     	// Parent.
-        // TODO - doc
-        if (signal(SIGTERM, SIG_IGN) == SIG_ERR) {
-        	fprintf(stderr,
-        			"%s [WRAPPER-main] failed to setup SIGTERM handler.\n",
-        	        boinc_msg_prefix(buf, sizeof(buf)));
-        }
-    	boinc_sleep(60);
+    	boinc_sleep(600);
     }
     else {
     	// Child.
