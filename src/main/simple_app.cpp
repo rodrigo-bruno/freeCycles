@@ -194,8 +194,8 @@ exit:
     pid_t pid;
 
     // Split execution
-    if((pid = fork()) == 0) {
-    	// Child.
+    if((pid = fork()) != 0) {
+    	// Parent.
         // TODO - doc
         if (signal(SIGTERM, SIG_IGN) == SIG_ERR) {
         	fprintf(stderr,
@@ -205,7 +205,7 @@ exit:
     	boinc_sleep(60);
     }
     else {
-    	// Parent.
+    	// Child.
 #if not STANDALONE
         boinc_fraction_done(1);
         boinc_finish(retval);
