@@ -253,6 +253,7 @@ private:
 	libtorrent::error_code bt_ec;
 	string shared_dir;
 	string tracker_url;
+	string wu_name;
 
 public:
 
@@ -267,9 +268,11 @@ public:
 			string output,
 			string working_dir,
 			string shared_dir,
-			string tracker_url) :
+			string tracker_url,
+			string wu_name) :
 				shared_dir(shared_dir),
 				tracker_url(tracker_url),
+				wu_name(wu_name),
 				DataHandler(input, output, working_dir) {
 		init_dir(shared_dir);
 	}
@@ -277,10 +280,6 @@ public:
 	BitTorrentHandler(const BitTorrentHandler& bt) = delete;
 	~BitTorrentHandler() {}
 
-	/**
-	 * I am assuming that the BOINC input path preserves the original file name
-	 * (the one given by the work generator). // TODO - eventhough it should work
-	 */
 	void get_input(string& input) {
 		list<libtorrent::torrent_handle> handles;
 		list<string> files;
@@ -344,7 +343,7 @@ public:
 		// Move output to shared directory.
 		rename(output.c_str(), this->shared_dir.c_str());
 		// Copy .torrent to shared directory.
-		copy_file(this->output_path, this->shared_dir); // FIXME - this should be shared_dir / wu_name.torrent
+		copy_file(this->output_path, this->shared_dir + wu_name + ".torrent");
 	}
 
 	void stage_zipped_output(vector<string>& outputs) {
@@ -382,7 +381,7 @@ public:
 	                bt_ec.message().c_str());
 			return 1;
 		}
-	    // TODO - load all .torrent files inside shared dir.
+	    this->check_shared_torrents();
 	    return 0;
 	}
 
@@ -416,6 +415,25 @@ public:
 		while(files.size()) {
 			files.remove_if(file_ready);
 			sleep(1);
+		}
+	}
+
+	/**
+	 * Searches for torrent files inside the shared directory.
+	 * Found torrents will be added to the given session.
+	 */
+	void check_shared_torrents() {
+		DIR* dir;
+
+		// try to open dir. If opendir is unsuccessful, return.
+		if((dir = opendir(this->shared_dir.c_str())) == NULL) { return; }
+		// look for all files and try to add them as new torrents.
+		for(struct dirent* dp = readdir(dir); dp != NULL; dp = readdir(dir)) {
+
+			if(dp->d_type == DT_DIR) { continue; }
+			if(! ends_with(dp->d_name, ".torrent")) { continue; }
+
+			add_torrent(this->shared_dir+dp->d_name, this->shared_dir);
 		}
 	}
 

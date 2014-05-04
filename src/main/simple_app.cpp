@@ -53,17 +53,6 @@ int nmaps = 0;
 // Number of reducers
 int nreds = 0;
 
-/**
- * TODO - test
- */
-void handle_signal(int signum) {
-    if (signum == SIGTERM) {
-#if DEBUG
-    	debug_log("handle_signal]", "SIGTERM received:", "ignoring.");
-#endif
-    }
-}
-
 /*
  * Command line processing.
  * This reads the command line arguments and saves them in global variables.
@@ -110,14 +99,15 @@ int main(int argc, char **argv) {
     APP_INIT_DATA boinc_data;
 #endif
 
-    // TODO - doc
+    // Ignore SIGTERM (I use this to keep a child process running for a bit
+    // longer after the parent calls boinc_finish).
     if (signal(SIGTERM, SIG_IGN) == SIG_ERR) {
     	fprintf(stderr,
     			"%s [WRAPPER-main] failed to setup SIGTERM handler.\n",
     	        boinc_msg_prefix(buf, sizeof(buf)));
     }
 
-    if((retval = process_cmd_args(argc, argv))) { goto exit; }
+    if((retval = process_cmd_args(argc, argv))) { goto fail; }
 
 #if not STANDALONE
     // Initialize BOINC.
@@ -125,7 +115,7 @@ int main(int argc, char **argv) {
         fprintf(stderr,
         		"%s [WRAPPER-main] boinc_init returned %d\n",
         		boinc_msg_prefix(buf, sizeof(buf)), retval);
-        goto exit;
+        goto fail;
     }
     // Resolve input and output files' logical name (.torrent files).
     boinc_resolve_filename_s(BOINC_INPUT_FILENAME, input_path);
@@ -144,13 +134,13 @@ int main(int argc, char **argv) {
     input_path = "/tmp/freeCycles-boinc-slot/freeCycles-reduce-0.zip";
     output_path = "/tmp/freeCycles-boinc-slot/freeCycles-reduce-0.torrent";
     wu_name = "freeCycles-reduce-0";
-
-
 #endif
     working_dir = std::string("/tmp/") + wu_name + "/";
 
     bth = new BitTorrentHandler(
-    		input_path, output_path, working_dir, shared_dir, tracker_url);
+    		input_path,	output_path,
+    		working_dir, shared_dir,
+    		tracker_url, wu_name);
     bth->init(download_rate, upload_rate);
 
 #if DEBUG
@@ -184,6 +174,7 @@ int main(int argc, char **argv) {
         		boinc_msg_prefix(buf, sizeof(buf)),
         		wu_name.c_str());
         retval = 1;
+        goto fail;
     }
 
     // TODO - while:
@@ -192,32 +183,38 @@ int main(int argc, char **argv) {
 	// 3- we are sleeping (in the end)
 	// -> search for new .torrent files.
 
-exit:
-	fprintf(stderr,
-			"%s [WRAPPER-main] Sleeping for 1 minutes\n",
-			boinc_msg_prefix(buf, sizeof(buf)));
-
 	delete tt;
     delete bth;
 
-
-    // Split execution
-    if((pid = fork()) == 0) {
+    // Hack: process is cloned. Parent calls boinc_finish and the child keeps
+    // running a BitTorrent client for some time.
+    if(!(pid = fork())) {
     	// Child.
         bth = new BitTorrentHandler(
-        		input_path, output_path, working_dir, shared_dir, tracker_url);
+        		input_path, output_path,
+        		working_dir, shared_dir,
+        		tracker_url, wu_name);
         bth->init(download_rate, upload_rate);
     	boinc_sleep(120);
     	delete bth;
-
+    	exit(retval);
     }
     else {
     	// Parent.
 #if not STANDALONE
         boinc_fraction_done(1);
         boinc_finish(retval);
+#else
+        exit(retval);
 #endif
     }
-
-
+    // This piece of code is never reached by normal execution (only gotos are
+    // able to jump here.
+fail:
+	delete tt;
+	delete bth;
+	fprintf(stderr,
+			"%s [WRAPPER-main] Failing.\n",
+			boinc_msg_prefix(buf, sizeof(buf)));
+	exit(retval);
 }
