@@ -382,6 +382,7 @@ public:
 	                bt_ec.message().c_str());
 			return 1;
 		}
+	    // TODO - load all .torrent files inside shared dir.
 	    return 0;
 	}
 

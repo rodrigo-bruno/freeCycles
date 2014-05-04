@@ -104,7 +104,8 @@ int main(int argc, char **argv) {
 	std::string input_path, output_path;
 	BitTorrentHandler* bth = NULL;
 	TaskTracker* tt = NULL;
-	 int retval = 0;
+	int retval = 0;
+	pid_t pid;
 #if not STANDALONE
     APP_INIT_DATA boinc_data;
 #endif
@@ -195,18 +196,23 @@ exit:
 	fprintf(stderr,
 			"%s [WRAPPER-main] Sleeping for 1 minutes\n",
 			boinc_msg_prefix(buf, sizeof(buf)));
-    delete tt;
+
+	delete tt;
     delete bth;
 
-    pid_t pid;
 
     // Split execution
-    if((pid = fork()) != 0) {
-    	// Parent.
-    	boinc_sleep(600);
+    if((pid = fork()) == 0) {
+    	// Child.
+        bth = new BitTorrentHandler(
+        		input_path, output_path, working_dir, shared_dir, tracker_url);
+        bth->init(download_rate, upload_rate);
+    	boinc_sleep(120);
+    	delete bth;
+
     }
     else {
-    	// Child.
+    	// Parent.
 #if not STANDALONE
         boinc_fraction_done(1);
         boinc_finish(retval);
