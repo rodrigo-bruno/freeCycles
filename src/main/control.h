@@ -15,6 +15,7 @@
 #define DEBUG		1
 
 #include <stdio.h>
+#include <unistd.h>
 
 
 #if not STADALONE
@@ -32,6 +33,7 @@ char debug_buf[256];
 char* boinc_msg_prefix(char* buf, int size) {
 	return strcpy(buf, "[STANDALONE]");
 }
+void boinc_sleep(double s) { sleep((int)s); }
 #endif
 
 #ifdef DEBUG
