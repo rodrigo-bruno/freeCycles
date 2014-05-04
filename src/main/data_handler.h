@@ -64,22 +64,6 @@ int copy_file(const string& source, const string& dest) {
 }
 
 /**
- * Moves one file from source to destination.
- * FIXME - deprecated code, delete?
- */
-int move_file(const string& source, const string& dest) {
-  pid_t pid;
-
-  // Split execution
-  if((pid = fork()) == 0)
-  { return execl("/bin/mv", "/bin/mv", source.c_str(), dest.c_str(), (char *)0); }
-  else {
-	  sprintf(dh_buf, "%s %s %s", "/bin/mv", source.c_str(), dest.c_str());
-	  return handle_child_proc(pid, dh_buf);
-  }
-}
-
-/**
  * Zips a set of files into an output (zipped) file.
  * Note: All files are PATHs.
  */
@@ -146,6 +130,7 @@ int unzip_files(const string& wdir, const string& input, vector<string>& files) 
 		}
 		// Read all files and fill the vector.
 		while (fscanf(f, "%s", buf) != EOF) { files.push_back(wdir + buf); }
+		fclose(f);
 		return 0;
 	}
 }
@@ -359,7 +344,7 @@ public:
 		// Move output to shared directory.
 		rename(output.c_str(), this->shared_dir.c_str());
 		// Copy .torrent to shared directory.
-		copy_file(this->output_path, this->shared_dir);
+		copy_file(this->output_path, this->shared_dir); // FIXME - this should be shared_dir / wu_name.torrent
 	}
 
 	void stage_zipped_output(vector<string>& outputs) {

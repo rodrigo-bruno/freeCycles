@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <signal.h>
 
 #if not STADALONE
 #include "config.h"
@@ -52,6 +53,17 @@ int nmaps = 0;
 // Number of reducers
 int nreds = 0;
 
+/**
+ * TODO - test
+ */
+void handle_signal(int signum) {
+    if (signum == SIGTERM) {
+#if DEBUG
+    	debug_log("handle_signal]", "SIGTERM received:", "ignoring.");
+#endif
+    }
+}
+
 /*
  * Command line processing.
  * This reads the command line arguments and saves them in global variables.
@@ -97,13 +109,20 @@ int main(int argc, char **argv) {
     APP_INIT_DATA boinc_data;
 #endif
 
+    // TODO - doc
+    if (signal(SIGTERM, SIG_IGN) == SIG_ERR) {
+    	fprintf(stderr,
+    			"%s [WRAPPER-main] failed to setup SIGTERM handler.\n",
+    	        boinc_msg_prefix(buf, sizeof(buf)));
+    }
+
     if((retval = process_cmd_args(argc, argv))) { goto exit; }
 
 #if not STANDALONE
     // Initialize BOINC.
     if ((retval = boinc_init())) {
         fprintf(stderr,
-        		"%s [BOINC] boinc_init returned %d\n",
+        		"%s [WRAPPER-main] boinc_init returned %d\n",
         		boinc_msg_prefix(buf, sizeof(buf)), retval);
         goto exit;
     }
@@ -156,7 +175,6 @@ int main(int argc, char **argv) {
     	tt = new ReduceTracker(bth, shared_dir + wu_name, nmaps, nreds);
         tt->reduce(wc_reduce);
         bth->stage_output(tt->getOutputs()->front());
-
     }
     // unknown task
     else {
@@ -180,9 +198,11 @@ exit:
     delete tt;
     delete bth;
 
-#if not STANDALONE
-    boinc_sleep(60);
+#if STANDALONE
+    sleep(60);
+#else
     boinc_fraction_done(1);
     boinc_finish(retval);
+    boinc_sleep(60);
 #endif
 }
