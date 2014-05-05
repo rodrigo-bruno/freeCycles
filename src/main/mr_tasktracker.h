@@ -18,47 +18,11 @@
 #include <vector>
 #include <string>
 
-
 #include "data_handler.h"
 
 using std::vector;
 using std::map;
 using std::string;
-
-/**
- * Simple implementation for the word count map task.
- * The function receives:
- *  - key (current file pointer)
- *  - line (read from input file (it may include a '\n' at the end))
- *  - imap (where output data should be placed).
- */
-void wc_map(
-		int k, string v, vector<std::map<string, vector<string> > >* imap) {
-	string token;
-	int red = 0;
-
-	// remove trailing new line if exists.
-	if(*(--v.end()) == '\n') { v.erase(--v.end()); }
-	std::istringstream iss(v);
-	// For every word in line, apply the modulo to the first character and
-	// insert some place holder inside a map.
-	while(getline(iss, token, ' '))
-	{ (*imap)[*token.c_str() % imap->size()][token].push_back("1"); }
-}
-
-/**
- * Implementation for the word count map task.
- * The function receives:
- *  - key
- *  - values
- *  - omap (where output data is stored until it is written to file).
- */
-void wc_reduce(
-		string k, vector<string> v, std::map<string, vector<string> >* omap) {
-	std::stringstream ss;
-	ss << v.size();
-	(*omap)[k] = vector<string>(1, ss.str());
-}
 
 /**
  * This class implements the task execution functionality inherent to a
@@ -96,10 +60,14 @@ public:
 	/**
 	 * Method that implements the map stage in a MapReduce workflow.
 	 * It receives a function that will be used to process each <K,V> read from
-	 * the input file.
+	 * the input file and a void pointer to some map specific data.
 	 */
 	int map(void (*map_func) (
-			int k, string v, vector<std::map<string, vector<string> > >* io)) {
+				int k,
+				string v,
+				vector<std::map<string, vector<string> > >* io,
+				void* args),
+			void* args) {
         char* line = NULL;
         size_t len = 0;
         std::map<string, vector<string> >::iterator mit;
@@ -118,7 +86,7 @@ public:
 
         // For every line, call map function.
         while (getline(&line, &len, f) != -1)
-        { map_func(ftell(f), std::string(line), &io); }
+        { map_func(ftell(f), std::string(line), &io, args); }
         // Cleanup.
         free(line);
         fclose(f);
@@ -130,10 +98,14 @@ public:
 	/**
 	 * Method that implements the reduce stage in a MapReduce workflow.
 	 * It receives a function that will be used to process each intermediate
-	 * <K,V>.
+	 * <K,V> and some reduce specific data (void* args).
 	 */
 	int reduce(void (*reduce_func) (
-			string k, vector<string> v,	std::map<string, vector<string> >* o)) {
+					string k,
+					vector<string> v,
+					std::map<string, vector<string> >* o,
+					void* args),
+				void* args) {
 		vector<string>::iterator vit;
 		std::map<string, vector<string> >::iterator mit;
 		std::map<string, vector<string> > imap;
@@ -144,7 +116,7 @@ public:
 		{ this->readData(*vit, &imap); }
 		// For every <K,V> pair, call reduce function.
 		for(mit = imap.begin(); mit != imap.end(); mit++)
-		{ reduce_func(mit->first, mit->second, &omap); }
+		{ reduce_func(mit->first, mit->second, &omap, args); }
 		this->writeData(this->outputs.front(), &omap);
 		return 0;
 	}

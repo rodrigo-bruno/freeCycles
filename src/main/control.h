@@ -11,8 +11,9 @@
 /**
  * Compilation flag to enable local testing.
  */
-#define STANDALONE 	0
+#define STANDALONE 	1
 #define DEBUG		1
+#define BITTORRENT  0
 
 #include <stdio.h>
 #include <unistd.h>

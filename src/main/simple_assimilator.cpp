@@ -130,7 +130,7 @@ int assimilate_handler(
 			sprintf(buf, "Can't find MapRedureTask %s\n", wu.name);
 			return write_error(buf);
         }
-		// FIXME - if wu.name contains reduce, also copy to bt new.
+		// FIXME - if wu.name contains reduce, also copy to bt new. -> put mrt output task = bt new
 		retval = boinc_copy(output_files[0].path.c_str() , mrt->getOutputPath().c_str());
 		if (!retval) { file_copied = true; }
 

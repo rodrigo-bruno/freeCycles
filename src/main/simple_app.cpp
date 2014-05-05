@@ -14,6 +14,7 @@
 
 #include "mr_tasktracker.h"
 #include "data_handler.h"
+#include "benchmarks.h"
 
 /*
  * Usage: freeCycles-wrapper [-d D] [-u U] [-s S] [-t T] -map M -red R
@@ -91,7 +92,11 @@ int process_cmd_args(int argc, char** argv) {
 
 int main(int argc, char **argv) {
 	std::string input_path, output_path;
-	BitTorrentHandler* bth = NULL;
+#if BITTORRENT
+	BitTorrentHandler* dh = NULL;
+#else
+	DataHandler* dh = NULL;
+#endif
 	TaskTracker* tt = NULL;
 	int retval = 0;
 	pid_t pid;
@@ -137,11 +142,15 @@ int main(int argc, char **argv) {
 #endif
     working_dir = std::string("/tmp/") + wu_name + "/";
 
-    bth = new BitTorrentHandler(
+#if BITTORRENT
+    dh = new BitTorrentHandler(
     		input_path,	output_path,
     		working_dir, shared_dir,
     		tracker_url, wu_name);
-    bth->init(download_rate, upload_rate);
+    dh->init(download_rate, upload_rate);
+#else
+    dh = new DataHandler(input_path, output_path, wu_name);
+#endif
 
 #if DEBUG
     	debug_log("[WRAPPER-main]", "running task:", wu_name.c_str());
@@ -151,21 +160,21 @@ int main(int argc, char **argv) {
 
     // map task
     if(wu_name.find("map") != std::string::npos) {
-    	tt = new MapTracker(bth, shared_dir + wu_name+"-", nmaps, nreds);
+    	tt = new MapTracker(dh, shared_dir + wu_name+"-", nmaps, nreds);
 #if DEBUG
     	debug_log("[WRAPPER-main]", "input downloaded.", "");
 #endif
-        tt->map(wc_map);
+        tt->map(wc_map, NULL);
 #if DEBUG
     	debug_log("[WRAPPER-main]", "map done.", "");
 #endif
-        bth->stage_zipped_output(*(tt->getOutputs()));
+    	dh->stage_zipped_output(*(tt->getOutputs()));
     }
     // reduce task
     else if (wu_name.find("reduce") != std::string::npos){
-    	tt = new ReduceTracker(bth, shared_dir + wu_name, nmaps, nreds);
-        tt->reduce(wc_reduce);
-        bth->stage_output(tt->getOutputs()->front());
+    	tt = new ReduceTracker(dh, shared_dir + wu_name, nmaps, nreds);
+        tt->reduce(wc_reduce, NULL);
+        dh->stage_output(tt->getOutputs()->front());
     }
     // unknown task
     else {
@@ -184,21 +193,26 @@ int main(int argc, char **argv) {
 	// -> search for new .torrent files.
 
 	delete tt;
-    delete bth;
+    delete dh;
 
     // Hack: process is cloned. Parent calls boinc_finish and the child keeps
     // running a BitTorrent client for some time.
+#if BITTORRENT
     if(!(pid = fork())) {
+
     	// Child.
-        bth = new BitTorrentHandler(
+    	dh = new BitTorrentHandler(
         		input_path, output_path,
         		working_dir, shared_dir,
         		tracker_url, wu_name);
-        bth->init(download_rate, upload_rate);
+    	dh->init(download_rate, upload_rate);
     	boinc_sleep(120);
-    	delete bth;
+    	delete dh;
     	exit(retval);
     }
+#else
+    if(0) {}
+#endif
     else {
     	// Parent.
 #if not STANDALONE
@@ -212,7 +226,7 @@ int main(int argc, char **argv) {
     // able to jump here.
 fail:
 	delete tt;
-	delete bth;
+	delete dh;
 	fprintf(stderr,
 			"%s [WRAPPER-main] Failing.\n",
 			boinc_msg_prefix(buf, sizeof(buf)));
