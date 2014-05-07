@@ -8,6 +8,8 @@
 #ifndef __BENCHMARKS_H__
 #define __BENCHMARKS_H__
 
+#include <stdlib.h>
+
 #include <string>
 #include <vector>
 
@@ -27,7 +29,7 @@ void wc_map(
 		int k,
 		string v,
 		vector<std::map<string, vector<string> > >* imap,
-		void* null) {
+		void* null = NULL) {
 	string token;
 	int red = 0;
 
@@ -51,8 +53,7 @@ void wc_map(
 void wc_reduce(
 		string k,
 		vector<string> v,
-		std::map<string, vector<string> >* omap,
-		void* null) {
+		std::map<string, vector<string> >* omap) {
 	std::stringstream ss;
 	ss << v.size();
 	(*omap)[k] = vector<string>(1, ss.str());
@@ -76,69 +77,75 @@ void grep_map(
 }
 
 /**
- * TODO - doc.
+ * Reduce task for grep job.
+ * It receives:
+ *  - key (some key, not really important for this example),
+ *  - v (vector of lines that contain the needle),
+ *  - ompa (output map).
  */
 void grep_reduce(
 		string k,
 		vector<string> v,
-		std::map<string, vector<string> >* omap,
-		void* needle) {
-	(*omap)["grep"].insert(
-			v.end(), (*omap)["grep"].begin(), (*omap)["grep"].end());
-}
+		std::map<string, vector<string> >* omap)
+	{ (*omap)["grep"].insert((*omap)["grep"].end(), v.begin(), v.end() ); }
 
 /**
- *  TODO - doc.
+ *  TODO -> page ranking.
  */
 void kmeans_map(
 		int k,
 		string v,
 		vector<std::map<string, vector<string> > >* imap,
-		void* needle) {}
+		void* needle = NULL) {}
 
 /**
- * TODO - doc.
+ * TODO - page ranking.
  */
 void kmeans_reduce(
 		string k,
 		vector<string> v,
-		std::map<string, vector<string> >* omap,
-		void* needle) {}
+		std::map<string, vector<string> >* omap) {}
 
 /**
- *  TODO - doc.
+ * This is a very very, very, simplified implementation of terasort. This only
+ * works with numbers. The partitioner assumes that all keys are uniformly
+ * spread in the input space. min_number is assumed to be 0 (zero).
  */
 void terasort_map(
 		int k,
 		string v,
 		vector<std::map<string, vector<string> > >* imap,
-		void* null) {}
+		void* max_number)
+	{ (*imap)[atol(v.c_str()) / (*((int*)max_number) / imap->size())]
+	         [v].push_back(v); }
 
 /**
- * TODO - doc.
+ * This is the reduce part of the very simplified implementation of terasort.
  */
 void terasort_reduce(
 		string k,
 		vector<string> v,
-		std::map<string, vector<string> >* omap,
-		void* null) {}
+		std::map<string, vector<string> >* omap)
+	{ (*omap)[k].insert((*omap)[k].end(), v.begin(), v.end() ); }
 
 /**
- *  TODO - doc.
+ * This is an almost empty map task. This benchmark is meant to measure the
+ * speed of the system and not some application.
  */
-void sort(
+void sort_map(
 		int k,
 		string v,
 		vector<std::map<string, vector<string> > >* imap,
-		void* null) {	(*imap)[k % imap->size()][v].push_back("sort"); }
+		void* null = NULL) { (*imap)[k % imap->size()][v].push_back(v); }
 
 /**
- * TODO - doc.
+ * This is the reduce implementation for the sort job. This benchmark is meant
+ * to measure the speed of the system and not some application.
  */
-void sort(
+void sort_reduce(
 		string k,
 		vector<string> v,
-		std::map<string, vector<string> >* omap,
-		void* null) { (*omap)[k].push_back("sort"); }
+		std::map<string, vector<string> >* omap)
+	{ (*omap)[k].insert((*omap)[k].end(), v.begin(), v.end() ); }
 
 #endif /* BENCHMARKS_H_ */

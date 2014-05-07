@@ -173,7 +173,7 @@ int main(int argc, char **argv) {
     // reduce task
     else if (wu_name.find("reduce") != std::string::npos){
     	tt = new ReduceTracker(dh, shared_dir + wu_name, nmaps, nreds);
-        tt->reduce(wc_reduce, NULL);
+        tt->reduce(wc_reduce);
         dh->stage_output(tt->getOutputs()->front());
     }
     // unknown task

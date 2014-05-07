@@ -103,9 +103,7 @@ public:
 	int reduce(void (*reduce_func) (
 					string k,
 					vector<string> v,
-					std::map<string, vector<string> >* o,
-					void* args),
-				void* args) {
+					std::map<string, vector<string> >* o)) {
 		vector<string>::iterator vit;
 		std::map<string, vector<string> >::iterator mit;
 		std::map<string, vector<string> > imap;
@@ -116,7 +114,7 @@ public:
 		{ this->readData(*vit, &imap); }
 		// For every <K,V> pair, call reduce function.
 		for(mit = imap.begin(); mit != imap.end(); mit++)
-		{ reduce_func(mit->first, mit->second, &omap, args); }
+		{ reduce_func(mit->first, mit->second, &omap); }
 		this->writeData(this->outputs.front(), &omap);
 		return 0;
 	}
