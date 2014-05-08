@@ -31,7 +31,6 @@ void wc_map(
 		vector<std::map<string, vector<string> > >* imap,
 		void* null = NULL) {
 	string token;
-	int red = 0;
 
 	// remove trailing new line if exists.
 	if(*(--v.end()) == '\n') { v.erase(--v.end()); }
@@ -115,9 +114,11 @@ void terasort_map(
 		int k,
 		string v,
 		vector<std::map<string, vector<string> > >* imap,
-		void* max_number)
-	{ (*imap)[atol(v.c_str()) / (*((int*)max_number) / imap->size())]
-	         [v].push_back(v); }
+		void* max_number) {
+	if(*(--v.end()) == '\n') { v.erase(--v.end()); }
+	(*imap)[atol(v.c_str()) / (*((int*)max_number) / imap->size())]
+	       [v].push_back(v);
+	}
 
 /**
  * This is the reduce part of the very simplified implementation of terasort.
@@ -136,7 +137,11 @@ void sort_map(
 		int k,
 		string v,
 		vector<std::map<string, vector<string> > >* imap,
-		void* null = NULL) { (*imap)[k % imap->size()][v].push_back(v); }
+		void* null = NULL) {
+	// remove trailing new line if exists.
+	if(*(--v.end()) == '\n') { v.erase(--v.end()); }
+	(*imap)[k % imap->size()][v].push_back(v);
+}
 
 /**
  * This is the reduce implementation for the sort job. This benchmark is meant

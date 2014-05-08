@@ -104,6 +104,7 @@ int main(int argc, char **argv) {
     APP_INIT_DATA boinc_data;
 #endif
 
+#if BITTORRENT
     // Ignore SIGTERM (I use this to keep a child process running for a bit
     // longer after the parent calls boinc_finish).
     if (signal(SIGTERM, SIG_IGN) == SIG_ERR) {
@@ -111,6 +112,7 @@ int main(int argc, char **argv) {
     			"%s [WRAPPER-main] failed to setup SIGTERM handler.\n",
     	        boinc_msg_prefix(buf, sizeof(buf)));
     }
+#endif
 
     if((retval = process_cmd_args(argc, argv))) { goto fail; }
 
@@ -130,16 +132,27 @@ int main(int argc, char **argv) {
     wu_name = std::string(boinc_data.wu_name);
 #else
     init_dir("/tmp/freeCycles-boinc-slot/");
+
+
 /** Test 1
-    input_path = "/tmp/freeCycles-boinc-slot/freeCycles-map-0.torrent";
+    // BT
+    //input_path = "/tmp/freeCycles-boinc-slot/freeCycles-map-0.torrent";
+    // BOINC
+    input_path = "/tmp/freeCycles-boinc-slot/freeCycles-map-0";
     output_path = "/tmp/freeCycles-boinc-slot/freeCycles-map-0.zip";
     wu_name = "freeCycles-map-0";
 */
-/** Teste 2 */
+
+/** Teste 2
     input_path = "/tmp/freeCycles-boinc-slot/freeCycles-reduce-0.zip";
-    output_path = "/tmp/freeCycles-boinc-slot/freeCycles-reduce-0.torrent";
+    // BT
+    //output_path = "/tmp/freeCycles-boinc-slot/freeCycles-reduce-0.torrent";
+    // BOINC
+    output_path = "/tmp/freeCycles-boinc-slot/freeCycles-reduce-0";
     wu_name = "freeCycles-reduce-0";
+*/
 #endif
+
     working_dir = std::string("/tmp/") + wu_name + "/";
 
 #if BITTORRENT
@@ -149,7 +162,7 @@ int main(int argc, char **argv) {
     		tracker_url, wu_name);
     dh->init(download_rate, upload_rate);
 #else
-    dh = new DataHandler(input_path, output_path, wu_name);
+    dh = new DataHandler(input_path, output_path, working_dir);
 #endif
 
 #if DEBUG
@@ -160,11 +173,16 @@ int main(int argc, char **argv) {
 
     // map task
     if(wu_name.find("map") != std::string::npos) {
+#if BITTORENT
     	tt = new MapTracker(dh, shared_dir + wu_name+"-", nmaps, nreds);
+#else
+    	tt = new MapTracker(dh, working_dir + wu_name+"-", nmaps, nreds);
+#endif
 #if DEBUG
     	debug_log("[WRAPPER-main]", "input downloaded.", "");
 #endif
-        tt->map(wc_map, NULL);
+    	retval = 32768;
+        tt->map(terasort_map, &retval);
 #if DEBUG
     	debug_log("[WRAPPER-main]", "map done.", "");
 #endif
@@ -172,8 +190,12 @@ int main(int argc, char **argv) {
     }
     // reduce task
     else if (wu_name.find("reduce") != std::string::npos){
+#if BITTORRENT
     	tt = new ReduceTracker(dh, shared_dir + wu_name, nmaps, nreds);
-        tt->reduce(wc_reduce);
+#else
+    	tt = new ReduceTracker(dh, working_dir + wu_name, nmaps, nreds);
+#endif
+        tt->reduce(terasort_reduce);
         dh->stage_output(tt->getOutputs()->front());
     }
     // unknown task

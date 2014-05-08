@@ -75,7 +75,7 @@ int zip_files(const string& output, vector<string>& files) {
 
   // Setup command
   args[0] = "/usr/bin/zip"; 		// 1) executable path,
-  args[1] = "-j"; 					// 2) -j (junk paths),
+  args[1] = "-j0"; 					// 2) -j (junk paths), 0 (only store)
   args[2] = output.c_str(); 		// 3) output zip file path,
   for(int i = 0; i < files.size(); i++)
   { args[i+3] = files[i].c_str(); }
