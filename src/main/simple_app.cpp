@@ -173,7 +173,7 @@ int main(int argc, char **argv) {
 
     // map task
     if(wu_name.find("map") != std::string::npos) {
-#if BITTORENT
+#if BITTORRENT
     	tt = new MapTracker(dh, shared_dir + wu_name+"-", nmaps, nreds);
 #else
     	tt = new MapTracker(dh, working_dir + wu_name+"-", nmaps, nreds);
@@ -182,7 +182,7 @@ int main(int argc, char **argv) {
     	debug_log("[WRAPPER-main]", "input downloaded.", "");
 #endif
     	retval = 32768;
-        tt->map(terasort_map, &retval);
+        tt->map(wc_map, &retval);
 #if DEBUG
     	debug_log("[WRAPPER-main]", "map done.", "");
 #endif
@@ -195,7 +195,7 @@ int main(int argc, char **argv) {
 #else
     	tt = new ReduceTracker(dh, working_dir + wu_name, nmaps, nreds);
 #endif
-        tt->reduce(terasort_reduce);
+        tt->reduce(wc_reduce);
         dh->stage_output(tt->getOutputs()->front());
     }
     // unknown task
