@@ -53,7 +53,7 @@
 
 #define CUSHION 10
     // maintain at least this many unsent results
-#define REPLICATION_FACTOR  1
+#define REPLICATION_FACTOR  2
 
 // FIXME - this file should be named freeCycles_work_generator.
 // It will use the mr-wrapper and, consequently, the bt-wrapper.
