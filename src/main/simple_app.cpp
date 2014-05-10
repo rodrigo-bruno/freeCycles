@@ -183,6 +183,7 @@ int main(int argc, char **argv) {
 #endif
     	retval = 32768;
         tt->map(wc_map, &retval);
+        retval = 0;
 #if DEBUG
     	debug_log("[WRAPPER-main]", "map done.", "");
 #endif
