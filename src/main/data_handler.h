@@ -467,9 +467,13 @@ public:
 
 		t.set_creator("freeCycles-wrapper (using libtorrent)");
 
-		// create the torrent and print it to stdout
+		// create the torrent
+		libtorrent::entry e = t.generate();
+		// hack to change creation date (needs to be the same for all .torrents files)
+		e.dict()["creation date"] = 0;
+
 		std::vector<char> torrent;
-		bencode(back_inserter(torrent), t.generate());
+		bencode(back_inserter(torrent), e);
 
 		FILE* output = fopen(output_torrent.c_str(), "wb+");
 		if (output == NULL)	{
