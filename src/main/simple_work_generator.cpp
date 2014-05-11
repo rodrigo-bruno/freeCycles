@@ -53,10 +53,7 @@
 
 #define CUSHION 10
     // maintain at least this many unsent results
-#define REPLICATION_FACTOR  2
-
-// FIXME - this file should be named freeCycles_work_generator.
-// It will use the mr-wrapper and, consequently, the bt-wrapper.
+#define REPLICATION_FACTOR  3
 
 // TODO - put some decent names.
 const char* app_name = "example_app";
@@ -253,7 +250,7 @@ int make_job(MapReduceTask* mrt) {
     wu.rsc_memory_bound = 1e8;
     wu.rsc_disk_bound = 1e8;
     wu.delay_bound = 86400;
-    wu.min_quorum = REPLICATION_FACTOR;      /* TODO <- 3 for both map and reduce */
+    wu.min_quorum = 1;      /* FIXME <- should be 3. Implement a zipped validator */
     wu.target_nresults = REPLICATION_FACTOR; /* TODO <- 5 if map, 3 if reduce */
     wu.max_error_results = REPLICATION_FACTOR*4;
     wu.max_total_results = REPLICATION_FACTOR*8;
