@@ -229,7 +229,7 @@ int main(int argc, char **argv) {
         		working_dir, shared_dir,
         		tracker_url, wu_name);
     	dh->init(download_rate, upload_rate);
-    	boinc_sleep(120);
+    	boinc_sleep(3600);
     	delete dh;
     	exit(retval);
     }
