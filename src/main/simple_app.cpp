@@ -182,7 +182,7 @@ int main(int argc, char **argv) {
     	debug_log("[WRAPPER-main]", "input downloaded.", "");
 #endif
     	retval = 32768;
-        tt->map(grep_map, (void*)"vinci");
+        tt->map(terasort_map, (void*)retval);
         retval = 0;
 #if DEBUG
     	debug_log("[WRAPPER-main]", "map done.", "");
@@ -196,7 +196,7 @@ int main(int argc, char **argv) {
 #else
     	tt = new ReduceTracker(dh, working_dir + wu_name, nmaps, nreds);
 #endif
-        tt->reduce(grep_reduce);
+        tt->reduce(terasort_reduce);
         dh->stage_output(tt->getOutputs()->front());
     }
     // unknown task
