@@ -182,8 +182,10 @@ int main(int argc, char **argv) {
     	debug_log("[WRAPPER-main]", "input downloaded.", "");
 #endif
     	retval = 32768;
-        tt->map(terasort_map, (void*)retval);
+        tt->map(terasort_map, (void*)&retval);
         retval = 0;
+        // Non terasort
+        //tt->map(terasort_map, NULL);
 #if DEBUG
     	debug_log("[WRAPPER-main]", "map done.", "");
 #endif
