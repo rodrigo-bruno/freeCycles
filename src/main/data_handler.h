@@ -236,8 +236,11 @@ public:
  	 * functionality to handle multiple output files (they are zipped into
  	 * one). 
  	 */	 
-	virtual void stage_zipped_output(vector<string>& outputs)
-	{ zip_files(this->output_path, outputs); }
+	virtual void stage_zipped_output(vector<string>& outputs) {
+		zip_files(this->output_path, outputs);
+		// Because BOINC dislikes extensions.
+		rename((this->output_path + ".zip").c_str(), this->output_path.c_str());
+	}
 };
 
 
