@@ -182,11 +182,11 @@ int main(int argc, char **argv) {
     	debug_log("[WRAPPER-main]", "input downloaded.", "");
 #endif
     	// terasort
-    	//retval = 32768;
-        //tt->map(terasort_map, (void*)&retval);
-        //retval = 0;
+    	retval = 32768;
+        tt->map(terasort_map, (void*)&retval);
+        retval = 0;
         // Non terasort
-        tt->map(wc_map, NULL);
+        //tt->map(wc_map, NULL);
 #if DEBUG
     	debug_log("[WRAPPER-main]", "map done.", "");
 #endif
@@ -199,7 +199,7 @@ int main(int argc, char **argv) {
 #else
     	tt = new ReduceTracker(dh, working_dir + wu_name, nmaps, nreds);
 #endif
-        tt->reduce(wc_reduce);
+        tt->reduce(terasort_reduce);
         dh->stage_output(tt->getOutputs()->front());
     }
     // unknown task
