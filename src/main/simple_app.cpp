@@ -186,7 +186,7 @@ int main(int argc, char **argv) {
         //tt->map(terasort_map, (void*)&retval);
         //retval = 0;
         // Non terasort
-        tt->map(grep_map, (void*)"Vinci");
+        tt->map(wc_map, NULL);
 #if DEBUG
     	debug_log("[WRAPPER-main]", "map done.", "");
 #endif
@@ -199,7 +199,7 @@ int main(int argc, char **argv) {
 #else
     	tt = new ReduceTracker(dh, working_dir + wu_name, nmaps, nreds);
 #endif
-        tt->reduce(grep_reduce);
+        tt->reduce(wc_reduce);
         dh->stage_output(tt->getOutputs()->front());
     }
     // unknown task
