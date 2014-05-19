@@ -186,7 +186,7 @@ int main(int argc, char **argv) {
         //tt->map(terasort_map, (void*)&retval);
         //retval = 0;
         // Non terasort
-        tt->map(grep_map, NULL);
+        tt->map(grep_map, (void*)"Vinci");
 #if DEBUG
     	debug_log("[WRAPPER-main]", "map done.", "");
 #endif
