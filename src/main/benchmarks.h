@@ -99,27 +99,39 @@ void pr_map(
 		vector<std::map<string, vector<string> > >* imap,
 		void* null = NULL) {
 	string token, key;
-	int rank = 0;
-	vector<string> pagev;
-	vector<string>::iterator vit;
+	int rank = 0, i = 0;
+	vector<string> *pagev = NULL, *out_pagev = NULL;
 	std::stringstream ss;
 
 	// remove trailing new line if exists.
 	if(*(--v.end()) == '\n') { v.erase(--v.end()); }
 	std::istringstream iss(v);
+
 	// get page id.
 	getline(iss, key, '=');
-	pagev =  (*imap)[*key.c_str() % imap->size()][key];
+	pagev = &((*imap)[*key.c_str() % imap->size()][key]);
+
 	// get page rank
 	getline(iss, token, ';');
 	rank = atol(token.c_str());
+
 	// get all outgoing links
-	while(getline(iss, token, ';'))	{ pagev.push_back(token); }
+	while(getline(iss, token, ';'))	{ pagev->push_back(token); }
+
 	// calculate how much to give to each outgoing link
-	ss << rank / pagev.size();
+	ss << rank / pagev->size();
+
 	// for each outgoing link, give a share of own rank
-	for(vit = pagev.begin(); vit != pagev.end(); vit++)
-	{ (*imap)[*(*vit).c_str() % imap->size()][*vit].push_back("#" + ss.str()); }
+	for(i = 0; i < pagev->size(); i++) {
+		token = pagev->at(i);
+		// if item is not link, ignore
+		if(token.c_str()[0] == '#') { continue; }
+		// get outgoing link vector
+		out_pagev = &((*imap)[*(token.c_str()) % imap->size()][token]);
+		// note that i am modifying the vector is beeing iterated.
+		out_pagev->insert(out_pagev->begin(),"#" + ss.str());
+		out_pagev == pagev ? i++ : 0;
+	}
 }
 
 /**
@@ -133,20 +145,20 @@ void pr_reduce(
 		std::map<string, vector<string> >* omap) {
 	int ratio_sum = 0;
 	std::stringstream ss;
-	vector<string> pagev = (*omap)[k];
+	vector<string>* pagev = &((*omap)[k]);
 
 	// for every element in intermediate vector
 	for (vector<string>::iterator vit = v.begin(); vit != v.end(); vit++) {
 		// if element is marked as ratio
 		if(vit->c_str()[0] == '#') { ratio_sum += atol(vit->c_str() + 1); }
 		// if element is output link, just copy it to output
-		else { pagev.push_back(*vit); }
+		else { pagev->push_back(*vit); }
 	}
 
 	// insert ratio and k at the beginning of the vector
 	ss << ratio_sum;
-	pagev.insert(pagev.begin(), ss.str());
-	pagev.insert(pagev.begin(), k);
+	pagev->insert(pagev->begin(), ss.str());
+	pagev->insert(pagev->begin(), k);
 }
 
 /**

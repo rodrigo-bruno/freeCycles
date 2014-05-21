@@ -134,14 +134,13 @@ int main(int argc, char **argv) {
     init_dir("/tmp/freeCycles-boinc-slot/");
 
 
-/** Test 1
+/** Test 1*/
     // BT
     //input_path = "/tmp/freeCycles-boinc-slot/freeCycles-map-0.torrent";
     // BOINC
     input_path = "/tmp/freeCycles-boinc-slot/freeCycles-map-0";
     output_path = "/tmp/freeCycles-boinc-slot/freeCycles-map-0.zip";
     wu_name = "freeCycles-map-0";
-*/
 
 /** Teste 2
     input_path = "/tmp/freeCycles-boinc-slot/freeCycles-reduce-0.zip";
@@ -186,7 +185,7 @@ int main(int argc, char **argv) {
         //tt->map(terasort_map, (void*)&retval);
         //retval = 0;
         // Non terasort
-        tt->map(wc_map, NULL);
+        tt->map(pr_map, NULL);
 #if DEBUG
     	debug_log("[WRAPPER-main]", "map done.", "");
 #endif
@@ -199,7 +198,7 @@ int main(int argc, char **argv) {
 #else
     	tt = new ReduceTracker(dh, working_dir + wu_name, nmaps, nreds);
 #endif
-        tt->reduce(wc_reduce);
+        tt->reduce(pr_reduce);
         dh->stage_output(tt->getOutputs()->front());
     }
     // unknown task
