@@ -89,21 +89,65 @@ void grep_reduce(
 	{ (*omap)["grep"].insert((*omap)["grep"].end(), v.begin(), v.end() ); }
 
 /**
- *  TODO -> page ranking.
+ * TODO - doc
+ * input -> key(int) v(id rank olink ... olink)
+ * output -> key(id) v(olink ... olink), key(olink) v(#r), ..., key(olink) v(#r)
  */
-void kmeans_map(
+void pr_map(
 		int k,
 		string v,
 		vector<std::map<string, vector<string> > >* imap,
-		void* needle = NULL) {}
+		void* null = NULL) {
+	string token, key;
+	int rank = 0;
+	vector<string> pagev;
+	vector<string>::iterator vit;
+	std::stringstream ss;
+
+	// remove trailing new line if exists.
+	if(*(--v.end()) == '\n') { v.erase(--v.end()); }
+	std::istringstream iss(v);
+	// get page id.
+	getline(iss, key, '=');
+	pagev =  (*imap)[*key.c_str() % imap->size()][key];
+	// get page rank
+	getline(iss, token, ';');
+	rank = atol(token.c_str());
+	// get all outgoing links
+	while(getline(iss, token, ';'))	{ pagev.push_back(token); }
+	// calculate how much to give to each outgoing link
+	ss << rank / pagev.size();
+	// for each outgoing link, give a share of own rank
+	for(vit = pagev.begin(); vit != pagev.end(); vit++)
+	{ (*imap)[*(*vit).c_str() % imap->size()][*vit].push_back("#" + ss.str()); }
+}
 
 /**
- * TODO - page ranking.
+ * TODO
+ * input -> key(id) v( (olink | #r1) ... (olink | #rn) )
+ * output -> key(id) v(id rank olink ... olink)
  */
-void kmeans_reduce(
+void pr_reduce(
 		string k,
 		vector<string> v,
-		std::map<string, vector<string> >* omap) {}
+		std::map<string, vector<string> >* omap) {
+	int ratio_sum = 0;
+	std::stringstream ss;
+	vector<string> pagev = (*omap)[k];
+
+	// for every element in intermediate vector
+	for (vector<string>::iterator vit = v.begin(); vit != v.end(); vit++) {
+		// if element is marked as ratio
+		if(vit->c_str()[0] == '#') { ratio_sum += atol(vit->c_str() + 1); }
+		// if element is output link, just copy it to output
+		else { pagev.push_back(*vit); }
+	}
+
+	// insert ratio and k at the beginning of the vector
+	ss << ratio_sum;
+	pagev.insert(pagev.begin(), ss.str());
+	pagev.insert(pagev.begin(), k);
+}
 
 /**
  * This is a very very, very, simplified implementation of terasort. This only
