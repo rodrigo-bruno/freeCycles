@@ -13,7 +13,7 @@
  */
 #define STANDALONE 	0
 #define DEBUG		1
-#define BITTORRENT  0
+#define BITTORRENT  1
 
 #include <stdio.h>
 #include <unistd.h>
