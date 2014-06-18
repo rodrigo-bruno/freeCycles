@@ -18,8 +18,9 @@ class DataProcessing extends DataOperation {
 	 * @param left_mbs
 	 * @param stakeholder
 	 */
-	public DataProcessing(int total_mbs, int left_mbs, Server stakeholder) {
-		super(total_mbs, left_mbs);
+	public DataProcessing(
+			int data_id, int total_mbs, int left_mbs, Server stakeholder) {
+		super(data_id, total_mbs, left_mbs);
 		this.stakeholder = stakeholder;
 	}
 	

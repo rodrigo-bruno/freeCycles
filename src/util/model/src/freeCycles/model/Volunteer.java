@@ -42,7 +42,7 @@ public class Volunteer extends Node {
 	 * @param server
 	 */
 	public Volunteer(int upload_rate, int processing_rate, Server server) {
-		super(upload_rate);
+		super(upload_rate, server);
 		this.prossessing_rate = processing_rate;
 		this.active_processing = new HashMap<Integer, DataProcessing>();
 		this.active_tasks = new LinkedList<WorkUnit>();
@@ -90,17 +90,18 @@ public class Volunteer extends Node {
 			DataTransfer dt = this.downloads.get(data_id);
 			DataProcessing dp = this.active_processing.get(data_id);
 			// if data transfer is done and no active processing, 
-			if(dt.getLeftMbs() == 0 && dp == null) {
+			if(dt.done() && dp == null) {
 				this.active_processing.put(
 						data_id, 
 						new DataProcessing(
+								data_id,
 								wu.getInputSize(), 
 								wu.getInputSize(), 
 								wu.getStakeholder()));
 				return;
 			}
 			// if processing is done, 
-			if(dp.getLeftMbs() == 0) {
+			if(dp.done()) {
 				dp.getStakeholder().taskFinished(wu.getJobId(), wu.getTaskId());
 				it.remove();
 				this.active_processing.remove(data_id);
@@ -109,22 +110,25 @@ public class Volunteer extends Node {
 	}
 	
 	/**
-	 * TODO - comment on this.
+	 * See base doc.
 	 */
 	@Override
-	public void fail() {
-		super.fail();
+	public void deactivate() {
+		this.active_tasks.clear();
 		this.active_processing.clear();
+		super.deactivate();
 	}
 	
 	/**
-	 * TODO - doc.
+	 * See base doc.
 	 */
 	@Override
 	void update() {
-		super.update();
-		this.updateDataProcessings();
+		// if failed, ignore
+		if(this.failed) { return; }
 		this.updateTasks();
+		this.updateDataProcessings();
+		super.update();
 	}
 
 }
