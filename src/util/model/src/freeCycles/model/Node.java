@@ -15,12 +15,12 @@ public class Node {
 	/**
 	 * Node upload rate (MB/s).
 	 */
-	private int upload_rate;
+	protected int upload_rate;
 	
 	/**
 	 * Tracker node, used to update uploaders list (for downloads).
 	 */
-	private Server tracker;
+	protected Server tracker;
 	
 	/**
 	 * List of ongoing uploads.
@@ -40,6 +40,7 @@ public class Node {
 	/**
 	 * Constructor.
 	 * @param upload_rate
+	 * @param tracker
 	 */
 	public Node(int upload_rate, Server tracker) {
 		this.upload_rate = upload_rate;
@@ -50,7 +51,19 @@ public class Node {
 	}
 	
 	/**
-	 * TODO - put some doc.
+	 * Constructor.
+	 * @param upload_rate
+	 */
+	public Node(int upload_rate) {
+		this.upload_rate = upload_rate;
+		this.active_uploads = new LinkedList<DataTransfer>();
+		this.downloads = new HashMap<Integer, DataTransfer>();
+		this.failed = false;
+	}
+	
+	/**
+	 * Request data transfer. Nodes wanting some data will call this method on
+	 * nodes they think that they have it.
 	 * @param data_transfer
 	 */
 	public void requestDataTransfer(DataTransfer data_transfer) {

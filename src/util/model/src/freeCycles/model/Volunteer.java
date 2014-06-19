@@ -6,7 +6,6 @@ package freeCycles.model;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Map.Entry;
 
 /**
  * @author underscore
@@ -49,19 +48,6 @@ public class Volunteer extends Node {
 		this.server = server;
 	}
 	
-	/** 
-	 * TODO - doc.
-	 */
-	void updateDataProcessings() {
-		Iterator<Entry<Integer, DataProcessing>> it = 
-				this.active_processing.entrySet().iterator();
-		while(it.hasNext()) {
-			DataProcessing dp = it.next().getValue();
-			dp.advance(prossessing_rate / this.active_processing.size());	
-		}
-		
-	}
-	
 	/**
 	 * Update current tasks' state. 
 	 * Each task has one piece of data to process. The task id is the same as
@@ -70,16 +56,18 @@ public class Volunteer extends Node {
 	void updateTasks() {
 		// if no task,
 		if(this.active_tasks.size() == 0) { 
-			WorkUnit wu = this.server.requestTask();
+			WorkUnit wu = this.server.requestWork();
 			
 			if (wu == null) { return; }
 			
 			int data_id = wu.getDataId();
 			int input_size = wu.getInputSize();
-			this.active_tasks.add(wu);
 			DataTransfer dt = new DataTransfer(data_id, input_size, input_size);
+			this.active_tasks.add(wu);
 			this.downloads.put(data_id,  dt);
-			for(Node node : wu.getUploaders()) { node.requestDataTransfer(dt); }
+			for(Node node : this.tracker.getUploaders(data_id))	{ 
+				node.requestDataTransfer(dt); 
+			}
 			return;
 		}
 		// if there is at least one ongoing task,
@@ -102,9 +90,13 @@ public class Volunteer extends Node {
 			}
 			// if processing is done, 
 			if(dp.done()) {
-				dp.getStakeholder().taskFinished(wu.getJobId(), wu.getTaskId());
+				dp.getStakeholder().workFinished(this ,wu.getDataId());
 				it.remove();
 				this.active_processing.remove(data_id);
+			}
+			// otherwise (if there is still more work to do),
+			else {
+				dp.advance(prossessing_rate / this.active_processing.size());
 			}
 		}
 	}
@@ -127,7 +119,6 @@ public class Volunteer extends Node {
 		// if failed, ignore
 		if(this.failed) { return; }
 		this.updateTasks();
-		this.updateDataProcessings();
 		super.update();
 	}
 
