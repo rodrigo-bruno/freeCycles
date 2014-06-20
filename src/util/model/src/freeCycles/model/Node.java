@@ -85,6 +85,7 @@ public class Node {
 		this.active_uploads.clear();
 		// for all downloads, abort
 		this.downloads.clear();
+		Main.log("[Node " + this.node_id + "] deactivated.");
 	}
 	
 	/**
@@ -92,6 +93,7 @@ public class Node {
 	 */
 	void activate() {
 		this.failed = false;
+		Main.log("[Node " + this.node_id + "] activated.");
 	}
 
 	
