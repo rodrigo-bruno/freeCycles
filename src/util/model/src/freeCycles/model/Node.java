@@ -11,6 +11,11 @@ import java.util.Map.Entry;
  *
  */
 public class Node {
+	
+	/**
+	 * Node uid.
+	 */
+	protected int node_id;
 		
 	/**
 	 * Node upload rate (MB/s).
@@ -42,23 +47,23 @@ public class Node {
 	 * @param upload_rate
 	 * @param tracker
 	 */
-	public Node(int upload_rate, Server tracker) {
-		this.upload_rate = upload_rate;
+	public Node(int node_id, int upload_rate, Server tracker) {
+		this(node_id, upload_rate);
 		this.tracker = tracker;
-		this.active_uploads = new LinkedList<DataTransfer>();
-		this.downloads = new HashMap<Integer, DataTransfer>();
-		this.failed = false;
 	}
 	
 	/**
 	 * Constructor.
 	 * @param upload_rate
 	 */
-	public Node(int upload_rate) {
+	public Node(int node_id, int upload_rate) {
+		this.node_id = node_id;
 		this.upload_rate = upload_rate;
+		this.tracker = null;
 		this.active_uploads = new LinkedList<DataTransfer>();
 		this.downloads = new HashMap<Integer, DataTransfer>();
 		this.failed = false;
+		Main.log("[Node " + node_id + "] - ready to serve." );
 	}
 	
 	/**
@@ -94,6 +99,8 @@ public class Node {
 	 * Update upload transfers.
 	 */
 	void updateUploads() {
+		// if no uploads, ignore,
+		if(this.active_uploads.size() == 0) { return; }
 		int share = this.upload_rate / this.active_uploads.size();
 		Iterator<DataTransfer> it = this.active_uploads.listIterator();
 		while(it.hasNext()) {

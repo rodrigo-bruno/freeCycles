@@ -10,7 +10,10 @@ import java.util.Map.Entry;
 
 /**
  * @author underscore
- * TODO - doc.
+ * Special node implementation. 
+ * A server is a node that delivers MapReduce tasks.
+ * It does not perform computation (i.e. does not contribute for the MapReduce
+ * tasks).
  */
 public class Server extends Node {
 	
@@ -38,16 +41,20 @@ public class Server extends Node {
 	 * Constructor. Sets up all tasks.
 	 * @param upload_rate
 	 */
-	public Server(int upload_rate, MapReduceJob mrj) { 
-		super(upload_rate);
+	public Server(int node_id, int upload_rate, MapReduceJob mrj) { 
+		super(node_id, upload_rate);
 		this.tracker = this;
+		this.tracker_table = new HashMap<Integer, LinkedList<Node>>();
 		
 		// create map tasks
 		this.map_tasks = new HashMap<Integer, Task>();
 		for(int i = 0; i < mrj.getMapTasks(); i++) {
 			int new_id = DATA_ID++;
-			this.map_tasks.put(
-					new_id, new Task(new_id, mrj.getMapReplFactor()));
+			this.map_tasks.put(new_id, new Task(
+					new_id,	
+					mrj.getMapReplFactor(),	
+					mrj.getInputSize(), 
+					mrj.getIntermSize()));
 			// tell tracker that this node (server) has data for this task.
 			this.registerData(this, new_id);
 		}
@@ -55,9 +62,35 @@ public class Server extends Node {
 		this.reduce_tasks = new HashMap<Integer, Task>();
 		for(int i = 0; i < mrj.getReduceTasks(); i++) {
 			int new_id = DATA_ID++;
-			this.reduce_tasks.put(
-					new_id, new Task(new_id, mrj.getRedReplFactor()));
+			this.reduce_tasks.put(new_id, new Task(
+					new_id, 
+					mrj.getRedReplFactor(), 							
+					mrj.getIntermSize(), 
+					mrj.getOutputSize()));
 		}		
+	}
+	
+	/**
+	 * Reduce tasks need special attention because the server needs to fetch
+	 * output data from volunteers as soon as a reduce task is done.
+	 */
+	private void updateReduceTasks() {
+		Iterator<Entry<Integer, Task>> it = 
+				this.reduce_tasks.entrySet().iterator();
+		// for every reduce task,
+		while(it.hasNext()) {
+			Task task = it.next().getValue();
+			// if task is finished and not downloading yet
+			if(task.finished() && !this.downloads.containsKey(task.getDataID())) {
+				DataTransfer dt = 
+						new DataTransfer(task.getDataID(), task.getOutputSize());
+				this.downloads.put(task.getDataID(),  dt);
+				for(Node uploader : this.tracker.getUploaders(task.getDataID())) {
+					uploader.requestDataTransfer(dt);
+				}
+			}
+			
+		}
 	}
 	
 	/**
@@ -65,7 +98,19 @@ public class Server extends Node {
 	 */
 	@Override
 	public void update() {
-		// TODO - check if we should ask for reduce data.
+		this.updateReduceTasks();
+		super.update();
+		// if all reduce tasks are finished
+		if(this.finished(this.reduce_tasks)) {
+			
+			Iterator<Entry<Integer, DataTransfer>> it =
+					this.downloads.entrySet().iterator();
+			while(it.hasNext()) {
+				// check if any output download is still going,
+				if(!it.next().getValue().done()) { break; }
+			}
+			throw new DoneException();			
+		}
 		// TODO - check if there is the new to replicate more tasks.
 	}
 	
@@ -85,8 +130,8 @@ public class Server extends Node {
 	}
 	
 	/**
-	 * TODO - implement!
-	 * Null if returned if: all work units have been delivered.
+	 * Searches for an unsent work unit.
+	 * Null returned if all work units have already been delivered.
 	 * @param map
 	 * @return
 	 */
@@ -95,16 +140,21 @@ public class Server extends Node {
 		while(it.hasNext()) {
 			Task task = it.next().getValue();
 			if(task.delivering()) {
-				return new WorkUnit(); // TODO - complete, Task impl is missing the input and output sizes.
+				return new WorkUnit(
+						task.getDataID(), 
+						task.getInputSize(), 
+						task.getOutputSize(), 
+						this);
 			}
 		}		
 		return null;
 	}
 	
 	/**
-	 * TODO - doc!
+	 * Method that goes through a set of tasks to verify if all of them are 
+	 * finished.
 	 * @param tasks
-	 * @return
+	 * @return true if all tasks are finished.
 	 */
 	private boolean finished(HashMap<Integer, Task> tasks) {
 		Iterator<Entry<Integer, Task>> it = tasks.entrySet().iterator();

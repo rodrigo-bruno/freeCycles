@@ -30,10 +30,10 @@ abstract class DataOperation {
 	 * @param total_mbs
 	 * @param left_mbs
 	 */
-	public DataOperation(int id, int total_mbs, int left_mbs) {
+	public DataOperation(int id, int total_mbs) {
 		this.id = id;
 		this.total_mbs = total_mbs;
-		this.left_mbs = left_mbs;
+		this.left_mbs = 0;
 		this.aborted = false;
 	}
 

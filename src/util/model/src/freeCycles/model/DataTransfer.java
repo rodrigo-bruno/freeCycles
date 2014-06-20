@@ -21,8 +21,8 @@ class DataTransfer extends DataOperation {
 	 * @param total_mbs
 	 * @param left_mbs
 	 */
-	public DataTransfer(int data_id, int total_mbs, int left_mbs) {
-		super(data_id, total_mbs, left_mbs);
+	public DataTransfer(int data_id, int total_mbs) {
+		super(data_id, total_mbs);
 		this.uploaders_contribution = new HashMap<Node, Integer>();
 	}
 	

@@ -40,8 +40,9 @@ public class Volunteer extends Node {
 	 * @param processing_rate
 	 * @param server
 	 */
-	public Volunteer(int upload_rate, int processing_rate, Server server) {
-		super(upload_rate, server);
+	public Volunteer(
+			int node_id, int upload_rate, int processing_rate, Server server) {
+		super(node_id, upload_rate, server);
 		this.prossessing_rate = processing_rate;
 		this.active_processing = new HashMap<Integer, DataProcessing>();
 		this.active_tasks = new LinkedList<WorkUnit>();
@@ -53,7 +54,7 @@ public class Volunteer extends Node {
 	 * Each task has one piece of data to process. The task id is the same as
 	 * its piece of data.
 	 */
-	void updateTasks() {
+	private void updateTasks() {
 		// if no task,
 		if(this.active_tasks.size() == 0) { 
 			WorkUnit wu = this.server.requestWork();
@@ -62,7 +63,7 @@ public class Volunteer extends Node {
 			
 			int data_id = wu.getDataId();
 			int input_size = wu.getInputSize();
-			DataTransfer dt = new DataTransfer(data_id, input_size, input_size);
+			DataTransfer dt = new DataTransfer(data_id, input_size);
 			this.active_tasks.add(wu);
 			this.downloads.put(data_id,  dt);
 			for(Node node : this.tracker.getUploaders(data_id))	{ 
@@ -83,8 +84,7 @@ public class Volunteer extends Node {
 						data_id, 
 						new DataProcessing(
 								data_id,
-								wu.getInputSize(), 
-								wu.getInputSize(), 
+								wu.getInputSize(),  
 								wu.getStakeholder()));
 				return;
 			}
