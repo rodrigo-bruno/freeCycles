@@ -8,22 +8,22 @@ abstract class DataOperation {
 	/**
 	 * Operation id.
 	 */
-	private int id;
+	protected int id;
 	
 	/**
 	 * Size of the data to transfer.
 	 */
-	private int total_mbs;
+	protected int total_mbs;
 	
 	/**
 	 * Number of MBs left to transfer;
 	 */
-	private int left_mbs;
+	protected int left_mbs;
 	
 	/**
 	 * Aborted?
 	 */
-	private boolean aborted;
+	protected boolean aborted;
 	
 	/**
 	 * Constructor.
@@ -33,7 +33,7 @@ abstract class DataOperation {
 	public DataOperation(int id, int total_mbs) {
 		this.id = id;
 		this.total_mbs = total_mbs;
-		this.left_mbs = 0;
+		this.left_mbs = total_mbs;
 		this.aborted = false;
 	}
 
@@ -55,7 +55,7 @@ abstract class DataOperation {
 	 * @return true if data operation is done.
 	 */
 	public boolean done() {
-		return this.left_mbs == 0;
+		return this.left_mbs <= 0;
 	}
 	
 	/**

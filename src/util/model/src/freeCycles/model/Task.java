@@ -75,14 +75,14 @@ public class Task {
 	 * @return true if task is finished.
 	 */
 	boolean finished() {
-		return this.results.size() == this.replication;
+		return this.results.size() >= this.replication;
 	}
 	
 	/**
 	 * @return false if the task still accepts new workers.
 	 */
 	boolean delivering() {
-		return this.workers.size() == this.replication;
+		return this.workers.size() < this.replication;
 	}
 	
 	public int getDataID() { return this.data_id; }

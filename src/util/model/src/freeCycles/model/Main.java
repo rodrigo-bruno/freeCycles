@@ -26,7 +26,7 @@ public class Main {
 				+ "Example: java freeCYclesModel 90 10 1000 16 3 4 3 1000 1000 1000";
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException {
 
 		if(args.length != 10) { 
 			err(usage()); 

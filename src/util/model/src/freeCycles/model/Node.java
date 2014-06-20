@@ -69,10 +69,12 @@ public class Node {
 	/**
 	 * Request data transfer. Nodes wanting some data will call this method on
 	 * nodes they think that they have it.
+	 * @param node
 	 * @param data_transfer
 	 */
-	public void requestDataTransfer(DataTransfer data_transfer) {
+	public void requestDataTransfer(Node node, DataTransfer data_transfer) {
 		if(!this.failed && !this.active_uploads.contains(data_transfer)) {
+			Main.log("[Node] - node " + node.getId() + " requested data id " + data_transfer.getId());
 			this.active_uploads.add(data_transfer);
 		}
 	}
@@ -111,6 +113,7 @@ public class Node {
 			int total_uploaded = dt.getConstribution(this);	
 			// if transfer is done or aborted
 			if(dt.done() || dt.aborted()) {
+				Main.log("[Node "+ this.getId() + "] finished uploading data with id " + dt.getId());
 				it.remove();
 				continue;
 			}
@@ -137,7 +140,7 @@ public class Node {
 			if(dt.done() || dt.aborted()) {	continue; }
 			// for all known uploader, request
 			for(Node uploader : this.tracker.getUploaders(entry.getKey())) {
-				uploader.requestDataTransfer(dt);
+				uploader.requestDataTransfer(this, dt);
 			}
 		}
 	}
@@ -151,5 +154,7 @@ public class Node {
 		this.updateUploads();
 		this.updateDownloads();
 	}
+	
+	int getId() { return this.node_id; }
 
 }

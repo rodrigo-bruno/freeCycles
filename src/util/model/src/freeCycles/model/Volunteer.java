@@ -57,7 +57,7 @@ public class Volunteer extends Node {
 	private void updateTasks() {
 		// if no task,
 		if(this.active_tasks.size() == 0) { 
-			WorkUnit wu = this.server.requestWork();
+			WorkUnit wu = this.server.requestWork(this);
 			
 			if (wu == null) { return; }
 			
@@ -67,7 +67,7 @@ public class Volunteer extends Node {
 			this.active_tasks.add(wu);
 			this.downloads.put(data_id,  dt);
 			for(Node node : this.tracker.getUploaders(data_id))	{ 
-				node.requestDataTransfer(dt); 
+				node.requestDataTransfer(this, dt); 
 			}
 			return;
 		}
@@ -78,6 +78,10 @@ public class Volunteer extends Node {
 			int data_id = wu.getDataId();
 			DataTransfer dt = this.downloads.get(data_id);
 			DataProcessing dp = this.active_processing.get(data_id);
+
+			// if data transfer is still going,
+			if(!dt.done()) { continue; }
+			
 			// if data transfer is done and no active processing, 
 			if(dt.done() && dp == null) {
 				this.active_processing.put(
@@ -88,12 +92,14 @@ public class Volunteer extends Node {
 								wu.getStakeholder()));
 				return;
 			}
+			
 			// if processing is done, 
 			if(dp.done()) {
 				dp.getStakeholder().workFinished(this ,wu.getDataId());
 				it.remove();
 				this.active_processing.remove(data_id);
 			}
+			
 			// otherwise (if there is still more work to do),
 			else {
 				dp.advance(prossessing_rate / this.active_processing.size());

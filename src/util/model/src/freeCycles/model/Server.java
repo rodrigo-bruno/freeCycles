@@ -86,7 +86,7 @@ public class Server extends Node {
 						new DataTransfer(task.getDataID(), task.getOutputSize());
 				this.downloads.put(task.getDataID(),  dt);
 				for(Node uploader : this.tracker.getUploaders(task.getDataID())) {
-					uploader.requestDataTransfer(dt);
+					uploader.requestDataTransfer(this, dt);
 				}
 			}
 			
@@ -130,22 +130,17 @@ public class Server extends Node {
 	}
 	
 	/**
-	 * Searches for an unsent work unit.
+	 * Searches for a task with unsent work units.
 	 * Null returned if all work units have already been delivered.
+	 * @param node
 	 * @param map
 	 * @return
 	 */
-	private WorkUnit searchAvailableWork(HashMap<Integer, Task> tasks) {
+	private Task searchDeliveringTask(HashMap<Integer, Task> tasks) {
 		Iterator<Entry<Integer, Task>> it = tasks.entrySet().iterator();
 		while(it.hasNext()) {
 			Task task = it.next().getValue();
-			if(task.delivering()) {
-				return new WorkUnit(
-						task.getDataID(), 
-						task.getInputSize(), 
-						task.getOutputSize(), 
-						this);
-			}
+			if(task.delivering()) { return task; }
 		}		
 		return null;
 	}
@@ -168,17 +163,36 @@ public class Server extends Node {
 	 * Request for work. Returns 'null' if there is no available task.
 	 * @return
 	 */
-	public WorkUnit requestWork() {
-		WorkUnit wu = this.searchAvailableWork(this.map_tasks);
+	public WorkUnit requestWork(Node node) {
+		Task task = this.searchDeliveringTask(this.map_tasks);
 		
 		// if there is a map work to deliver,
-		if(wu != null) { return wu;	}
+		if(task != null) { 
+			task.newWorker(node); 
+		}
 		
 		// if we are still waiting for map results,
-		if(!this.finished(this.map_tasks)) { return null; }
+		else if(!this.finished(this.map_tasks)) {
+			Main.log("[Server] - node id " + node.getId() + " requested work. Got Task: null");
+			return null; 
+		}
 		
 		// if we are in the reduce phase,
-		return this.searchAvailableWork(this.reduce_tasks);
+		else if((task = this.searchDeliveringTask(this.reduce_tasks)) != null )	{ 
+			task.newWorker(node); 
+		}
+		// if no more reduce tasks to deliver,
+		else {
+			Main.log("[Server] - node id " + node.getId() + " requested work. Got Task: null");
+			return null;
+		}
+		
+		Main.log("[Server] - node id " + node.getId() + " requested work. Got Task: " + task.getDataID());
+		return new WorkUnit(
+				task.getDataID(), 
+				task.getInputSize(), 
+				task.getOutputSize(), 
+				this);
 	}
 	
 	/**
@@ -196,6 +210,7 @@ public class Server extends Node {
 			this.reduce_tasks.get(data_id).newResult(node);
 		}
 		this.registerData(node, data_id);
+		Main.log("[Server] - task " + data_id + " finished by node "+ node.getId());
 	}
 	
 	/**

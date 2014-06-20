@@ -37,7 +37,8 @@ class DataTransfer extends DataOperation {
 			this.uploaders_contribution.put(uploader, 0);
 		}
 		Integer uploaded = this.uploaders_contribution.get(uploader);
-		uploaded = uploaded.intValue() + mbs;		
+		uploaded = uploaded.intValue() + mbs;
+		
 	}
 	
 	/**
