@@ -35,7 +35,7 @@ public class Main {
 
 		// Configuration
 		int number_volunteers = Integer.parseInt(args[0]);
-		int upload_rate = Integer.parseInt(args[1]);
+		float upload_rate =Float.parseFloat(args[1]);
 		int processing_rate = Integer.parseInt(args[2]);
 		int number_maps = Integer.parseInt(args[3]);
 		int map_repl_factor = Integer.parseInt(args[4]);
@@ -64,7 +64,7 @@ public class Main {
 		// Simulation
 		try {
 			while(true) {
-				log("[Shit " + ++TIME + "]");
+				log("[Shit " + ++TIME + "] ##########");
 				server.update();
 				for(Volunteer v : volunteers) { v.update(); }
 			}

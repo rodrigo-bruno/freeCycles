@@ -20,7 +20,7 @@ public class Node {
 	/**
 	 * Node upload rate (MB/s).
 	 */
-	protected int upload_rate;
+	protected float upload_rate;
 	
 	/**
 	 * Tracker node, used to update uploaders list (for downloads).
@@ -40,14 +40,14 @@ public class Node {
 	/**
 	 * Failed?
 	 */
-	boolean failed;
+	protected boolean failed;
 	
 	/**
 	 * Constructor.
 	 * @param upload_rate
 	 * @param tracker
 	 */
-	public Node(int node_id, int upload_rate, Server tracker) {
+	public Node(int node_id, float upload_rate, Server tracker) {
 		this(node_id, upload_rate);
 		this.tracker = tracker;
 	}
@@ -56,7 +56,7 @@ public class Node {
 	 * Constructor.
 	 * @param upload_rate
 	 */
-	public Node(int node_id, int upload_rate) {
+	public Node(int node_id, float upload_rate) {
 		this.node_id = node_id;
 		this.upload_rate = upload_rate;
 		this.tracker = null;
@@ -74,7 +74,7 @@ public class Node {
 	 */
 	public void requestDataTransfer(Node node, DataTransfer data_transfer) {
 		if(!this.failed && !this.active_uploads.contains(data_transfer)) {
-			Main.log("[Node] - node " + node.getId() + " requested data id " + data_transfer.getId());
+			Main.log("[Node " + this.getId() + "] - node " + node.getId() + " requested data " + data_transfer.getId());
 			this.active_uploads.add(data_transfer);
 		}
 	}
@@ -82,47 +82,75 @@ public class Node {
 	/**
 	 * Deactivate node.
 	 */
-	void deactivate(){ 
+	public void deactivate(){ 
 		this.failed = true;
 		this.active_uploads.clear();
 		// for all downloads, abort
 		this.downloads.clear();
-		Main.log("[Node " + this.node_id + "] deactivated.");
+		Main.log("[Node " + this.node_id + "] - deactivated.");
 	}
 	
 	/**
 	 * Activate node.
 	 */
-	void activate() {
+	public void activate() {
 		this.failed = false;
-		Main.log("[Node " + this.node_id + "] activated.");
+		Main.log("[Node " + this.node_id + "] - activated.");
 	}
-
+	
+	/**
+	 * Method that goes through a set of data transfers to verify if all of 
+	 * them are finished.
+	 * @param data_transfer
+	 * @return
+	 */
+	protected boolean finishedDataTransfers(
+			HashMap<Integer, DataTransfer> data_transfer) {
+		Iterator<Entry<Integer, DataTransfer>> it = 
+				data_transfer.entrySet().iterator();
+		while(it.hasNext()) { 
+			if(!it.next().getValue().done()) { return false; } 
+		}
+		return true;				
+	}
 	
 	/**
 	 * Update upload transfers.
 	 */
-	void updateUploads() {
+	public void updateUploads() {
 		// if no uploads, ignore,
 		if(this.active_uploads.size() == 0) { return; }
-		int share = this.upload_rate / this.active_uploads.size();
+		
+		float share = this.upload_rate / this.active_uploads.size();
+		
 		Iterator<DataTransfer> it = this.active_uploads.listIterator();
 		while(it.hasNext()) {
 			DataTransfer dt = it.next();
-			DataTransfer local_data = this.downloads.get(dt.getId());
-			int total_uploaded = dt.getConstribution(this);	
+			int destination_id = dt.getNodeID();
+			float total_uploaded = dt.getConstribution(this.node_id);
+			DataTransfer local_data = this.downloads.get(dt.getId());	
+			
 			// if transfer is done or aborted
 			if(dt.done() || dt.aborted()) {
-				Main.log("[Node "+ this.getId() + "] finished uploading data with id " + dt.getId());
+				Main.log("[Node "+ this.getId() + "] - finished uploading data " + dt.getId());
 				it.remove();
 				continue;
 			}
+			
 			// if local data is inexistent,
 			if(local_data == null) { continue; }
-			int unsent_mbs = local_data.getFinishedMBs() - total_uploaded;
+			// unsent_mbs = every thing that I have less: 1) what you gave me, 2) what I gave you 
+			float unsent_mbs = 
+					local_data.getFinishedMBs() -  
+					local_data.getConstribution(destination_id) -
+					total_uploaded;
 			// if there is still data to transfer,
 			if(unsent_mbs > 0) {
-				dt.advance(this, unsent_mbs < share ? unsent_mbs : share);
+				
+				if(this.getId() != 0) {
+					System.out.println("Node " + this.getId() + "finishedMBs=" + local_data.getFinishedMBs() + "\tuploaded="+total_uploaded);
+				}	
+				dt.advance(this.node_id, unsent_mbs < share ? unsent_mbs : share);
 			}
 		} 
 	}
@@ -130,16 +158,21 @@ public class Node {
 	/**
 	 * Update download transfers.
 	 */
-	void updateDownloads() {
+	public void updateDownloads() {
 		Iterator<Entry<Integer, DataTransfer>> it =
 				this.downloads.entrySet().iterator();
 		while(it.hasNext()) {
 			Entry<Integer, DataTransfer> entry = it.next();
 			DataTransfer dt = entry.getValue();
+			dt.commitAdvances(Main.getTime() - 1);
+			// register node as uploader,
+			this.tracker.registerUploader(this, dt.getId());
 			// if transfer is done or aborted
-			if(dt.done() || dt.aborted()) {	continue; }
+			if(dt.done()) {	continue; }
 			// for all known uploader, request
 			for(Node uploader : this.tracker.getUploaders(entry.getKey())) {
+				// cheating =)
+				if(uploader.getId() == this.getId()) { continue; }
 				uploader.requestDataTransfer(this, dt);
 			}
 		}
@@ -151,8 +184,8 @@ public class Node {
 	void update() { 
 		// if failed, ignore
 		if(this.failed) { return; }
-		this.updateUploads();
 		this.updateDownloads();
+		this.updateUploads();
 	}
 	
 	int getId() { return this.node_id; }

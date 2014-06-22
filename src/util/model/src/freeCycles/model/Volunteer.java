@@ -41,7 +41,7 @@ public class Volunteer extends Node {
 	 * @param server
 	 */
 	public Volunteer(
-			int node_id, int upload_rate, int processing_rate, Server server) {
+			int node_id, float upload_rate, int processing_rate, Server server) {
 		super(node_id, upload_rate, server);
 		this.prossessing_rate = processing_rate;
 		this.active_processing = new HashMap<Integer, DataProcessing>();
@@ -59,15 +59,22 @@ public class Volunteer extends Node {
 		if(this.active_tasks.size() == 0) { 
 			WorkUnit wu = this.server.requestWork(this);
 			
+			// if no task was received,
 			if (wu == null) { return; }
 			
-			int data_id = wu.getDataId();
-			int input_size = wu.getInputSize();
-			DataTransfer dt = new DataTransfer(data_id, input_size);
 			this.active_tasks.add(wu);
-			this.downloads.put(data_id,  dt);
-			for(Node node : this.tracker.getUploaders(data_id))	{ 
-				node.requestDataTransfer(this, dt); 
+			
+			int input_size = wu.getInputSize();
+			// for all input ids,
+			for(int input_id : wu.getInputDataIDs()) {
+				if(!this.downloads.containsKey(input_id)) {
+					DataTransfer dt = new DataTransfer(this.node_id, input_id, input_size);
+					this.downloads.put(input_id,  dt);	
+				}
+				// for all uploaders of this input id,
+				for(Node node : this.tracker.getUploaders(input_id))	{ 
+					node.requestDataTransfer(this, this.downloads.get(input_id)); 
+				}
 			}
 			return;
 		}
@@ -75,29 +82,48 @@ public class Volunteer extends Node {
 		Iterator<WorkUnit> it = this.active_tasks.listIterator();
 		while(it.hasNext()) {
 			WorkUnit wu = it.next();
-			int data_id = wu.getDataId();
-			DataTransfer dt = this.downloads.get(data_id);
-			DataProcessing dp = this.active_processing.get(data_id);
+			int task_id = wu.getTaskID();
+			DataProcessing dp = this.active_processing.get(task_id);
+			boolean downloads_finished = true;
 
-			// if data transfer is still going,
-			if(!dt.done()) { continue; }
+			// for every input id,
+			for(int input_id : wu.getInputDataIDs()) {
+				// if download is still going,
+				if(!this.downloads.get(input_id).done()) {
+					downloads_finished = false;
+					break;
+				}
+			}
 			
-			// if data transfer is done and no active processing, 
-			if(dt.done() && dp == null) {
-				this.active_processing.put(
-						data_id, 
-						new DataProcessing(
-								data_id,
-								wu.getInputSize(),  
-								wu.getStakeholder()));
-				return;
+			// if we are still missing some data,
+			if(!downloads_finished) { continue; }
+			
+			// if processing is not started yet, 
+			if(dp == null) {
+				this.active_processing.put(task_id,	new DataProcessing(
+						this.node_id,
+						task_id,
+						wu.getInputSize() * wu.getInputDataIDs().size(),  
+						wu.getStakeholder()));
+				Main.log("[Node " + this.getId() + "] - starting computation " + task_id);
+				continue;
 			}
 			
 			// if processing is done, 
 			if(dp.done()) {
-				dp.getStakeholder().workFinished(this ,wu.getDataId());
+				// for all partial outputs
+				for(int output_id : wu.getOutputDataIDs()) {
+					// share create output data of the computation.
+					this.downloads.put(
+							output_id, 
+							new DataTransfer(this.node_id, output_id, wu.getOutputSize()));
+					// advance output to completion. 
+					this.downloads.get(
+							output_id).advance(this.node_id, wu.getOutputSize());
+				}
+				dp.getStakeholder().workFinished(this , wu.getTaskID());
 				it.remove();
-				this.active_processing.remove(data_id);
+				this.active_processing.remove(task_id);
 			}
 			
 			// otherwise (if there is still more work to do),
@@ -122,10 +148,10 @@ public class Volunteer extends Node {
 	 */
 	@Override
 	void update() {
+		super.update();
 		// if failed, ignore
 		if(this.failed) { return; }
 		this.updateTasks();
-		super.update();
 	}
 
 }

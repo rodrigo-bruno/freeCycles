@@ -6,6 +6,11 @@ package freeCycles.model;
 abstract class DataOperation {
 	
 	/**
+	 * Responsible node for this operation.
+	 */
+	protected int node_id;
+	
+	/**
 	 * Operation id.
 	 */
 	protected int id;
@@ -13,12 +18,12 @@ abstract class DataOperation {
 	/**
 	 * Size of the data to transfer.
 	 */
-	protected int total_mbs;
+	protected float total_mbs;
 	
 	/**
 	 * Number of MBs left to transfer;
 	 */
-	protected int left_mbs;
+	protected float left_mbs;
 	
 	/**
 	 * Aborted?
@@ -30,7 +35,8 @@ abstract class DataOperation {
 	 * @param total_mbs
 	 * @param left_mbs
 	 */
-	public DataOperation(int id, int total_mbs) {
+	public DataOperation(int node_id, int id, float total_mbs) {
+		this.node_id = node_id;
 		this.id = id;
 		this.total_mbs = total_mbs;
 		this.left_mbs = total_mbs;
@@ -40,14 +46,14 @@ abstract class DataOperation {
 	/**
 	 * @return the total_mbs
 	 */
-	public int getTotalMBs() {
+	public float getTotalMBs() {
 		return total_mbs;
 	}
 
 	/**
 	 * @return the left_mbs
 	 */
-	public int getLeftMBs() {
+	public float getLeftMBs() {
 		return left_mbs;
 	}
 	
@@ -68,7 +74,7 @@ abstract class DataOperation {
 	/**
 	 * @return number of processed/downloaded/whatever MBs.
 	 */
-	public int getFinishedMBs() {
+	public float getFinishedMBs() {
 		return this.total_mbs - this.left_mbs;
 	}
 	
@@ -81,10 +87,18 @@ abstract class DataOperation {
 	}
 	
 	/**
+	 * 
+	 * @return node id.
+	 */
+	public int getNodeID() {
+		return this.node_id;
+	}
+	
+	/**
 	 * Advance this operation by mbs MBs.
 	 * @param mbs - number of MBs to advance.
 	 */
-	public void advance(int mbs) {
+	public void advance(float mbs) {
 		this.left_mbs = (this.left_mbs <= mbs) ? 0 : this.left_mbs - mbs;
 	}
 	
