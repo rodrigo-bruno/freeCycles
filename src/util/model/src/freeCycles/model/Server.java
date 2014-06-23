@@ -204,8 +204,8 @@ public class Server extends Node {
 				for(int output_id : task.getOutputDataIDs()) {
 					// if we are not downloading it already,
 					if(!this.downloads.containsKey(output_id)) {
-						DataTransfer dt = 
-								new DataTransfer(this.node_id, output_id, task.getOutputSize());
+						DataTransfer dt = new DataTransfer(
+								this.node_id, output_id, task.getOutputSize());
 						this.downloads.put(output_id,  dt);
 						// for every uploader of this output data,
 						for(Node uploader : this.tracker.getUploaders(output_id)) {

@@ -34,8 +34,16 @@ public class Node {
 	
 	/**
 	 * Map of downloads (some might be ongoing, others might be done).
+	 * Map<data id, data transfer>
 	 */
 	protected HashMap<Integer, DataTransfer> downloads;
+	
+	/**
+	 * Map of buffered uploads. This is used to commit/flush uploads when 
+	 * more appropriate.
+	 * Map<data transfer, mbs to upload>  
+	 */
+	protected HashMap<DataTransfer, Float> buffered_uploads;
 	
 	/**
 	 * Failed?
@@ -62,6 +70,7 @@ public class Node {
 		this.tracker = null;
 		this.active_uploads = new LinkedList<DataTransfer>();
 		this.downloads = new HashMap<Integer, DataTransfer>();
+		this.buffered_uploads = new HashMap<DataTransfer, Float>();
 		this.failed = false;
 		Main.log("[Node " + node_id + "] - ready to serve." );
 	}
@@ -146,11 +155,7 @@ public class Node {
 					total_uploaded;
 			// if there is still data to transfer,
 			if(unsent_mbs > 0) {
-				
-				if(this.getId() != 0) {
-					System.out.println("Node " + this.getId() + "finishedMBs=" + local_data.getFinishedMBs() + "\tuploaded="+total_uploaded);
-				}	
-				dt.advance(this.node_id, unsent_mbs < share ? unsent_mbs : share);
+				this.bufferUploads(dt, unsent_mbs < share ? unsent_mbs : share);
 			}
 		} 
 	}
@@ -164,7 +169,6 @@ public class Node {
 		while(it.hasNext()) {
 			Entry<Integer, DataTransfer> entry = it.next();
 			DataTransfer dt = entry.getValue();
-			dt.commitAdvances(Main.getTime() - 1);
 			// register node as uploader,
 			this.tracker.registerUploader(this, dt.getId());
 			// if transfer is done or aborted
@@ -175,6 +179,32 @@ public class Node {
 				if(uploader.getId() == this.getId()) { continue; }
 				uploader.requestDataTransfer(this, dt);
 			}
+		}
+	}
+	
+	/**
+	 * Register data to upload.
+	 * @param dt
+	 * @param mbs
+	 */
+	private void bufferUploads(DataTransfer dt, float mbs) {
+		Float current = 0f;
+		if(this.buffered_uploads.containsKey(dt)) {
+			current = this.buffered_uploads.get(dt);
+		}
+		this.buffered_uploads.put(dt, current + mbs);
+	}
+	
+	/**
+	 * Float buffered uploads.
+	 */
+	public void flushUploads() {
+		Iterator<Entry<DataTransfer, Float>> it =
+				this.buffered_uploads.entrySet().iterator();
+		while(it.hasNext()) { 
+			Entry<DataTransfer, Float> entry = it.next();
+			entry.getKey().advance(this.node_id, entry.getValue());
+			it.remove();
 		}
 	}
 	

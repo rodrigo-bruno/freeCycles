@@ -64,13 +64,13 @@ public class Main {
 		// Simulation
 		try {
 			while(true) {
-				log("[Shit " + ++TIME + "] ##########");
+				log("[Shit " + ++TIME + "] ##############################");
 				server.update();
 				for(Volunteer v : volunteers) { v.update(); }
+				server.flushUploads();
+				for(Volunteer v : volunteers) { v.flushUploads(); }
 			}
-		} catch(DoneException e) {
-			err(new Integer(TIME).toString());
-		}
+		} catch(DoneException e) { err(new Integer(TIME).toString()); }
 	}
 
 }

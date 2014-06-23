@@ -1,9 +1,7 @@
 package freeCycles.model;
 
 /**
- * 
- * @author underscore
- *
+ * Class representing a some data processing operation.
  */
 class DataProcessing extends DataOperation {
 
@@ -20,7 +18,7 @@ class DataProcessing extends DataOperation {
 	 * @param stakeholder
 	 */
 	public DataProcessing(
-			int node_id, int data_id, int total_mbs, Server stakeholder) {
+			int node_id, int data_id, float total_mbs, Server stakeholder) {
 		super(node_id, data_id, total_mbs);
 		this.stakeholder = stakeholder;
 	}
