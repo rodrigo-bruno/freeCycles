@@ -1,15 +1,26 @@
 package freeCycles.model;
 
-import java.util.LinkedList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map.Entry;
 
 public class Main {
 
 	private static int TIME = 0;
 	private static int NODE_ID = 0;
 	
+	// FIXME - maybe this static stuff is not needed after all...
+	private static HashMap<Integer, Volunteer> VOLUNTEERS = 
+			new HashMap<Integer, Volunteer>();
+	private static Server SERVER = null;
+	
+	
 	public static int getTime() { return TIME; }
 	public static void log(String msg) { System.out.println(msg); }
 	public static void err(String msg) { System.err.println(msg); }
+	public static Volunteer getVolunteer(int node_id) { 
+		return VOLUNTEERS.get(node_id); 
+	}
 	
 	public static String usage() {
 		return "Usage: java freeCyclesModel\n"
@@ -25,6 +36,18 @@ public class Main {
 				+ "\t\t<output size> - output size (MBs)\n"
 				+ "Example: java freeCYclesModel 90 10 1000 16 3 4 3 1000 1000 1000";
 	}
+	
+	private static void updateVolunteers() {
+		Iterator<Entry<Integer, Volunteer>> it = VOLUNTEERS.entrySet().iterator();
+		while(it.hasNext()) { it.next().getValue().update(); }
+	}
+	
+	private static void flushVolunteers() {
+		Iterator<Entry<Integer, Volunteer>> it = VOLUNTEERS.entrySet().iterator();
+		while(it.hasNext()) { it.next().getValue().flushUploads();; }
+	}
+	
+
 	
 	public static void main(String[] args) throws InterruptedException {
 
@@ -47,30 +70,32 @@ public class Main {
 		
 		
 		// Create nodes
-		Server server = new Server(NODE_ID++, upload_rate,	new MapReduceJob(
-					number_maps, 
-					number_reds, 
-					input_size, 
-					interm_size, 
-					output_size,
-					map_repl_factor, 
-					red_repl_factor));
-		LinkedList<Volunteer> volunteers = new LinkedList<Volunteer>();
-		for(int i = 0; i < number_volunteers; i++) {
-			volunteers.add(new Volunteer(
-					NODE_ID++, upload_rate, processing_rate, server));
+		SERVER = new Server(NODE_ID++, upload_rate,	new MapReduceJob(
+				number_maps, 
+				number_reds, 
+				input_size, 
+				interm_size, 
+				output_size,
+				map_repl_factor, 
+				red_repl_factor));
+		
+		for(int i = 0; i < number_volunteers; i++, NODE_ID++) {
+			VOLUNTEERS.put(NODE_ID, new Volunteer(
+					NODE_ID, upload_rate, processing_rate, SERVER));
 		}
 		
 		// Simulation
 		try {
 			while(true) {
 				log("[Shit " + ++TIME + "] ##############################");
-				server.update();
-				for(Volunteer v : volunteers) { v.update(); }
-				server.flushUploads();
-				for(Volunteer v : volunteers) { v.flushUploads(); }
+				SERVER.update();
+				updateVolunteers();
+				SERVER.flushUploads();
+				flushVolunteers();
 			}
-		} catch(DoneException e) { err(new Integer(TIME).toString()); }
+		} catch(DoneException e) { 
+			err("Finish time - " + new Integer(TIME).toString()); 
+		}
 	}
 
 }

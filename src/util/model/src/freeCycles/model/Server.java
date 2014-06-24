@@ -37,6 +37,11 @@ public class Server extends Node {
 	 * Map of reduce tasks.
 	 */
 	private HashMap<Integer, Task> reduce_tasks;
+	
+	/**
+	 * True if in the map phase. False if in the reduce phase.
+	 */
+	private boolean map_phase;
 
 	/**
 	 * Constructor. Sets up all tasks.
@@ -45,6 +50,7 @@ public class Server extends Node {
 	public Server(int node_id, float upload_rate, MapReduceJob mrj) { 
 		super(node_id, upload_rate);
 		this.tracker = this;
+		this.map_phase = true;
 		this.tracker_table = new HashMap<Integer, LinkedList<Node>>();
 	
 		// prepare data IDs
@@ -226,6 +232,13 @@ public class Server extends Node {
 	public void update() {
 		super.update();
 		this.updateReduceTasks();
+
+		// log map finish time.
+		if(this.finishedTasks(map_tasks) && this.map_phase) {
+			this.map_phase = false;
+			Main.err("Map Done - " + new Integer(Main.getTime()).toString());
+		}
+		
 		// if all reduce tasks are finished
 		if(this.finishedTasks(this.reduce_tasks) && 
 		   this.finishedDataTransfers(this.downloads)) {
@@ -300,7 +313,9 @@ public class Server extends Node {
 		// if no more reduce tasks to deliver,
 		else { return null;	}
 		
-		Main.log("[Node 0] - node " + node.getId() + " requested work. Got task " + task.getTaskID());
+		Main.log(	"[Node 0] - node " + node.getId() + 
+					" requested work. Got task " + task.getTaskID());
+
 		return new WorkUnit(
 				task.getTaskID(),
 				task.getInputDataIDs(),
@@ -333,7 +348,8 @@ public class Server extends Node {
 			this.registerUploader(node, output_id);	
 		}
 		
-		Main.log("[Node 0] - computation " + task_id + " finished by node "+ node.getId());
+		Main.log(	"[Node 0] - computation " + task_id + " finished by node "+ 
+					node.getId());
 	}
 	
 	/**

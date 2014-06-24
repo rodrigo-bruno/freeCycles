@@ -58,6 +58,13 @@ abstract class DataOperation {
 	}
 	
 	/**
+	 * @return number of processed/downloaded/whatever MBs.
+	 */
+	public float getFinishedMBs() {
+		return this.total_mbs - this.left_mbs;
+	}
+	
+	/**
 	 * @return true if data operation is done.
 	 */
 	public boolean done() {
@@ -70,14 +77,7 @@ abstract class DataOperation {
 	public boolean aborted() {
 		return this.aborted;
 	}
-	
-	/**
-	 * @return number of processed/downloaded/whatever MBs.
-	 */
-	public float getFinishedMBs() {
-		return this.total_mbs - this.left_mbs;
-	}
-	
+		
 	/**
 	 * 
 	 * @return the id.

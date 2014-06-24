@@ -83,7 +83,8 @@ public class Node {
 	 */
 	public void requestDataTransfer(Node node, DataTransfer data_transfer) {
 		if(!this.failed && !this.active_uploads.contains(data_transfer)) {
-			Main.log("[Node " + this.getId() + "] - node " + node.getId() + " requested data " + data_transfer.getId());
+			Main.log(	"[Node " + this.getId() + "] - node " + node.getId() + 
+						" requested data " + data_transfer.getId());
 			this.active_uploads.add(data_transfer);
 		}
 	}
@@ -141,7 +142,8 @@ public class Node {
 			
 			// if transfer is done or aborted
 			if(dt.done() || dt.aborted()) {
-				Main.log("[Node "+ this.getId() + "] - finished uploading data " + dt.getId());
+				Main.log(	"[Node "+ this.getId() + "] - finished uploading data " 
+							+ dt.getId());
 				it.remove();
 				continue;
 			}
@@ -149,10 +151,11 @@ public class Node {
 			// if local data is inexistent,
 			if(local_data == null) { continue; }
 			// unsent_mbs = every thing that I have less: 1) what you gave me, 2) what I gave you 
-			float unsent_mbs = 
-					local_data.getFinishedMBs() -  
-					local_data.getConstribution(destination_id) -
-					total_uploaded;
+			//float unsent_mbs = 
+			//		local_data.getFinishedMBs() -  
+			//		local_data.getConstribution(destination_id) -
+			//		total_uploaded;
+			float unsent_mbs = local_data.getFinishedMBs() - dt.getFinishedMBs();
 			// if there is still data to transfer,
 			if(unsent_mbs > 0) {
 				this.bufferUploads(dt, unsent_mbs < share ? unsent_mbs : share);
@@ -219,5 +222,21 @@ public class Node {
 	}
 	
 	int getId() { return this.node_id; }
+	
+	DataTransfer getDownload(int data_id) { 
+		return this.downloads.get(data_id); 
+	}
+	
+	DataTransfer getUpload(int data_id) {
+		for(DataTransfer dt : this.active_uploads) { 
+			if(dt.getId() == data_id) { return dt; } 
+		}
+		return null;
+	}
+	
+	DataTransfer getDataTransfer(int data_id) {
+		DataTransfer dt = this.getDownload(data_id);
+		return dt == null ? this.getUpload(data_id) : dt; 
+	}
 
 }
