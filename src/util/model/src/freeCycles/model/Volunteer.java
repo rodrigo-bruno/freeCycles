@@ -68,7 +68,8 @@ public class Volunteer extends Node {
 			// for all input ids,
 			for(int input_id : wu.getInputDataIDs()) {
 				if(!this.downloads.containsKey(input_id)) {
-					DataTransfer dt = new DataTransfer(this.node_id, input_id, input_size);
+					DataTransfer dt = 
+							new DataTransfer(this, input_id, input_size);
 					this.downloads.put(input_id,  dt);	
 				}
 				// for all uploaders of this input id,
@@ -101,8 +102,8 @@ public class Volunteer extends Node {
 			// if processing is not started yet, 
 			if(dp == null) {
 				this.active_processing.put(task_id,	new DataProcessing(
-						this.node_id,
-						task_id,
+						this, 
+						task_id,	
 						wu.getInputSize() * wu.getInputDataIDs().size(),  
 						wu.getStakeholder()));
 				Main.log("[Node " + this.getId() + "] - starting computation " + task_id);
@@ -116,7 +117,7 @@ public class Volunteer extends Node {
 					// share create output data of the computation.
 					this.downloads.put(
 							output_id, 
-							new DataTransfer(this.node_id, output_id, wu.getOutputSize()));
+							new DataTransfer(this, output_id, wu.getOutputSize()));
 					// advance output to completion. 
 					this.downloads.get(
 							output_id).advance(this.node_id, wu.getOutputSize());

@@ -8,7 +8,7 @@ abstract class DataOperation {
 	/**
 	 * Responsible node for this operation.
 	 */
-	protected int node_id;
+	protected Node node;
 	
 	/**
 	 * Operation id.
@@ -32,11 +32,12 @@ abstract class DataOperation {
 	
 	/**
 	 * Constructor.
+	 * @param node
 	 * @param total_mbs
 	 * @param left_mbs
 	 */
-	public DataOperation(int node_id, int id, float total_mbs) {
-		this.node_id = node_id;
+	public DataOperation(Node node, int id, float total_mbs) {
+		this.node = node;
 		this.id = id;
 		this.total_mbs = total_mbs;
 		this.left_mbs = total_mbs;
@@ -88,10 +89,10 @@ abstract class DataOperation {
 	
 	/**
 	 * 
-	 * @return node id.
+	 * @return responsible node.
 	 */
-	public int getNodeID() {
-		return this.node_id;
+	public Node getNode() {
+		return this.node;
 	}
 	
 	/**

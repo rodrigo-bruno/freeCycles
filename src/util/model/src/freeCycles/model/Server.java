@@ -72,7 +72,8 @@ public class Server extends Node {
 			this.registerUploader(this, input_id);
 			// register input data on the server (and advance it to completion).
 			this.downloads.put(
-					input_id, new DataTransfer(this.node_id, input_ids[i], mrj.getInputSize()));
+					input_id, 
+					new DataTransfer(this, input_ids[i], mrj.getInputSize()));
 			this.downloads.get(input_id).advance(this.node_id, mrj.getInputSize());
 			
 			Main.log("[Node 0] - new map task with id " + task_id);
@@ -211,7 +212,7 @@ public class Server extends Node {
 					// if we are not downloading it already,
 					if(!this.downloads.containsKey(output_id)) {
 						DataTransfer dt = new DataTransfer(
-								this.node_id, output_id, task.getOutputSize());
+								this, output_id, task.getOutputSize());
 						this.downloads.put(output_id,  dt);
 						// for every uploader of this output data,
 						for(Node uploader : this.tracker.getUploaders(output_id)) {

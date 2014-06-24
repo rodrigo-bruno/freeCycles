@@ -12,14 +12,14 @@ class DataProcessing extends DataOperation {
 	
 	/**
 	 * Constructor.
-	 * @param node_id
+	 * @param node
 	 * @param total_mbs
 	 * @param left_mbs
 	 * @param stakeholder
 	 */
 	public DataProcessing(
-			int node_id, int data_id, float total_mbs, Server stakeholder) {
-		super(node_id, data_id, total_mbs);
+			Node node, int data_id, float total_mbs, Server stakeholder) {
+		super(node, data_id, total_mbs);
 		this.stakeholder = stakeholder;
 	}
 	
