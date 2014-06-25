@@ -36,10 +36,11 @@ class DataTransfer extends DataOperation {
 		}
 		Float uploaded = this.uploaders_contribution.get(node_id);
 		this.uploaders_contribution.put(node_id, uploaded.floatValue() + mbs);	
-		
+	/* DEBUG ONLY	
 		Main.log(	"[Node " + this.node.getId() + " ( " + this + 
 					")] - received " + mbs + " (left=" + this.left_mbs + 
 					") from node " + node_id);
+	*/
 	}
 	
 	/**

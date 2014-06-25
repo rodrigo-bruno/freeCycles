@@ -1,5 +1,5 @@
 #!/bin/bash
 
-ARGS="10 10 1000 16 3 4 3 1000 1000 1000"
+ARGS="200 1.25 250 16 $1 4 3 256 64 64"
 
 java -cp .:../bin freeCycles.model.Main `echo $ARGS`
