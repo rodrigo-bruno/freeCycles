@@ -107,7 +107,12 @@ public class Node {
 	public void deactivate(){ 
 		this.failed = true;
 		this.upload_requests.clear();
+		
 		// for all downloads, abort
+		Iterator<Entry<Integer, DataTransfer>> it =	
+				this.downloads.entrySet().iterator();
+		while(it.hasNext()) { it.next().getValue().aborted(); }
+		
 		this.downloads.clear();
 		Main.log("[Node " + this.node_id + "] - deactivated.");
 	}
@@ -306,25 +311,5 @@ public class Node {
 			}
 		}
 		return null;
-	}
-	
-	
-	// TODO - delete me...
-	DataTransfer getUploadTransfer(Integer responbile_node, Integer data_id) {
-		if(!this.upload_requests.containsKey(data_id)) { return null; }
-		for(DataTransfer dt : this.upload_requests.get(data_id)) {
-			if(dt.getNode().getId() == this.getId()) { return dt; }
-		}
-		return null;
-	}
-	
-	DataTransfer getDownloadTransfer(Integer responsible_node, Integer data_id) {
-		return this.downloads.get(data_id);
-	}
-	
-	DataTransfer getDataTransfer(Integer responsible_node, Integer data_id) {
-		return responsible_node == this.getId() ? 
-				this.getDownloadTransfer(responsible_node, data_id) : 
-					this.getUploadTransfer(responsible_node, data_id);  
 	}
 }

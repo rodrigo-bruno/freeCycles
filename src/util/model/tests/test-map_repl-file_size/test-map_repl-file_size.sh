@@ -1,8 +1,10 @@
 #!/bin/bash
 
-ARGS="200 1.25 250 16 $1 4 3 256 64 64"
+ARGS="200 0 0 1.25 250 16 $1 4 3 256 64 64"
 
 number_nodes=200
+session_time=0
+new_volunteer=0
 upload_bandwidth=1.25
 processing_power=250
 maps=16
@@ -17,8 +19,10 @@ do
 		interm_size=$((input_size / 8))
 		output_size=$((input_size/8))
 		echo "map_repl=$map_repl, file_size=$file_size" >> err
-		java -cp .:../bin freeCycles.model.Main \
+		java -cp .:../../bin freeCycles.model.Main \
 			$number_nodes 			\
+			$session_time			\
+			$new_volunteer			\
 			$upload_bandwidth 		\
 			$processing_power 		\
 			$maps 				\

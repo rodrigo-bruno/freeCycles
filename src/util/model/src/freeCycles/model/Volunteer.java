@@ -20,6 +20,11 @@ public class Volunteer extends Node {
 	private int prossessing_rate;
 	
 	/**
+	 * Number of seconds until the node leaves the network.
+	 */
+	private int time_to_leave;
+	
+	/**
 	 * Map of on going computations (data processings).
 	 */
 	private HashMap<Integer, DataProcessing> active_processing;
@@ -41,8 +46,13 @@ public class Volunteer extends Node {
 	 * @param server
 	 */
 	public Volunteer(
-			int node_id, float upload_rate, int processing_rate, Server server) {
+			int node_id, 
+			int time_to_leave, 
+			float upload_rate, 
+			int processing_rate, 
+			Server server) {
 		super(node_id, upload_rate, server);
+		this.time_to_leave = time_to_leave;
 		this.prossessing_rate = processing_rate;
 		this.active_processing = new HashMap<Integer, DataProcessing>();
 		this.active_tasks = new LinkedList<WorkUnit>();
@@ -153,6 +163,9 @@ public class Volunteer extends Node {
 		// if failed, ignore
 		if(this.failed) { return; }
 		this.updateTasks();
+		this.time_to_leave--;
 	}
+	
+	public int getTimeToLeave() { return this.time_to_leave; }
 
 }
