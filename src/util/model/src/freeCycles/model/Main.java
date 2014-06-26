@@ -43,15 +43,15 @@ public class Main {
 				+ "\t\t<input size> - input size (MBs)\n"
 				+ "\t\t<interm size> - intermediate output size (MBs)\n"
 				+ "\t\t<output size> - output size (MBs)\n"
-				+ "\t\t<min time to repl task> - when a node fails. In minutes, (inf = 0)\n"
-				+ "\t\t<min time to repl idata> - when a map task is done. In minutes, (inf = 0)\n"
+				+ "\t\t<min time to repl task> - when a node fails. In seconds, (inf = 0)\n"
+				+ "\t\t<min time to repl idata> - when a map task is done. In seconds, (inf = 0)\n"
 				+ "Example: java freeCYclesModel 90 10 1000 16 3 4 3 1000 1000 1000";
 	}
 	
 	private static Volunteer newVolunteer(Server server) {
 		return new Volunteer(
 				NODE_ID++,
-				(int)new Random().nextGaussian()*(session_time/10) + session_time,
+				(int)new Random().nextGaussian()*(session_time/2) + session_time,
 				upload_rate, 
 				processing_rate, 
 				server);
@@ -77,8 +77,8 @@ public class Main {
 		input_size = Integer.parseInt(args[9]);
 		interm_size = Integer.parseInt(args[10]);
 		output_size = Integer.parseInt(args[11]);
-		time_repl_task = Integer.parseInt(args[12])*60;
-		time_repl_idata = Integer.parseInt(args[13])*60;
+		time_repl_task = Integer.parseInt(args[12]);
+		time_repl_idata = Integer.parseInt(args[13]);
 		
 		
 		// Create nodes
@@ -128,7 +128,7 @@ public class Main {
 				for(Volunteer v : volunteers) { v.flushUploads(); }
 			}
 		} catch(DoneException e) { 
-			err("Finish time - " + new Integer(TIME).toString()); 
+			err("Finish time (seconds)- " + new Integer(TIME).toString()); 
 		}
 	}
 

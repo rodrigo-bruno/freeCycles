@@ -254,7 +254,8 @@ public class Server extends Node {
 		// log map finish time.
 		if(this.finishedTasks(map_tasks) && this.map_phase) {
 			this.map_phase = false;
-			Main.err("Map Done - " + new Integer(Main.getTime()).toString());
+			Main.err(	"Map Done (seconds)- " + 
+						new Integer(Main.getTime()).toString());
 		}
 		
 		// if all reduce tasks are finished
@@ -268,11 +269,6 @@ public class Server extends Node {
 			this.checkTaskNodes(map_tasks);
 			this.checkTaskNodes(reduce_tasks);
 		}
-		
-		// TODO
-		// if 	we are still in the map phase and 
-		//		there are completed tasks with failed nodes
-		// 	replicate intermediate data
 	}
 	
 	/**
@@ -288,8 +284,13 @@ public class Server extends Node {
 				Node n = it.next();
 				if(	n.getFailed() && 
 					Main.getTime() - n.getFailureTimestamp() > 
-						this.time_repl_task) {
+						this.time_repl_task) {					
+					Main.log(	"[Node 0] - Replicating task " + task.getTaskID());
+					// remove worker, do not remove results, 
+					// it would prevent reduce from starting
 					it.remove();
+					// remove result if exist // FIXME - this can delay reduce -> 
+					// task.getResults().remove(n);
 				}
 			}
 		}
@@ -345,6 +346,13 @@ public class Server extends Node {
 	 * @return
 	 */
 	public WorkUnit requestWork(Node node) {
+		
+		// TODO
+		// in request work
+		// if 	we are still in the map phase and 
+		//		there are completed tasks with failed nodes
+		// 	replicate intermediate data
+		
 		Task task = null;
 		Task map_task = this.searchDeliveringTask(this.map_tasks, node);
 		Task red_task = this.searchDeliveringTask(this.reduce_tasks, node);

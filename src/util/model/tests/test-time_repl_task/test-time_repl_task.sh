@@ -12,10 +12,10 @@ red_repl=3
 input_size=64
 interm_size=16
 output_size=16
-time_repl_task=60
+time_repl_task=600
 time_repl_idata=0
 
-java -cp .:../bin freeCycles.model.Main 	\
+java -cp .:../../bin freeCycles.model.Main 	\
 	$number_nodes                   	\
 	$session_time                   	\
 	$new_volunteer_rate                  	\

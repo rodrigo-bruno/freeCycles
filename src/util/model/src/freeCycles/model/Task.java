@@ -122,4 +122,5 @@ public class Task {
 	public int getInputSize() { return this.input_size; }
 	public int getOutputSize() { return this.output_size; }
 	public HashMap<Node, Integer> getWorkers() { return this.workers; }
+	public HashMap<Node, Integer> getResults() { return this.results; }
 }
