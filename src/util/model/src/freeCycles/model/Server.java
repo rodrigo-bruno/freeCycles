@@ -42,16 +42,33 @@ public class Server extends Node {
 	 * True if in the map phase. False if in the reduce phase.
 	 */
 	private boolean map_phase;
+	
+	/**
+	 * Time that it takes to replicate a task when a node fails.
+	 */
+	private int time_repl_task;
+	
+	/**
+	 * Time that it takes to replicate intermediate data when a map task is done.
+	 */
+	private int time_repl_idata;
 
 	/**
 	 * Constructor. Sets up all tasks.
 	 * @param upload_rate
 	 */
-	public Server(int node_id, float upload_rate, MapReduceJob mrj) { 
+	public Server(
+			int node_id, 
+			float upload_rate, 
+			int time_repl_task, 
+			int time_repl_idata, 
+			MapReduceJob mrj) { 
 		super(node_id, upload_rate);
 		this.tracker = this;
 		this.map_phase = true;
 		this.tracker_table = new HashMap<Integer, LinkedList<Node>>();
+		this.time_repl_task = time_repl_task;
+		this.time_repl_idata = time_repl_idata;
 	
 		// prepare data IDs
 		int[] input_ids = this.prepareInputIDs(mrj);
@@ -245,7 +262,37 @@ public class Server extends Node {
 		   this.finishedDataTransfers(this.downloads)) {
 			throw new DoneException();			
 		}
-		// TODO - check if there is the new to replicate more tasks.
+		
+		// check for failed nodes
+		if(this.time_repl_task != 0) {
+			this.checkTaskNodes(map_tasks);
+			this.checkTaskNodes(reduce_tasks);
+		}
+		
+		// TODO
+		// if 	we are still in the map phase and 
+		//		there are completed tasks with failed nodes
+		// 	replicate intermediate data
+	}
+	
+	/**
+	 * Checks if there are failed nodes. If so, remove workers (enabling the 
+	 * delivery of WUs).
+	 * @param tasks
+	 */
+	private void checkTaskNodes(HashMap<Integer, Task> tasks) {
+		for(Task task : tasks.values()) {
+			// if task is done, ignore
+			Iterator<Node> it = task.getWorkers().keySet().iterator();
+			while(it.hasNext()) {
+				Node n = it.next();
+				if(	n.getFailed() && 
+					Main.getTime() - n.getFailureTimestamp() > 
+						this.time_repl_task) {
+					it.remove();
+				}
+			}
+		}
 	}
 	
 	/**

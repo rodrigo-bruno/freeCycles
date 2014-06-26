@@ -51,6 +51,11 @@ public class Node {
 	protected boolean failed;
 	
 	/**
+	 * Time of failure. Initialized to -1 (invalid value).
+	 */
+	protected int failure_timestamp;
+	
+	/**
 	 * Constructor.
 	 * @param upload_rate
 	 * @param tracker
@@ -58,6 +63,7 @@ public class Node {
 	public Node(int node_id, float upload_rate, Server tracker) {
 		this(node_id, upload_rate);
 		this.tracker = tracker;
+		this.failure_timestamp = -1;
 	}
 	
 	/**
@@ -106,12 +112,13 @@ public class Node {
 	 */
 	public void deactivate(){ 
 		this.failed = true;
+		this.failure_timestamp = Main.getTime();
 		this.upload_requests.clear();
 		
 		// for all downloads, abort
 		Iterator<Entry<Integer, DataTransfer>> it =	
 				this.downloads.entrySet().iterator();
-		while(it.hasNext()) { it.next().getValue().aborted(); }
+		while(it.hasNext()) { it.next().getValue().abort();; }
 		
 		this.downloads.clear();
 		Main.log("[Node " + this.node_id + "] - deactivated.");
@@ -122,6 +129,7 @@ public class Node {
 	 */
 	public void activate() {
 		this.failed = false;
+		this.failure_timestamp = -1;
 		Main.log("[Node " + this.node_id + "] - activated.");
 	}
 	
@@ -280,6 +288,8 @@ public class Node {
 	}
 	
 	int getId() { return this.node_id; }
+	int getFailureTimestamp() { return this.failure_timestamp; }
+	boolean getFailed() { return this.failed; }
 	
 	/**
 	 * 

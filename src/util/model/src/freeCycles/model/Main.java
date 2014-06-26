@@ -1,6 +1,8 @@
 package freeCycles.model;
 
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Random;
 
 public class Main {
 
@@ -20,6 +22,8 @@ public class Main {
 	private static int input_size 			= 0;
 	private static int interm_size 			= 0;
 	private static int output_size 			= 0;
+	private static int time_repl_task	= 0;
+	private static int time_repl_idata	= 0;
 	
 	public static int getTime() { return TIME; }
 	public static void log(String msg) { System.out.println(msg); }
@@ -39,13 +43,15 @@ public class Main {
 				+ "\t\t<input size> - input size (MBs)\n"
 				+ "\t\t<interm size> - intermediate output size (MBs)\n"
 				+ "\t\t<output size> - output size (MBs)\n"
+				+ "\t\t<min time to repl task> - when a node fails. In minutes, (inf = 0)\n"
+				+ "\t\t<min time to repl idata> - when a map task is done. In minutes, (inf = 0)\n"
 				+ "Example: java freeCYclesModel 90 10 1000 16 3 4 3 1000 1000 1000";
 	}
 	
 	private static Volunteer newVolunteer(Server server) {
 		return new Volunteer(
 				NODE_ID++,
-				0 + (int)(Math.random() * ((session_time - 0) + 1)),
+				(int)new Random().nextGaussian()*(session_time/10) + session_time,
 				upload_rate, 
 				processing_rate, 
 				server);
@@ -53,7 +59,7 @@ public class Main {
 	
 	public static void main(String[] args) throws InterruptedException {
 
-		if(args.length != 12) { 
+		if(args.length != 14) { 
 			err(usage()); 
 			return; 
 		}
@@ -71,17 +77,24 @@ public class Main {
 		input_size = Integer.parseInt(args[9]);
 		interm_size = Integer.parseInt(args[10]);
 		output_size = Integer.parseInt(args[11]);
+		time_repl_task = Integer.parseInt(args[12])*60;
+		time_repl_idata = Integer.parseInt(args[13])*60;
 		
 		
 		// Create nodes
-		Server server = new Server(NODE_ID++, upload_rate,	new MapReduceJob(
-				number_maps, 
-				number_reds, 
-				input_size, 
-				interm_size, 
-				output_size,
-				map_repl_factor, 
-				red_repl_factor));
+		Server server = new Server(
+				NODE_ID++, 
+				upload_rate,
+				time_repl_task, 
+				time_repl_idata, 
+				new MapReduceJob(
+						number_maps, 
+						number_reds, 
+						input_size, 
+						interm_size, 
+						output_size,
+						map_repl_factor, 
+						red_repl_factor));
 		
 		LinkedList<Volunteer> volunteers = new LinkedList<Volunteer>();
 		for(int i = 0; i < number_volunteers; i++) {
@@ -95,9 +108,13 @@ public class Main {
 				
 				// if session time != infinite
 				if(session_time != 0) {
-					for(Volunteer v : volunteers) { 
-						// TODO - check deactivate
-						if(v.getTimeToLeave() <= 0) { v.deactivate(); }
+					Iterator<Volunteer> it = volunteers.iterator();
+					while(it.hasNext()) {
+						Volunteer v = it.next();
+						if(v.getTimeToLeave() <= 0) {
+							v.deactivate();
+							it.remove();
+						}
 					}
 				}
 				

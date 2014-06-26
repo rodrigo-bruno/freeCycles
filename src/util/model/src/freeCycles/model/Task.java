@@ -121,4 +121,5 @@ public class Task {
 	public LinkedList<Integer> getOutputDataIDs() { return this.odata_ids; }
 	public int getInputSize() { return this.input_size; }
 	public int getOutputSize() { return this.output_size; }
+	public HashMap<Node, Integer> getWorkers() { return this.workers; }
 }
