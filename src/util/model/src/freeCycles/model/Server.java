@@ -289,8 +289,6 @@ public class Server extends Node {
 					// remove worker, do not remove results, 
 					// it would prevent reduce from starting
 					it.remove();
-					// remove result if exist // FIXME - this can delay reduce -> 
-					// task.getResults().remove(n);
 				}
 			}
 		}
@@ -347,11 +345,8 @@ public class Server extends Node {
 	 */
 	public WorkUnit requestWork(Node node) {
 		
-		// TODO
-		// in request work
-		// if 	we are still in the map phase and 
-		//		there are completed tasks with failed nodes
-		// 	replicate intermediate data
+		// TODO- if there are completed tasks with failed nodes
+		// 	-> replicate only output (or intermediate) data
 		
 		Task task = null;
 		Task map_task = this.searchDeliveringTask(this.map_tasks, node);
