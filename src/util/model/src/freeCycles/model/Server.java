@@ -44,14 +44,9 @@ public class Server extends Node {
 	private boolean map_phase;
 	
 	/**
-	 * Time that it takes to replicate a task when a node fails.
+	 * Time that it takes to replicate task or data when a node fails.
 	 */
-	private int time_repl_task;
-	
-	/**
-	 * Time that it takes to replicate intermediate data when a map task is done.
-	 */
-	private int time_repl_idata;
+	private int time_to_repl;
 
 	/**
 	 * Constructor. Sets up all tasks.
@@ -60,15 +55,13 @@ public class Server extends Node {
 	public Server(
 			int node_id, 
 			float upload_rate, 
-			int time_repl_task, 
-			int time_repl_idata, 
+			int time_to_repl,  
 			MapReduceJob mrj) { 
 		super(node_id, upload_rate);
 		this.tracker = this;
 		this.map_phase = true;
 		this.tracker_table = new HashMap<Integer, LinkedList<Node>>();
-		this.time_repl_task = time_repl_task;
-		this.time_repl_idata = time_repl_idata;
+		this.time_to_repl = time_to_repl;
 	
 		// prepare data IDs
 		int[] input_ids = this.prepareInputIDs(mrj);
@@ -110,7 +103,7 @@ public class Server extends Node {
 	} 
 	
 	/**
-	 * TODO - doc.
+	 * Method that prepares a Map task (places the correct data ids).
 	 * @param task_id
 	 * @param input_id
 	 * @param interm_ids
@@ -135,7 +128,7 @@ public class Server extends Node {
 	}
 	
 	/**
-	 * TODO - doc.
+	 * Method that prepares a Reduce task (places the correct data ids).
 	 * @param task_id
 	 * @param output_id
 	 * @param interm_ids
@@ -174,7 +167,7 @@ public class Server extends Node {
 	}
 	
 	/**
-	 * TODO - doc.
+	 * Prepare data ids.
 	 * @param mrj
 	 * @return
 	 */
@@ -183,7 +176,7 @@ public class Server extends Node {
 	} 
 
 	/**
-	 * TODO - doc.
+	 * Prepare data ids.
 	 * @param mrj
 	 * @return
 	 */
@@ -265,7 +258,7 @@ public class Server extends Node {
 		}
 		
 		// check for failed nodes
-		if(this.time_repl_task != 0) {
+		if(this.time_to_repl != 0) {
 			this.checkTaskNodes(map_tasks);
 			this.checkTaskNodes(reduce_tasks);
 		}
@@ -284,7 +277,7 @@ public class Server extends Node {
 				Node n = it.next();
 				if(	n.getFailed() && 
 					Main.getTime() - n.getFailureTimestamp() > 
-						this.time_repl_task) {					
+						this.time_to_repl) {					
 					Main.log(	"[Node 0] - Replicating task " + task.getTaskID());
 					// remove worker, do not remove results, 
 					// it would prevent reduce from starting
@@ -325,6 +318,17 @@ public class Server extends Node {
 		return null;
 	}
 	
+	private Task searchFailedWorkerTask(HashMap<Integer, Task> tasks) {
+		Iterator<Entry<Integer, Task>> it = tasks.entrySet().iterator();
+		while(it.hasNext()) {
+			Task task = it.next().getValue();
+			if(task.getWorkers().size() < task.getResults().size()) {
+				return task;
+			}
+		}		
+		return null;
+	}
+	
 	/**
 	 * Method that goes through a set of tasks to verify if all of them are 
 	 * finished.
@@ -344,10 +348,7 @@ public class Server extends Node {
 	 * @return
 	 */
 	public WorkUnit requestWork(Node node) {
-		
-		// TODO- if there are completed tasks with failed nodes
-		// 	-> replicate only output (or intermediate) data
-		
+			
 		Task task = null;
 		Task map_task = this.searchDeliveringTask(this.map_tasks, node);
 		Task red_task = this.searchDeliveringTask(this.reduce_tasks, node);
@@ -356,7 +357,20 @@ public class Server extends Node {
 		if(map_task != null) { task = map_task; task.newWorker(node); }
 		
 		// if we are still waiting for map results,
-		else if(!this.finishedTasks(this.map_tasks)) { return null;	}
+		else if(!this.finishedTasks(this.map_tasks)) {
+			// if there is a task with more results than workers,
+			if((task = this.searchFailedWorkerTask(this.map_tasks)) != null) {
+				// FIXME - this is a design flaw, I'm doing this to save time...
+				Main.log(	"[Node 0] - node " + node.getId() + 
+							" requested work. Got replication of output data "
+							+ "for task " + task.getTaskID());				
+				node.forceDataTransfer(
+						task.getOutputDataIDs(), task.getOutputSize());
+				task.newWorker(node);
+				
+			}
+			return null;
+		}
 		
 		// if we are in the reduce phase,
 		else if(red_task != null )	{ task = red_task; task.newWorker(node); }

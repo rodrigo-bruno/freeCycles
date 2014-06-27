@@ -113,7 +113,7 @@ public class Task {
 	 * @return false if the task still accepts new workers.
 	 */
 	boolean delivering() {
-		return this.workers.size() < this.replication;
+		return !this.finished() && (this.workers.size() < this.replication);
 	}
 	
 	public int getTaskID() { return this.task_id; }

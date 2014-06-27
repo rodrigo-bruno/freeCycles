@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.Map.Entry;
 
 /**
- * TODO - comment on this.
+ * Class representing a node.
  * @author underscore
  *
  */
@@ -108,6 +108,20 @@ public class Node {
 	}
 	
 	/**
+	 * Method that the node to download a set of data ids.
+	 * @param data_transfer
+	 */
+	public void forceDataTransfer(LinkedList<Integer> data_ids, int data_size) {
+		for(int input_id : data_ids) {
+			if(!this.downloads.containsKey(input_id)) {
+				DataTransfer dt = 
+						new DataTransfer(this, input_id, data_size);
+				this.downloads.put(input_id,  dt);	
+			}
+		}
+	}
+	
+	/**
 	 * Deactivate node.
 	 */
 	public void deactivate(){ 
@@ -190,7 +204,8 @@ public class Node {
 					continue;
 				}
 				
-				// TODO - comment.
+				// nshare = min(MBs that I have and the other guy doesn't, the
+				// share given for this data id.
 				float nshare = 
 						Math.min(	Math.abs(
 										dt.getFinishedMBs() - 
@@ -252,7 +267,7 @@ public class Node {
 	}
 	
 	/**
-	 * TODO - doc!
+	 * Register data to upload.
 	 * @param data_id
 	 * @param mbs
 	 */
@@ -304,10 +319,10 @@ public class Node {
 	}
 	
 	/**
-	 * TODO - Comment!
 	 * @param node_id
 	 * @param data_id
-	 * @return
+	 * @return  the mount of buffered upload of a particular data id, to a 
+	 * particular node. 
 	 */
 	private Float getBufferedUpload(Integer node_id, Integer data_id) {
 		Iterator<Entry<DataTransfer, Float>> it = 

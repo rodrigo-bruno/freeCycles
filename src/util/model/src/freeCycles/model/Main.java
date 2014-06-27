@@ -22,8 +22,7 @@ public class Main {
 	private static int input_size 			= 0;
 	private static int interm_size 			= 0;
 	private static int output_size 			= 0;
-	private static int time_repl_task	= 0;
-	private static int time_repl_idata	= 0;
+	private static int time_to_repl			= 0;
 	
 	public static int getTime() { return TIME; }
 	public static void log(String msg) { System.out.println(msg); }
@@ -44,7 +43,6 @@ public class Main {
 				+ "\t\t<interm size> - intermediate output size (MBs)\n"
 				+ "\t\t<output size> - output size (MBs)\n"
 				+ "\t\t<min time to repl task> - when a node fails. In seconds, (inf = 0)\n"
-				+ "\t\t<min time to repl idata> - when a map task is done. In seconds, (inf = 0)\n"
 				+ "Example: java freeCYclesModel 90 10 1000 16 3 4 3 1000 1000 1000";
 	}
 	
@@ -59,7 +57,7 @@ public class Main {
 	
 	public static void main(String[] args) throws InterruptedException {
 
-		if(args.length != 14) { 
+		if(args.length != 13) { 
 			err(usage()); 
 			return; 
 		}
@@ -77,16 +75,13 @@ public class Main {
 		input_size = Integer.parseInt(args[9]);
 		interm_size = Integer.parseInt(args[10]);
 		output_size = Integer.parseInt(args[11]);
-		time_repl_task = Integer.parseInt(args[12]);
-		time_repl_idata = Integer.parseInt(args[13]);
-		
+		time_to_repl = Integer.parseInt(args[12]);		
 		
 		// Create nodes
 		Server server = new Server(
 				NODE_ID++, 
 				upload_rate,
-				time_repl_task, 
-				time_repl_idata, 
+				time_to_repl, 
 				new MapReduceJob(
 						number_maps, 
 						number_reds, 

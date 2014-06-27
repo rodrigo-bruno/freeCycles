@@ -82,10 +82,6 @@ public class Volunteer extends Node {
 							new DataTransfer(this, input_id, input_size);
 					this.downloads.put(input_id,  dt);	
 				}
-				// for all uploaders of this input id,
-				for(Node node : this.tracker.getUploaders(input_id))	{ 
-					node.requestDataTransfer(this, this.downloads.get(input_id)); 
-				}
 			}
 			return;
 		}

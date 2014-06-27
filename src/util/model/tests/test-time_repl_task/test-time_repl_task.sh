@@ -12,8 +12,7 @@ red_repl=3
 input_size=64
 interm_size=16
 output_size=16
-time_repl_task=600
-time_repl_idata=0
+time_to_repl=600
 
 java -cp .:../../bin freeCycles.model.Main 	\
 	$number_nodes                   	\
@@ -28,6 +27,5 @@ java -cp .:../../bin freeCycles.model.Main 	\
 	$input_size                     	\
         $interm_size                    	\
         $output_size                    	\
-        $time_repl_task          		\
-        $time_repl_idata         		\
+        $time_to_repl	          		\
         >> log 2>> err

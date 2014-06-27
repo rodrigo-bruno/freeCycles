@@ -10,8 +10,7 @@ processing_power=250
 maps=16
 reds=4
 red_repl=3
-time_repl_task=0
-time_repl_idata=0
+time_to_repl=0
 
 for map_repl in {3..10} 
 do
@@ -34,8 +33,7 @@ do
 			$input_size 			\
 			$interm_size 			\
 			$output_size			\
-			$time_repl_task          \
-			$time_repl_idata         \
+			$time_to_repl			\
 			>> log.$map_repl.$file_size 2>> err
 	done
 done

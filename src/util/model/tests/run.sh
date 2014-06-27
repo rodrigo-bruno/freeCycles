@@ -1,19 +1,18 @@
 #!/bin/bash
 
-number_nodes=0
-session_time=120
-new_volunteer_rate=1
+number_nodes=100
+session_time=0
+new_volunteer_rate=0
 upload_bandwidth=1.25
 processing_power=250
-maps=16
-map_repl=3
-reds=4
-red_repl=3
-input_size=64
+maps=4
+map_repl=1
+reds=2
+red_repl=1
+input_size=128
 interm_size=16
 output_size=16
-time_repl_task=60
-time_repl_idata=0
+time_to_repl=1
 
 java -cp .:../bin freeCycles.model.Main 	\
 	$number_nodes                   	\
@@ -28,6 +27,5 @@ java -cp .:../bin freeCycles.model.Main 	\
 	$input_size                     	\
         $interm_size                    	\
         $output_size                    	\
-        $time_repl_task          		\
-        $time_repl_idata         		\
+        $time_to_repl	          		\
         >> log 2>> err
