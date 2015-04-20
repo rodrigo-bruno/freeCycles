@@ -12,9 +12,10 @@ reds=4
 red_repl=3
 time_to_repl=0
 
-for map_repl in {3..10} 
+for map_repl in {2..10} 
 do
-	for file_size in {64,128,256,512,1024}
+	#for file_size in {64,128,256,512,1024}
+	for file_size in 1024
 	do
 		input_size=$file_size
 		interm_size=$((input_size / 8))

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 number_nodes=0
-session_time=120
+session_time=300
 new_volunteer_rate=1
 upload_bandwidth=1.25
 processing_power=250
@@ -9,9 +9,9 @@ maps=16
 map_repl=3
 reds=4
 red_repl=3
-input_size=64
-interm_size=16
-output_size=16
+input_size=128
+interm_size=32
+output_size=32
 time_to_repl=1
 
 java -cp .:../../bin freeCycles.model.Main 	\
