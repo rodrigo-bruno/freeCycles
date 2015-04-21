@@ -114,7 +114,11 @@ public class Main {
 				}
 				
 				if(volunteer_rate > 0 && TIME % volunteer_rate == 0) {
-					volunteers.add(newVolunteer(server));
+					// TODO - put this par in usage
+					int vols_per_batch = 1;
+					for (int i = 0; i < vols_per_batch; i++) {
+						volunteers.add(newVolunteer(server));
+					}
 				}
 				
 				server.update();
