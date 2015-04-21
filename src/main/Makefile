@@ -9,6 +9,7 @@ MACROS = $(BOOST_MACROS) $(LIBTORRENT_MACROS)
 
 BOINC_LIBS = /usr/lib/libboinc_api.a /usr/lib/libboinc.a -pthread
 LIBTORRENT_LIBS = -L/usr/local/lib/ -L/usr/lib/ -ltorrent-rasterbar -lboost_system-mt
+OPENCV_LIBS = -L/usr/local/lib/ -L/usr/lib/ -lopencv_core -lopencv_imgproc -lopencv_highgui
 
 INCLUDES = -I/usr/include -I/usr/local/include -I/usr/local/include/libtorrent -I/usr/include/boinc
 
@@ -34,5 +35,11 @@ simple_assimilator: simple_assimilator.cpp mr_jobtracker.h mr_parser.h
 	cp $(BOINC_BUILD)/sched/sample_assimilator.o ./simple_assimilator.o
 	cp $(BOINC_BUILD)/sched/sample_assimilator ./simple_assimilator
 
+opencv_canny: opencv_canny.o
+	g++ -o opencv_canny opencv_canny.o $(OPENCV_LIBS)
+
+opencv_canny.o: opencv_canny.cpp
+	g++ -c opencv_canny.cpp $(INCLUDES) $(FLAGS)
+
 clean:
-	rm *.o simple_app simple_work_generator simple_assimilator
+	rm *.o simple_app simple_work_generator simple_assimilator opencv_canny
