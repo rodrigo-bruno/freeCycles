@@ -9,7 +9,7 @@ MACROS = $(BOOST_MACROS) $(LIBTORRENT_MACROS)
 
 BOINC_LIBS = /usr/lib/libboinc_api.a /usr/lib/libboinc.a -pthread
 LIBTORRENT_LIBS = -L/usr/local/lib/ -L/usr/lib/ -ltorrent-rasterbar -lboost_system-mt
-OPENCV_LIBS = -L/usr/local/lib/ -L/usr/lib/ -lopencv_core -lopencv_imgproc -lopencv_highgui
+OPENCV_LIBS = -L/usr/local/lib/ -L/usr/lib/ -lcvaux -lcv -lcxcore -lhighgui
 
 INCLUDES = -I/usr/include -I/usr/local/include -I/usr/local/include/libtorrent -I/usr/include/boinc
 
