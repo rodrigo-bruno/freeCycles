@@ -201,6 +201,16 @@ int main(int argc, char **argv) {
         tt->reduce(pr_reduce);
         dh->stage_output(tt->getOutputs()->front());
     }
+    // parallel task // TODO - test! Check server side scripts!
+    else if (wu_name.find("parallel") != std::string::npos){
+    	std::string input, output;
+    	dh->get_input(input);
+    	output = wu_name+"-0";
+    	canny(input,output);
+    	std::vector<std::string> outputs = std::vector<std::string>();
+    	outputs.push_back(output);
+    	dh->stage_zipped_output(outputs);
+    }
     // unknown task
     else {
         fprintf(stderr,

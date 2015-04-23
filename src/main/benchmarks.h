@@ -8,6 +8,10 @@
 #ifndef __BENCHMARKS_H__
 #define __BENCHMARKS_H__
 
+#include "opencv/cv.h"
+#include "opencv/highgui.h"
+#include <math.h>
+
 #include <stdlib.h>
 
 #include <string>
@@ -208,5 +212,37 @@ void sort_reduce(
 		vector<string> v,
 		std::map<string, vector<string> >* omap)
 	{ (*omap)[k].insert((*omap)[k].end(), v.begin(), v.end() ); }
+
+void canny(string input, string output) {
+	cv::Mat src, src_gray;
+	cv::Mat dst, detected_edges;
+
+	int edgeThresh = 1;
+	int lowThreshold = 50;
+	int const max_lowThreshold = 100;
+	int ratio = 3;
+	int kernel_size = 3;
+
+	/// Load an image
+	src = cv::imread( input );
+
+	/// Create a matrix of the same type and size as src (for dst)
+	dst.create( src.size(), src.type() );
+
+	/// Convert the image to grayscale
+	cvtColor( src, src_gray, CV_BGR2GRAY );
+
+	/// Reduce noise with a kernel 3x3
+	blur( src_gray, detected_edges, cv::Size(3,3) );
+
+	/// Canny detector
+	Canny( detected_edges, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size );
+
+	/// Using Canny's output as a mask, we display our result
+	dst = cv::Scalar::all(0);
+
+	src.copyTo( dst, detected_edges);
+	imwrite(output, dst);
+}
 
 #endif /* BENCHMARKS_H_ */
