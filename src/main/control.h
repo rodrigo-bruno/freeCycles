@@ -12,7 +12,7 @@
  * Compilation flag to enable local testing.
  */
 #define STANDALONE 	0
-#define DEBUG		0
+#define DEBUG		1
 #define BITTORRENT  1
 
 #include <stdio.h>
@@ -40,9 +40,19 @@ void boinc_sleep(double s) { sleep((int)s); }
 #if DEBUG
 void debug_log(const char* where, const char* what, const char* aux) {
 	fprintf(stderr,
-			"%s [%s] %s %s\n",
-			boinc_msg_prefix(debug_buf, sizeof(debug_buf)), where, what, aux);
+//			"%s [%s] %s %s\n",
+			"[%s] %s %s\n",
+//			boinc_msg_prefix(debug_buf, sizeof(debug_buf)), where, what, aux);
+			where, what, aux);
 }
 #endif
+
+void error_log(const char* where, const char* what, const char* aux) {
+	fprintf(stderr,
+//			"%s [%s] %s %s\n",
+			"[%s] %s %s\n",
+//			boinc_msg_prefix(debug_buf, sizeof(debug_buf)),where, what, aux);
+			where, what, aux);
+}
 
 #endif /* CONTROL_H_ */

@@ -44,7 +44,7 @@ std::string working_dir;
 #if STANDALONE
 std::string tracker_url = "udp://localhost:6969";
 #else
-std::string tracker_url = "udp://boinc.rnl.ist.utl.pt:6969";
+std::string tracker_url = "udp://ginga2.gsd.inesc-id.pt:6969";
 #endif
 char buf[256];
 // WU name
@@ -73,18 +73,13 @@ int process_cmd_args(int argc, char** argv) {
 		else if (!strcmp(argv[arg_index], "-red"))
 		{ nreds = atoi(argv[++arg_index]); }
 		else {
-//	        fprintf(stderr,
-//	        		"%s [WRAPPER-process_cmd_args] unknown cmd arg %s\n",
-//	        		boinc_msg_prefix(buf, sizeof(buf)),
-//	        		argv[arg_index]);
+			error_log("WRAPPER-process_cmd_args", "unknown cmd arg", argv[arg_index]);
 	        return 1;
 		}
 	}
 	// Check for mandatory args.
     if(!nmaps || !nreds) {
-//        fprintf(stderr,
-//        		"%s [WRAPPER-process_cmd_args] nreds or nmaps set to zero\n",
-//        		boinc_msg_prefix(buf, sizeof(buf)));
+    	error_log("WRAPPER-process_cmd_args", "nreds or nmaps set to zero", "");
         return 1;
     }
     return 0;
@@ -108,10 +103,7 @@ int main(int argc, char **argv) {
     // Ignore SIGTERM (I use this to keep a child process running for a bit
     // longer after the parent calls boinc_finish).
     if (signal(SIGTERM, SIG_IGN) == SIG_ERR) {
-//    	fprintf(stderr,
-//    			"%s [WRAPPER-main] failed to setup SIGTERM handler.\n",
-//    	        boinc_msg_prefix(buf, sizeof(buf)));
-;
+    	error_log("WRAPPER-main", "failed to setup SIGTERM handler", "");
     }
 #endif
 
@@ -120,9 +112,8 @@ int main(int argc, char **argv) {
 #if not STANDALONE
     // Initialize BOINC.
     if ((retval = boinc_init())) {
-//        fprintf(stderr,
-//        		"%s [WRAPPER-main] boinc_init returned %d\n",
-//        		boinc_msg_prefix(buf, sizeof(buf)), retval);
+    	// FIXME - send the error value
+    	error_log("WRAPPER-main", "boinc_init returned with error", "");
         goto fail;
     }
     // Resolve input and output files' logical name (.torrent files).
@@ -214,10 +205,7 @@ int main(int argc, char **argv) {
     }
     // unknown task
     else {
-//        fprintf(stderr,
-//        		"%s [WRAPPER-main] task is not map nor reduce: %s\n",
-//        		boinc_msg_prefix(buf, sizeof(buf)),
-//        		wu_name.c_str());
+    	error_log("WRAPPER-main", "task it not map nor reduce: ", wu_name.c_str());
         retval = 1;
         goto fail;
     }
@@ -263,8 +251,6 @@ int main(int argc, char **argv) {
 fail:
 	delete tt;
 	delete dh;
-//	fprintf(stderr,
-//			"%s [WRAPPER-main] Failing.\n",
-//			boinc_msg_prefix(buf, sizeof(buf)));
+	error_log("WRAPPER-main", "Failing.", "");
 	exit(retval);
 }

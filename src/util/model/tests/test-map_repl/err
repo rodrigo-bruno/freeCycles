@@ -1,0 +1,171 @@
+map_repl=2, file_size=
+Usage: java freeCyclesModel
+		<# volunteers> - number initial volunteers
+		<avg session time> - minutes until failure (inf = 0)
+		<new volunteer rate> - minutes until a new volunteer comes (inf = 0)
+		<upload rate> - upload rate for all nodes (MBs)
+		<processing rate> - processing rate for volunteers (MBs)
+		<# maps> - number of map tasks
+		<map repl factor> - replication factor for map tasks
+		<# reds> - number of reduce tasks
+		<red repl factor> - replication factor for reduce tasks
+		<input size> - input size (MBs)
+		<interm size> - intermediate output size (MBs)
+		<output size> - output size (MBs)
+		<min time to repl task> - when a node fails. In seconds, (inf = 0)
+Example: java freeCYclesModel 90 10 1000 16 3 4 3 1000 1000 1000
+map_repl=3, file_size=
+Usage: java freeCyclesModel
+		<# volunteers> - number initial volunteers
+		<avg session time> - minutes until failure (inf = 0)
+		<new volunteer rate> - minutes until a new volunteer comes (inf = 0)
+		<upload rate> - upload rate for all nodes (MBs)
+		<processing rate> - processing rate for volunteers (MBs)
+		<# maps> - number of map tasks
+		<map repl factor> - replication factor for map tasks
+		<# reds> - number of reduce tasks
+		<red repl factor> - replication factor for reduce tasks
+		<input size> - input size (MBs)
+		<interm size> - intermediate output size (MBs)
+		<output size> - output size (MBs)
+		<min time to repl task> - when a node fails. In seconds, (inf = 0)
+Example: java freeCYclesModel 90 10 1000 16 3 4 3 1000 1000 1000
+map_repl=4, file_size=
+Usage: java freeCyclesModel
+		<# volunteers> - number initial volunteers
+		<avg session time> - minutes until failure (inf = 0)
+		<new volunteer rate> - minutes until a new volunteer comes (inf = 0)
+		<upload rate> - upload rate for all nodes (MBs)
+		<processing rate> - processing rate for volunteers (MBs)
+		<# maps> - number of map tasks
+		<map repl factor> - replication factor for map tasks
+		<# reds> - number of reduce tasks
+		<red repl factor> - replication factor for reduce tasks
+		<input size> - input size (MBs)
+		<interm size> - intermediate output size (MBs)
+		<output size> - output size (MBs)
+		<min time to repl task> - when a node fails. In seconds, (inf = 0)
+Example: java freeCYclesModel 90 10 1000 16 3 4 3 1000 1000 1000
+map_repl=5, file_size=
+Usage: java freeCyclesModel
+		<# volunteers> - number initial volunteers
+		<avg session time> - minutes until failure (inf = 0)
+		<new volunteer rate> - minutes until a new volunteer comes (inf = 0)
+		<upload rate> - upload rate for all nodes (MBs)
+		<processing rate> - processing rate for volunteers (MBs)
+		<# maps> - number of map tasks
+		<map repl factor> - replication factor for map tasks
+		<# reds> - number of reduce tasks
+		<red repl factor> - replication factor for reduce tasks
+		<input size> - input size (MBs)
+		<interm size> - intermediate output size (MBs)
+		<output size> - output size (MBs)
+		<min time to repl task> - when a node fails. In seconds, (inf = 0)
+Example: java freeCYclesModel 90 10 1000 16 3 4 3 1000 1000 1000
+map_repl=6, file_size=
+Usage: java freeCyclesModel
+		<# volunteers> - number initial volunteers
+		<avg session time> - minutes until failure (inf = 0)
+		<new volunteer rate> - minutes until a new volunteer comes (inf = 0)
+		<upload rate> - upload rate for all nodes (MBs)
+		<processing rate> - processing rate for volunteers (MBs)
+		<# maps> - number of map tasks
+		<map repl factor> - replication factor for map tasks
+		<# reds> - number of reduce tasks
+		<red repl factor> - replication factor for reduce tasks
+		<input size> - input size (MBs)
+		<interm size> - intermediate output size (MBs)
+		<output size> - output size (MBs)
+		<min time to repl task> - when a node fails. In seconds, (inf = 0)
+Example: java freeCYclesModel 90 10 1000 16 3 4 3 1000 1000 1000
+map_repl=7, file_size=
+Usage: java freeCyclesModel
+		<# volunteers> - number initial volunteers
+		<avg session time> - minutes until failure (inf = 0)
+		<new volunteer rate> - minutes until a new volunteer comes (inf = 0)
+		<upload rate> - upload rate for all nodes (MBs)
+		<processing rate> - processing rate for volunteers (MBs)
+		<# maps> - number of map tasks
+		<map repl factor> - replication factor for map tasks
+		<# reds> - number of reduce tasks
+		<red repl factor> - replication factor for reduce tasks
+		<input size> - input size (MBs)
+		<interm size> - intermediate output size (MBs)
+		<output size> - output size (MBs)
+		<min time to repl task> - when a node fails. In seconds, (inf = 0)
+Example: java freeCYclesModel 90 10 1000 16 3 4 3 1000 1000 1000
+map_repl=8, file_size=
+Usage: java freeCyclesModel
+		<# volunteers> - number initial volunteers
+		<avg session time> - minutes until failure (inf = 0)
+		<new volunteer rate> - minutes until a new volunteer comes (inf = 0)
+		<upload rate> - upload rate for all nodes (MBs)
+		<processing rate> - processing rate for volunteers (MBs)
+		<# maps> - number of map tasks
+		<map repl factor> - replication factor for map tasks
+		<# reds> - number of reduce tasks
+		<red repl factor> - replication factor for reduce tasks
+		<input size> - input size (MBs)
+		<interm size> - intermediate output size (MBs)
+		<output size> - output size (MBs)
+		<min time to repl task> - when a node fails. In seconds, (inf = 0)
+Example: java freeCYclesModel 90 10 1000 16 3 4 3 1000 1000 1000
+map_repl=9, file_size=
+Usage: java freeCyclesModel
+		<# volunteers> - number initial volunteers
+		<avg session time> - minutes until failure (inf = 0)
+		<new volunteer rate> - minutes until a new volunteer comes (inf = 0)
+		<upload rate> - upload rate for all nodes (MBs)
+		<processing rate> - processing rate for volunteers (MBs)
+		<# maps> - number of map tasks
+		<map repl factor> - replication factor for map tasks
+		<# reds> - number of reduce tasks
+		<red repl factor> - replication factor for reduce tasks
+		<input size> - input size (MBs)
+		<interm size> - intermediate output size (MBs)
+		<output size> - output size (MBs)
+		<min time to repl task> - when a node fails. In seconds, (inf = 0)
+Example: java freeCYclesModel 90 10 1000 16 3 4 3 1000 1000 1000
+map_repl=10, file_size=
+Usage: java freeCyclesModel
+		<# volunteers> - number initial volunteers
+		<avg session time> - minutes until failure (inf = 0)
+		<new volunteer rate> - minutes until a new volunteer comes (inf = 0)
+		<upload rate> - upload rate for all nodes (MBs)
+		<processing rate> - processing rate for volunteers (MBs)
+		<# maps> - number of map tasks
+		<map repl factor> - replication factor for map tasks
+		<# reds> - number of reduce tasks
+		<red repl factor> - replication factor for reduce tasks
+		<input size> - input size (MBs)
+		<interm size> - intermediate output size (MBs)
+		<output size> - output size (MBs)
+		<min time to repl task> - when a node fails. In seconds, (inf = 0)
+Example: java freeCYclesModel 90 10 1000 16 3 4 3 1000 1000 1000
+map_repl=2, file_size=
+Map Done (seconds)- 417
+Finish time (seconds)- 474
+map_repl=3, file_size=
+Map Done (seconds)- 418
+Finish time (seconds)- 470
+map_repl=4, file_size=
+Map Done (seconds)- 418
+Finish time (seconds)- 466
+map_repl=5, file_size=
+Map Done (seconds)- 418
+Finish time (seconds)- 464
+map_repl=6, file_size=
+Map Done (seconds)- 418
+Finish time (seconds)- 463
+map_repl=7, file_size=
+Map Done (seconds)- 418
+Finish time (seconds)- 462
+map_repl=8, file_size=
+Map Done (seconds)- 418
+Finish time (seconds)- 461
+map_repl=9, file_size=
+Map Done (seconds)- 418
+Finish time (seconds)- 460
+map_repl=10, file_size=
+Map Done (seconds)- 418
+Finish time (seconds)- 459

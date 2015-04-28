@@ -1,0 +1,981 @@
+[Node 0] - ready to serve.
+[Node 0] - new map task with id 0
+[Node 0] - new map task with id 1
+[Node 0] - new map task with id 2
+[Node 0] - new map task with id 3
+[Node 0] - new reduce task with id 4
+[Node 1] - ready to serve.
+[Node 2] - ready to serve.
+[Node 3] - ready to serve.
+[Node 4] - ready to serve.
+[Node 5] - ready to serve.
+[Node 6] - ready to serve.
+[Node 7] - ready to serve.
+[Node 8] - ready to serve.
+[Node 9] - ready to serve.
+[Node 10] - ready to serve.
+[Node 11] - ready to serve.
+[Node 12] - ready to serve.
+[Node 13] - ready to serve.
+[Node 14] - ready to serve.
+[Node 15] - ready to serve.
+[Node 16] - ready to serve.
+[Node 17] - ready to serve.
+[Node 18] - ready to serve.
+[Node 19] - ready to serve.
+[Node 20] - ready to serve.
+[Node 21] - ready to serve.
+[Node 22] - ready to serve.
+[Node 23] - ready to serve.
+[Node 24] - ready to serve.
+[Node 25] - ready to serve.
+[Node 26] - ready to serve.
+[Node 27] - ready to serve.
+[Node 28] - ready to serve.
+[Node 29] - ready to serve.
+[Node 30] - ready to serve.
+[Node 31] - ready to serve.
+[Node 32] - ready to serve.
+[Node 33] - ready to serve.
+[Node 34] - ready to serve.
+[Node 35] - ready to serve.
+[Node 36] - ready to serve.
+[Node 37] - ready to serve.
+[Node 38] - ready to serve.
+[Node 39] - ready to serve.
+[Node 40] - ready to serve.
+[Node 41] - ready to serve.
+[Node 42] - ready to serve.
+[Node 43] - ready to serve.
+[Node 44] - ready to serve.
+[Node 45] - ready to serve.
+[Node 46] - ready to serve.
+[Node 47] - ready to serve.
+[Node 48] - ready to serve.
+[Node 49] - ready to serve.
+[Node 50] - ready to serve.
+[Node 51] - ready to serve.
+[Node 52] - ready to serve.
+[Node 53] - ready to serve.
+[Node 54] - ready to serve.
+[Node 55] - ready to serve.
+[Node 56] - ready to serve.
+[Node 57] - ready to serve.
+[Node 58] - ready to serve.
+[Node 59] - ready to serve.
+[Node 60] - ready to serve.
+[Shit 1] ##############################
+[Node 0] - node 1 requested work. Got task 0
+[Node 0] - node 2 requested work. Got task 0
+[Node 0] - node 3 requested work. Got task 0
+[Node 0] - node 4 requested work. Got task 0
+[Node 0] - node 5 requested work. Got task 0
+[Node 0] - node 6 requested work. Got task 0
+[Node 0] - node 7 requested work. Got task 1
+[Node 0] - node 8 requested work. Got task 1
+[Node 0] - node 9 requested work. Got task 1
+[Node 0] - node 10 requested work. Got task 1
+[Node 0] - node 11 requested work. Got task 1
+[Node 0] - node 12 requested work. Got task 1
+[Node 0] - node 13 requested work. Got task 2
+[Node 0] - node 14 requested work. Got task 2
+[Node 0] - node 15 requested work. Got task 2
+[Node 0] - node 16 requested work. Got task 2
+[Node 0] - node 17 requested work. Got task 2
+[Node 0] - node 18 requested work. Got task 2
+[Node 0] - node 19 requested work. Got task 3
+[Node 0] - node 20 requested work. Got task 3
+[Node 0] - node 21 requested work. Got task 3
+[Node 0] - node 22 requested work. Got task 3
+[Node 0] - node 23 requested work. Got task 3
+[Node 0] - node 24 requested work. Got task 3
+[Shit 2] ##############################
+[Node 0] - node 1 requested data 0
+[Node 0] - node 2 requested data 0
+[Node 1] - node 2 requested data 0
+[Node 0] - node 3 requested data 0
+[Node 1] - node 3 requested data 0
+[Node 2] - node 3 requested data 0
+[Node 0] - node 4 requested data 0
+[Node 1] - node 4 requested data 0
+[Node 2] - node 4 requested data 0
+[Node 3] - node 4 requested data 0
+[Node 0] - node 5 requested data 0
+[Node 1] - node 5 requested data 0
+[Node 2] - node 5 requested data 0
+[Node 3] - node 5 requested data 0
+[Node 4] - node 5 requested data 0
+[Node 0] - node 6 requested data 0
+[Node 1] - node 6 requested data 0
+[Node 2] - node 6 requested data 0
+[Node 3] - node 6 requested data 0
+[Node 4] - node 6 requested data 0
+[Node 5] - node 6 requested data 0
+[Node 0] - node 7 requested data 1
+[Node 0] - node 8 requested data 1
+[Node 7] - node 8 requested data 1
+[Node 0] - node 9 requested data 1
+[Node 7] - node 9 requested data 1
+[Node 8] - node 9 requested data 1
+[Node 0] - node 10 requested data 1
+[Node 7] - node 10 requested data 1
+[Node 8] - node 10 requested data 1
+[Node 9] - node 10 requested data 1
+[Node 0] - node 11 requested data 1
+[Node 7] - node 11 requested data 1
+[Node 8] - node 11 requested data 1
+[Node 9] - node 11 requested data 1
+[Node 10] - node 11 requested data 1
+[Node 0] - node 12 requested data 1
+[Node 7] - node 12 requested data 1
+[Node 8] - node 12 requested data 1
+[Node 9] - node 12 requested data 1
+[Node 10] - node 12 requested data 1
+[Node 11] - node 12 requested data 1
+[Node 0] - node 13 requested data 2
+[Node 0] - node 14 requested data 2
+[Node 13] - node 14 requested data 2
+[Node 0] - node 15 requested data 2
+[Node 13] - node 15 requested data 2
+[Node 14] - node 15 requested data 2
+[Node 0] - node 16 requested data 2
+[Node 13] - node 16 requested data 2
+[Node 14] - node 16 requested data 2
+[Node 15] - node 16 requested data 2
+[Node 0] - node 17 requested data 2
+[Node 13] - node 17 requested data 2
+[Node 14] - node 17 requested data 2
+[Node 15] - node 17 requested data 2
+[Node 16] - node 17 requested data 2
+[Node 0] - node 18 requested data 2
+[Node 13] - node 18 requested data 2
+[Node 14] - node 18 requested data 2
+[Node 15] - node 18 requested data 2
+[Node 16] - node 18 requested data 2
+[Node 17] - node 18 requested data 2
+[Node 0] - node 19 requested data 3
+[Node 0] - node 20 requested data 3
+[Node 19] - node 20 requested data 3
+[Node 0] - node 21 requested data 3
+[Node 19] - node 21 requested data 3
+[Node 20] - node 21 requested data 3
+[Node 0] - node 22 requested data 3
+[Node 19] - node 22 requested data 3
+[Node 20] - node 22 requested data 3
+[Node 21] - node 22 requested data 3
+[Node 0] - node 23 requested data 3
+[Node 19] - node 23 requested data 3
+[Node 20] - node 23 requested data 3
+[Node 21] - node 23 requested data 3
+[Node 22] - node 23 requested data 3
+[Node 0] - node 24 requested data 3
+[Node 19] - node 24 requested data 3
+[Node 20] - node 24 requested data 3
+[Node 21] - node 24 requested data 3
+[Node 22] - node 24 requested data 3
+[Node 23] - node 24 requested data 3
+[Shit 3] ##############################
+[Node 2] - node 1 requested data 0
+[Node 3] - node 1 requested data 0
+[Node 4] - node 1 requested data 0
+[Node 5] - node 1 requested data 0
+[Node 6] - node 1 requested data 0
+[Node 3] - node 2 requested data 0
+[Node 4] - node 2 requested data 0
+[Node 5] - node 2 requested data 0
+[Node 6] - node 2 requested data 0
+[Node 4] - node 3 requested data 0
+[Node 5] - node 3 requested data 0
+[Node 6] - node 3 requested data 0
+[Node 5] - node 4 requested data 0
+[Node 6] - node 4 requested data 0
+[Node 6] - node 5 requested data 0
+[Node 8] - node 7 requested data 1
+[Node 9] - node 7 requested data 1
+[Node 10] - node 7 requested data 1
+[Node 11] - node 7 requested data 1
+[Node 12] - node 7 requested data 1
+[Node 9] - node 8 requested data 1
+[Node 10] - node 8 requested data 1
+[Node 11] - node 8 requested data 1
+[Node 12] - node 8 requested data 1
+[Node 10] - node 9 requested data 1
+[Node 11] - node 9 requested data 1
+[Node 12] - node 9 requested data 1
+[Node 11] - node 10 requested data 1
+[Node 12] - node 10 requested data 1
+[Node 12] - node 11 requested data 1
+[Node 14] - node 13 requested data 2
+[Node 15] - node 13 requested data 2
+[Node 16] - node 13 requested data 2
+[Node 17] - node 13 requested data 2
+[Node 18] - node 13 requested data 2
+[Node 15] - node 14 requested data 2
+[Node 16] - node 14 requested data 2
+[Node 17] - node 14 requested data 2
+[Node 18] - node 14 requested data 2
+[Node 16] - node 15 requested data 2
+[Node 17] - node 15 requested data 2
+[Node 18] - node 15 requested data 2
+[Node 17] - node 16 requested data 2
+[Node 18] - node 16 requested data 2
+[Node 18] - node 17 requested data 2
+[Node 20] - node 19 requested data 3
+[Node 21] - node 19 requested data 3
+[Node 22] - node 19 requested data 3
+[Node 23] - node 19 requested data 3
+[Node 24] - node 19 requested data 3
+[Node 21] - node 20 requested data 3
+[Node 22] - node 20 requested data 3
+[Node 23] - node 20 requested data 3
+[Node 24] - node 20 requested data 3
+[Node 22] - node 21 requested data 3
+[Node 23] - node 21 requested data 3
+[Node 24] - node 21 requested data 3
+[Node 23] - node 22 requested data 3
+[Node 24] - node 22 requested data 3
+[Node 24] - node 23 requested data 3
+[Shit 4] ##############################
+[Shit 5] ##############################
+[Shit 6] ##############################
+[Shit 7] ##############################
+[Shit 8] ##############################
+[Shit 9] ##############################
+[Shit 10] ##############################
+[Shit 11] ##############################
+[Shit 12] ##############################
+[Shit 13] ##############################
+[Shit 14] ##############################
+[Shit 15] ##############################
+[Shit 16] ##############################
+[Shit 17] ##############################
+[Shit 18] ##############################
+[Shit 19] ##############################
+[Shit 20] ##############################
+[Shit 21] ##############################
+[Shit 22] ##############################
+[Shit 23] ##############################
+[Shit 24] ##############################
+[Shit 25] ##############################
+[Shit 26] ##############################
+[Shit 27] ##############################
+[Shit 28] ##############################
+[Shit 29] ##############################
+[Shit 30] ##############################
+[Shit 31] ##############################
+[Shit 32] ##############################
+[Shit 33] ##############################
+[Shit 34] ##############################
+[Shit 35] ##############################
+[Shit 36] ##############################
+[Shit 37] ##############################
+[Shit 38] ##############################
+[Shit 39] ##############################
+[Shit 40] ##############################
+[Shit 41] ##############################
+[Shit 42] ##############################
+[Shit 43] ##############################
+[Shit 44] ##############################
+[Shit 45] ##############################
+[Shit 46] ##############################
+[Shit 47] ##############################
+[Shit 48] ##############################
+[Shit 49] ##############################
+[Shit 50] ##############################
+[Shit 51] ##############################
+[Shit 52] ##############################
+[Shit 53] ##############################
+[Shit 54] ##############################
+[Shit 55] ##############################
+[Shit 56] ##############################
+[Shit 57] ##############################
+[Shit 58] ##############################
+[Shit 59] ##############################
+[Shit 60] ##############################
+[Shit 61] ##############################
+[Shit 62] ##############################
+[Shit 63] ##############################
+[Shit 64] ##############################
+[Shit 65] ##############################
+[Shit 66] ##############################
+[Shit 67] ##############################
+[Shit 68] ##############################
+[Shit 69] ##############################
+[Shit 70] ##############################
+[Shit 71] ##############################
+[Shit 72] ##############################
+[Shit 73] ##############################
+[Shit 74] ##############################
+[Shit 75] ##############################
+[Shit 76] ##############################
+[Shit 77] ##############################
+[Shit 78] ##############################
+[Shit 79] ##############################
+[Shit 80] ##############################
+[Shit 81] ##############################
+[Shit 82] ##############################
+[Shit 83] ##############################
+[Shit 84] ##############################
+[Shit 85] ##############################
+[Shit 86] ##############################
+[Shit 87] ##############################
+[Shit 88] ##############################
+[Shit 89] ##############################
+[Shit 90] ##############################
+[Shit 91] ##############################
+[Shit 92] ##############################
+[Shit 93] ##############################
+[Shit 94] ##############################
+[Shit 95] ##############################
+[Shit 96] ##############################
+[Shit 97] ##############################
+[Shit 98] ##############################
+[Shit 99] ##############################
+[Shit 100] ##############################
+[Shit 101] ##############################
+[Shit 102] ##############################
+[Shit 103] ##############################
+[Shit 104] ##############################
+[Shit 105] ##############################
+[Shit 106] ##############################
+[Shit 107] ##############################
+[Shit 108] ##############################
+[Shit 109] ##############################
+[Shit 110] ##############################
+[Shit 111] ##############################
+[Shit 112] ##############################
+[Shit 113] ##############################
+[Shit 114] ##############################
+[Shit 115] ##############################
+[Shit 116] ##############################
+[Shit 117] ##############################
+[Shit 118] ##############################
+[Shit 119] ##############################
+[Shit 120] ##############################
+[Shit 121] ##############################
+[Shit 122] ##############################
+[Shit 123] ##############################
+[Shit 124] ##############################
+[Shit 125] ##############################
+[Shit 126] ##############################
+[Shit 127] ##############################
+[Shit 128] ##############################
+[Shit 129] ##############################
+[Shit 130] ##############################
+[Shit 131] ##############################
+[Shit 132] ##############################
+[Shit 133] ##############################
+[Shit 134] ##############################
+[Shit 135] ##############################
+[Shit 136] ##############################
+[Shit 137] ##############################
+[Shit 138] ##############################
+[Shit 139] ##############################
+[Shit 140] ##############################
+[Shit 141] ##############################
+[Shit 142] ##############################
+[Shit 143] ##############################
+[Shit 144] ##############################
+[Shit 145] ##############################
+[Shit 146] ##############################
+[Shit 147] ##############################
+[Shit 148] ##############################
+[Shit 149] ##############################
+[Shit 150] ##############################
+[Shit 151] ##############################
+[Shit 152] ##############################
+[Shit 153] ##############################
+[Shit 154] ##############################
+[Shit 155] ##############################
+[Shit 156] ##############################
+[Shit 157] ##############################
+[Shit 158] ##############################
+[Shit 159] ##############################
+[Shit 160] ##############################
+[Shit 161] ##############################
+[Shit 162] ##############################
+[Shit 163] ##############################
+[Shit 164] ##############################
+[Shit 165] ##############################
+[Shit 166] ##############################
+[Shit 167] ##############################
+[Shit 168] ##############################
+[Shit 169] ##############################
+[Shit 170] ##############################
+[Shit 171] ##############################
+[Shit 172] ##############################
+[Shit 173] ##############################
+[Shit 174] ##############################
+[Shit 175] ##############################
+[Shit 176] ##############################
+[Shit 177] ##############################
+[Shit 178] ##############################
+[Shit 179] ##############################
+[Shit 180] ##############################
+[Shit 181] ##############################
+[Shit 182] ##############################
+[Shit 183] ##############################
+[Shit 184] ##############################
+[Shit 185] ##############################
+[Shit 186] ##############################
+[Shit 187] ##############################
+[Shit 188] ##############################
+[Shit 189] ##############################
+[Shit 190] ##############################
+[Shit 191] ##############################
+[Shit 192] ##############################
+[Shit 193] ##############################
+[Shit 194] ##############################
+[Shit 195] ##############################
+[Shit 196] ##############################
+[Shit 197] ##############################
+[Shit 198] ##############################
+[Shit 199] ##############################
+[Shit 200] ##############################
+[Shit 201] ##############################
+[Shit 202] ##############################
+[Shit 203] ##############################
+[Shit 204] ##############################
+[Shit 205] ##############################
+[Shit 206] ##############################
+[Shit 207] ##############################
+[Shit 208] ##############################
+[Shit 209] ##############################
+[Shit 210] ##############################
+[Shit 211] ##############################
+[Shit 212] ##############################
+[Shit 213] ##############################
+[Shit 214] ##############################
+[Shit 215] ##############################
+[Shit 216] ##############################
+[Shit 217] ##############################
+[Shit 218] ##############################
+[Shit 219] ##############################
+[Shit 220] ##############################
+[Shit 221] ##############################
+[Shit 222] ##############################
+[Shit 223] ##############################
+[Shit 224] ##############################
+[Shit 225] ##############################
+[Shit 226] ##############################
+[Shit 227] ##############################
+[Shit 228] ##############################
+[Shit 229] ##############################
+[Shit 230] ##############################
+[Shit 231] ##############################
+[Shit 232] ##############################
+[Shit 233] ##############################
+[Shit 234] ##############################
+[Shit 235] ##############################
+[Shit 236] ##############################
+[Shit 237] ##############################
+[Shit 238] ##############################
+[Shit 239] ##############################
+[Shit 240] ##############################
+[Shit 241] ##############################
+[Shit 242] ##############################
+[Shit 243] ##############################
+[Shit 244] ##############################
+[Shit 245] ##############################
+[Shit 246] ##############################
+[Shit 247] ##############################
+[Shit 248] ##############################
+[Shit 249] ##############################
+[Shit 250] ##############################
+[Shit 251] ##############################
+[Shit 252] ##############################
+[Shit 253] ##############################
+[Shit 254] ##############################
+[Shit 255] ##############################
+[Shit 256] ##############################
+[Shit 257] ##############################
+[Shit 258] ##############################
+[Shit 259] ##############################
+[Shit 260] ##############################
+[Shit 261] ##############################
+[Shit 262] ##############################
+[Shit 263] ##############################
+[Shit 264] ##############################
+[Shit 265] ##############################
+[Shit 266] ##############################
+[Shit 267] ##############################
+[Shit 268] ##############################
+[Shit 269] ##############################
+[Shit 270] ##############################
+[Shit 271] ##############################
+[Shit 272] ##############################
+[Shit 273] ##############################
+[Shit 274] ##############################
+[Shit 275] ##############################
+[Shit 276] ##############################
+[Shit 277] ##############################
+[Shit 278] ##############################
+[Shit 279] ##############################
+[Shit 280] ##############################
+[Shit 281] ##############################
+[Shit 282] ##############################
+[Shit 283] ##############################
+[Shit 284] ##############################
+[Shit 285] ##############################
+[Shit 286] ##############################
+[Shit 287] ##############################
+[Shit 288] ##############################
+[Shit 289] ##############################
+[Shit 290] ##############################
+[Shit 291] ##############################
+[Shit 292] ##############################
+[Shit 293] ##############################
+[Shit 294] ##############################
+[Shit 295] ##############################
+[Shit 296] ##############################
+[Shit 297] ##############################
+[Shit 298] ##############################
+[Shit 299] ##############################
+[Shit 300] ##############################
+[Shit 301] ##############################
+[Shit 302] ##############################
+[Shit 303] ##############################
+[Shit 304] ##############################
+[Shit 305] ##############################
+[Shit 306] ##############################
+[Shit 307] ##############################
+[Shit 308] ##############################
+[Shit 309] ##############################
+[Shit 310] ##############################
+[Shit 311] ##############################
+[Shit 312] ##############################
+[Shit 313] ##############################
+[Shit 314] ##############################
+[Shit 315] ##############################
+[Shit 316] ##############################
+[Shit 317] ##############################
+[Shit 318] ##############################
+[Shit 319] ##############################
+[Shit 320] ##############################
+[Shit 321] ##############################
+[Shit 322] ##############################
+[Shit 323] ##############################
+[Shit 324] ##############################
+[Shit 325] ##############################
+[Shit 326] ##############################
+[Shit 327] ##############################
+[Shit 328] ##############################
+[Shit 329] ##############################
+[Shit 330] ##############################
+[Shit 331] ##############################
+[Shit 332] ##############################
+[Shit 333] ##############################
+[Shit 334] ##############################
+[Shit 335] ##############################
+[Shit 336] ##############################
+[Shit 337] ##############################
+[Shit 338] ##############################
+[Shit 339] ##############################
+[Shit 340] ##############################
+[Shit 341] ##############################
+[Shit 342] ##############################
+[Shit 343] ##############################
+[Shit 344] ##############################
+[Shit 345] ##############################
+[Shit 346] ##############################
+[Shit 347] ##############################
+[Shit 348] ##############################
+[Shit 349] ##############################
+[Shit 350] ##############################
+[Shit 351] ##############################
+[Shit 352] ##############################
+[Shit 353] ##############################
+[Shit 354] ##############################
+[Shit 355] ##############################
+[Shit 356] ##############################
+[Shit 357] ##############################
+[Shit 358] ##############################
+[Shit 359] ##############################
+[Shit 360] ##############################
+[Shit 361] ##############################
+[Shit 362] ##############################
+[Shit 363] ##############################
+[Shit 364] ##############################
+[Shit 365] ##############################
+[Shit 366] ##############################
+[Shit 367] ##############################
+[Shit 368] ##############################
+[Shit 369] ##############################
+[Shit 370] ##############################
+[Shit 371] ##############################
+[Shit 372] ##############################
+[Shit 373] ##############################
+[Shit 374] ##############################
+[Shit 375] ##############################
+[Shit 376] ##############################
+[Shit 377] ##############################
+[Shit 378] ##############################
+[Shit 379] ##############################
+[Shit 380] ##############################
+[Shit 381] ##############################
+[Shit 382] ##############################
+[Shit 383] ##############################
+[Shit 384] ##############################
+[Shit 385] ##############################
+[Shit 386] ##############################
+[Shit 387] ##############################
+[Shit 388] ##############################
+[Shit 389] ##############################
+[Shit 390] ##############################
+[Shit 391] ##############################
+[Shit 392] ##############################
+[Shit 393] ##############################
+[Shit 394] ##############################
+[Shit 395] ##############################
+[Shit 396] ##############################
+[Shit 397] ##############################
+[Shit 398] ##############################
+[Shit 399] ##############################
+[Shit 400] ##############################
+[Shit 401] ##############################
+[Shit 402] ##############################
+[Shit 403] ##############################
+[Shit 404] ##############################
+[Shit 405] ##############################
+[Shit 406] ##############################
+[Shit 407] ##############################
+[Shit 408] ##############################
+[Shit 409] ##############################
+[Shit 410] ##############################
+[Shit 411] ##############################
+[Shit 412] ##############################
+[Shit 413] ##############################
+[Node 0] - finished uploading data 0 to 6
+[Node 0] - finished uploading data 1 to 12
+[Node 0] - finished uploading data 2 to 18
+[Node 0] - finished uploading data 3 to 24
+[Node 1] - finished uploading data 0 to 6
+[Node 2] - finished uploading data 0 to 6
+[Node 3] - finished uploading data 0 to 6
+[Node 4] - finished uploading data 0 to 6
+[Node 5] - finished uploading data 0 to 6
+[Node 6] - starting computation 0
+[Node 7] - finished uploading data 1 to 12
+[Node 8] - finished uploading data 1 to 12
+[Node 9] - finished uploading data 1 to 12
+[Node 10] - finished uploading data 1 to 12
+[Node 11] - finished uploading data 1 to 12
+[Node 12] - starting computation 1
+[Node 13] - finished uploading data 2 to 18
+[Node 14] - finished uploading data 2 to 18
+[Node 15] - finished uploading data 2 to 18
+[Node 16] - finished uploading data 2 to 18
+[Node 17] - finished uploading data 2 to 18
+[Node 18] - starting computation 2
+[Node 19] - finished uploading data 3 to 24
+[Node 20] - finished uploading data 3 to 24
+[Node 21] - finished uploading data 3 to 24
+[Node 22] - finished uploading data 3 to 24
+[Node 23] - finished uploading data 3 to 24
+[Node 24] - starting computation 3
+[Shit 414] ##############################
+[Node 0] - finished uploading data 0 to 3
+[Node 0] - finished uploading data 0 to 4
+[Node 0] - finished uploading data 0 to 5
+[Node 0] - finished uploading data 1 to 9
+[Node 0] - finished uploading data 1 to 10
+[Node 0] - finished uploading data 1 to 11
+[Node 0] - finished uploading data 2 to 15
+[Node 0] - finished uploading data 2 to 16
+[Node 0] - finished uploading data 2 to 17
+[Node 0] - finished uploading data 3 to 21
+[Node 0] - finished uploading data 3 to 22
+[Node 0] - finished uploading data 3 to 23
+[Node 1] - finished uploading data 0 to 3
+[Node 1] - finished uploading data 0 to 4
+[Node 1] - finished uploading data 0 to 5
+[Node 2] - finished uploading data 0 to 3
+[Node 2] - finished uploading data 0 to 4
+[Node 2] - finished uploading data 0 to 5
+[Node 3] - finished uploading data 0 to 4
+[Node 3] - finished uploading data 0 to 5
+[Node 3] - starting computation 0
+[Node 4] - finished uploading data 0 to 5
+[Node 4] - finished uploading data 0 to 3
+[Node 4] - starting computation 0
+[Node 5] - finished uploading data 0 to 3
+[Node 5] - finished uploading data 0 to 4
+[Node 5] - starting computation 0
+[Node 6] - finished uploading data 0 to 3
+[Node 6] - finished uploading data 0 to 4
+[Node 6] - finished uploading data 0 to 5
+[Node 7] - finished uploading data 1 to 9
+[Node 7] - finished uploading data 1 to 10
+[Node 7] - finished uploading data 1 to 11
+[Node 8] - finished uploading data 1 to 9
+[Node 8] - finished uploading data 1 to 10
+[Node 8] - finished uploading data 1 to 11
+[Node 9] - finished uploading data 1 to 10
+[Node 9] - finished uploading data 1 to 11
+[Node 9] - starting computation 1
+[Node 10] - finished uploading data 1 to 11
+[Node 10] - finished uploading data 1 to 9
+[Node 10] - starting computation 1
+[Node 11] - finished uploading data 1 to 9
+[Node 11] - finished uploading data 1 to 10
+[Node 11] - starting computation 1
+[Node 12] - finished uploading data 1 to 9
+[Node 12] - finished uploading data 1 to 10
+[Node 12] - finished uploading data 1 to 11
+[Node 13] - finished uploading data 2 to 15
+[Node 13] - finished uploading data 2 to 16
+[Node 13] - finished uploading data 2 to 17
+[Node 14] - finished uploading data 2 to 15
+[Node 14] - finished uploading data 2 to 16
+[Node 14] - finished uploading data 2 to 17
+[Node 15] - finished uploading data 2 to 16
+[Node 15] - finished uploading data 2 to 17
+[Node 15] - starting computation 2
+[Node 16] - finished uploading data 2 to 17
+[Node 16] - finished uploading data 2 to 15
+[Node 16] - starting computation 2
+[Node 17] - finished uploading data 2 to 15
+[Node 17] - finished uploading data 2 to 16
+[Node 17] - starting computation 2
+[Node 18] - finished uploading data 2 to 15
+[Node 18] - finished uploading data 2 to 16
+[Node 18] - finished uploading data 2 to 17
+[Node 19] - finished uploading data 3 to 21
+[Node 19] - finished uploading data 3 to 22
+[Node 19] - finished uploading data 3 to 23
+[Node 20] - finished uploading data 3 to 21
+[Node 20] - finished uploading data 3 to 22
+[Node 20] - finished uploading data 3 to 23
+[Node 21] - finished uploading data 3 to 22
+[Node 21] - finished uploading data 3 to 23
+[Node 21] - starting computation 3
+[Node 22] - finished uploading data 3 to 23
+[Node 22] - finished uploading data 3 to 21
+[Node 22] - starting computation 3
+[Node 23] - finished uploading data 3 to 21
+[Node 23] - finished uploading data 3 to 22
+[Node 23] - starting computation 3
+[Node 24] - finished uploading data 3 to 21
+[Node 24] - finished uploading data 3 to 22
+[Node 24] - finished uploading data 3 to 23
+[Shit 415] ##############################
+[Node 0] - finished uploading data 0 to 1
+[Node 0] - finished uploading data 0 to 2
+[Node 0] - finished uploading data 1 to 7
+[Node 0] - finished uploading data 1 to 8
+[Node 0] - finished uploading data 2 to 13
+[Node 0] - finished uploading data 2 to 14
+[Node 0] - finished uploading data 3 to 19
+[Node 0] - finished uploading data 3 to 20
+[Node 1] - finished uploading data 0 to 2
+[Node 1] - starting computation 0
+[Node 2] - finished uploading data 0 to 1
+[Node 2] - starting computation 0
+[Node 3] - finished uploading data 0 to 1
+[Node 3] - finished uploading data 0 to 2
+[Node 4] - finished uploading data 0 to 1
+[Node 4] - finished uploading data 0 to 2
+[Node 5] - finished uploading data 0 to 1
+[Node 5] - finished uploading data 0 to 2
+[Node 6] - finished uploading data 0 to 1
+[Node 6] - finished uploading data 0 to 2
+[Node 0] - computation 0 finished by node 6
+[Node 7] - finished uploading data 1 to 8
+[Node 7] - starting computation 1
+[Node 8] - finished uploading data 1 to 7
+[Node 8] - starting computation 1
+[Node 9] - finished uploading data 1 to 7
+[Node 9] - finished uploading data 1 to 8
+[Node 10] - finished uploading data 1 to 7
+[Node 10] - finished uploading data 1 to 8
+[Node 11] - finished uploading data 1 to 7
+[Node 11] - finished uploading data 1 to 8
+[Node 12] - finished uploading data 1 to 7
+[Node 12] - finished uploading data 1 to 8
+[Node 0] - computation 1 finished by node 12
+[Node 13] - finished uploading data 2 to 14
+[Node 13] - starting computation 2
+[Node 14] - finished uploading data 2 to 13
+[Node 14] - starting computation 2
+[Node 15] - finished uploading data 2 to 13
+[Node 15] - finished uploading data 2 to 14
+[Node 16] - finished uploading data 2 to 13
+[Node 16] - finished uploading data 2 to 14
+[Node 17] - finished uploading data 2 to 13
+[Node 17] - finished uploading data 2 to 14
+[Node 18] - finished uploading data 2 to 13
+[Node 18] - finished uploading data 2 to 14
+[Node 0] - computation 2 finished by node 18
+[Node 19] - finished uploading data 3 to 20
+[Node 19] - starting computation 3
+[Node 20] - finished uploading data 3 to 19
+[Node 20] - starting computation 3
+[Node 21] - finished uploading data 3 to 19
+[Node 21] - finished uploading data 3 to 20
+[Node 22] - finished uploading data 3 to 19
+[Node 22] - finished uploading data 3 to 20
+[Node 23] - finished uploading data 3 to 19
+[Node 23] - finished uploading data 3 to 20
+[Node 24] - finished uploading data 3 to 19
+[Node 24] - finished uploading data 3 to 20
+[Node 0] - computation 3 finished by node 24
+[Shit 416] ##############################
+[Node 0] - computation 0 finished by node 3
+[Node 0] - computation 0 finished by node 4
+[Node 0] - computation 0 finished by node 5
+[Node 0] - computation 1 finished by node 9
+[Node 0] - computation 1 finished by node 10
+[Node 0] - computation 1 finished by node 11
+[Node 0] - computation 2 finished by node 15
+[Node 0] - computation 2 finished by node 16
+[Node 0] - computation 2 finished by node 17
+[Node 0] - computation 3 finished by node 21
+[Node 0] - computation 3 finished by node 22
+[Node 0] - computation 3 finished by node 23
+[Shit 417] ##############################
+[Node 0] - computation 0 finished by node 1
+[Node 0] - computation 0 finished by node 2
+[Node 0] - computation 1 finished by node 7
+[Node 0] - computation 1 finished by node 8
+[Node 0] - computation 2 finished by node 13
+[Node 0] - computation 2 finished by node 14
+[Node 0] - computation 3 finished by node 19
+[Node 0] - computation 3 finished by node 20
+[Node 0] - node 21 requested work. Got task 4
+[Node 0] - node 22 requested work. Got task 4
+[Shit 418] ##############################
+[Node 6] - node 21 requested data 4
+[Node 3] - node 21 requested data 4
+[Node 4] - node 21 requested data 4
+[Node 5] - node 21 requested data 4
+[Node 1] - node 21 requested data 4
+[Node 2] - node 21 requested data 4
+[Node 12] - node 21 requested data 5
+[Node 9] - node 21 requested data 5
+[Node 10] - node 21 requested data 5
+[Node 11] - node 21 requested data 5
+[Node 7] - node 21 requested data 5
+[Node 8] - node 21 requested data 5
+[Node 18] - node 21 requested data 6
+[Node 15] - node 21 requested data 6
+[Node 16] - node 21 requested data 6
+[Node 17] - node 21 requested data 6
+[Node 13] - node 21 requested data 6
+[Node 14] - node 21 requested data 6
+[Node 6] - node 22 requested data 4
+[Node 3] - node 22 requested data 4
+[Node 4] - node 22 requested data 4
+[Node 5] - node 22 requested data 4
+[Node 1] - node 22 requested data 4
+[Node 2] - node 22 requested data 4
+[Node 21] - node 22 requested data 4
+[Node 12] - node 22 requested data 5
+[Node 9] - node 22 requested data 5
+[Node 10] - node 22 requested data 5
+[Node 11] - node 22 requested data 5
+[Node 7] - node 22 requested data 5
+[Node 8] - node 22 requested data 5
+[Node 21] - node 22 requested data 5
+[Node 18] - node 22 requested data 6
+[Node 15] - node 22 requested data 6
+[Node 16] - node 22 requested data 6
+[Node 17] - node 22 requested data 6
+[Node 13] - node 22 requested data 6
+[Node 14] - node 22 requested data 6
+[Node 21] - node 22 requested data 6
+[Shit 419] ##############################
+[Node 22] - node 21 requested data 4
+[Node 22] - node 21 requested data 5
+[Node 22] - node 21 requested data 6
+[Shit 420] ##############################
+[Shit 421] ##############################
+[Shit 422] ##############################
+[Shit 423] ##############################
+[Shit 424] ##############################
+[Shit 425] ##############################
+[Shit 426] ##############################
+[Shit 427] ##############################
+[Node 1] - finished uploading data 4 to 22
+[Node 2] - finished uploading data 4 to 22
+[Node 3] - finished uploading data 4 to 22
+[Node 4] - finished uploading data 4 to 22
+[Node 5] - finished uploading data 4 to 22
+[Node 6] - finished uploading data 4 to 22
+[Node 7] - finished uploading data 5 to 22
+[Node 8] - finished uploading data 5 to 22
+[Node 9] - finished uploading data 5 to 22
+[Node 10] - finished uploading data 5 to 22
+[Node 11] - finished uploading data 5 to 22
+[Node 12] - finished uploading data 5 to 22
+[Node 13] - finished uploading data 6 to 22
+[Node 14] - finished uploading data 6 to 22
+[Node 15] - finished uploading data 6 to 22
+[Node 16] - finished uploading data 6 to 22
+[Node 17] - finished uploading data 6 to 22
+[Node 18] - finished uploading data 6 to 22
+[Node 21] - finished uploading data 4 to 22
+[Node 21] - finished uploading data 5 to 22
+[Node 21] - finished uploading data 6 to 22
+[Node 22] - starting computation 4
+[Shit 428] ##############################
+[Node 1] - finished uploading data 4 to 21
+[Node 2] - finished uploading data 4 to 21
+[Node 3] - finished uploading data 4 to 21
+[Node 4] - finished uploading data 4 to 21
+[Node 5] - finished uploading data 4 to 21
+[Node 6] - finished uploading data 4 to 21
+[Node 7] - finished uploading data 5 to 21
+[Node 8] - finished uploading data 5 to 21
+[Node 9] - finished uploading data 5 to 21
+[Node 10] - finished uploading data 5 to 21
+[Node 11] - finished uploading data 5 to 21
+[Node 12] - finished uploading data 5 to 21
+[Node 13] - finished uploading data 6 to 21
+[Node 14] - finished uploading data 6 to 21
+[Node 15] - finished uploading data 6 to 21
+[Node 16] - finished uploading data 6 to 21
+[Node 17] - finished uploading data 6 to 21
+[Node 18] - finished uploading data 6 to 21
+[Node 21] - starting computation 4
+[Node 22] - finished uploading data 4 to 21
+[Node 22] - finished uploading data 5 to 21
+[Node 22] - finished uploading data 6 to 21
+[Shit 429] ##############################
+[Node 0] - computation 4 finished by node 22
+[Shit 430] ##############################
+[Node 0] - computation 4 finished by node 21
+[Shit 431] ##############################
+[Node 22] - node 0 requested data 8
+[Node 21] - node 0 requested data 8
+[Shit 432] ##############################
+[Shit 433] ##############################
+[Shit 434] ##############################
+[Shit 435] ##############################
+[Shit 436] ##############################
+[Shit 437] ##############################
+[Shit 438] ##############################
+[Shit 439] ##############################
+[Shit 440] ##############################
+[Shit 441] ##############################
+[Shit 442] ##############################
+[Shit 443] ##############################
+[Shit 444] ##############################
+[Shit 445] ##############################
+[Shit 446] ##############################
+[Shit 447] ##############################
+[Shit 448] ##############################
+[Shit 449] ##############################
+[Shit 450] ##############################
+[Shit 451] ##############################
+[Shit 452] ##############################
+[Shit 453] ##############################
+[Shit 454] ##############################
+[Shit 455] ##############################
+[Shit 456] ##############################
+[Shit 457] ##############################
+[Shit 458] ##############################
+[Shit 459] ##############################
+[Shit 460] ##############################
+[Shit 461] ##############################
+[Shit 462] ##############################
+[Shit 463] ##############################
