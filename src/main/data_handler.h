@@ -63,6 +63,12 @@ int copy_file(const string& source, const string& dest) {
   }
 }
 
+bool ends_with(string const & value, string const & ending)
+{
+    if (ending.size() > value.size()) return false;
+    return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
+}
+
 /**
  * Zips a set of files into an output (zipped) file.
  * Note: All files are PATHs.

@@ -9,15 +9,16 @@ MACROS = $(BOOST_MACROS) $(LIBTORRENT_MACROS)
 
 BOINC_LIBS = /usr/lib/libboinc_api.a /usr/lib/libboinc.a -pthread
 LIBTORRENT_LIBS = -L/usr/local/lib/ -L/usr/lib/ -ltorrent-rasterbar -lboost_system-mt
-#OPENCV_LIBS = -L/usr/local/lib/ -L/usr/lib/ -lcvaux -lcv -lcxcore -lhighgui
-OPENCV_LIBS = -L/usr/local/lib/ -L/usr/lib/ -lopencv_core -lopencv_imgproc -lopencv_highgui
+OPENCV_LIBS = -L/usr/local/lib/ -L/usr/lib/ -lcvaux -lcv -lcxcore -lhighgui
+#OPENCV_LIBS = -L/usr/local/lib/ -L/usr/lib/ -lopencv_core -lopencv_imgproc -lopencv_highgui
 
-INCLUDES = -I/usr/include -I/usr/local/include -I/usr/local/include/libtorrent -I/usr/include/boinc
+#INCLUDES = -I/usr/include -I/usr/local/include -I/usr/local/include/libtorrent -I/usr/include/boinc
+INCLUDES = -I/usr/include -I/usr/local/include -I/usr/local/include/libtorrent -I/home/istple_vmr/src_boinc-original/boinc_client_release_6_10 -I/home/istple_vmr/src_boinc-original/boinc_client_release_6_10/lib -I/home/istple_vmr/src_boinc-original/boinc_client_release_6_10/api
 
 FLAGS = -Wall -g3 -pedantic -w -Wextra -Werror
 
 simple_app: simple_app.o
-	g++ simple_app.o -o simple_app $(BOINC_LIBS) $(LIBTORRENT_LIBS)
+	g++ simple_app.o -o simple_app $(BOINC_LIBS) $(LIBTORRENT_LIBS) $(OPENCV_LIBS)
 	
 simple_app.o: simple_app.cpp mr_tasktracker.h data_handler.h control.h benchmarks.h
 	g++ -c simple_app.cpp $(MACROS) $(INCLUDES) $(FLAGS)
